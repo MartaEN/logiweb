@@ -38,6 +38,7 @@ public class DataSourceConfig {
             @Qualifier("dataSource") DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
         factoryBean.setDataSource(dataSource);
+        //TODO а можно ли не хардкодить провайдера?
         factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         factoryBean.setPackagesToScan("com.marta.logistika.entity");
         Properties properties = new Properties();
