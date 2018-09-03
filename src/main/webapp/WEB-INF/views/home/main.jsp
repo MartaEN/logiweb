@@ -12,13 +12,8 @@
     <link rel="stylesheet" href="${resPath}/style.css"/>
 </head>
 <body>
-    Список городов
-    <ul>
-        <c:if test="${not empty cities}">
-            <c:forEach items="${cities}" var="city">
-                <li>${city.name}</li>
-            </c:forEach>
-        </c:if>
-    </ul>
+    <menu>
+        <a href="/destinations">Логистические центры</a>
+    </menu>
 </body>
 </html>
