@@ -4,7 +4,7 @@
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
-          <element id="module-output" name="t-systems-internship" />
+          <element id="module-output" name="logistika" />
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="Maven: org.springframework:spring-context:5.0.6.RELEASE" />
@@ -41,12 +41,13 @@
           <element id="library" level="project" name="Maven: javax.servlet:jsp-api:2.0" />
           <element id="library" level="project" name="Maven: javax.servlet:servlet-api:2.4" />
           <element id="library" level="project" name="Maven: javax.servlet:jstl:1.2" />
+          <element id="library" level="project" name="Maven: org.projectlombok:lombok:1.18.2" />
         </element>
       </element>
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/target/logistika/META-INF/MANIFEST.MF" />
       </element>
-      <element id="javaee-facet-resources" facet="t-systems-internship/web/Web" />
+      <element id="javaee-facet-resources" facet="logistika/web/Web" />
     </root>
   </artifact>
 </component>
