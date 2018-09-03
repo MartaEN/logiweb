@@ -3,6 +3,7 @@ package com.marta.logistika.dao.impl;
 import com.marta.logistika.dao.api.CityDao;
 import com.marta.logistika.entity.CityEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -10,39 +11,35 @@ import java.util.List;
 public class CityDaoImpl extends AbstractDao implements CityDao {
 
     @Override
+    @Transactional
     public void add(CityEntity city) {
-        em.getTransaction().begin();
         em.persist(city);
-        em.getTransaction().commit();
     }
 
     @Override
+    @Transactional
     public void update(CityEntity city) {
-        em.getTransaction().begin();
         em.merge(city);
-        em.getTransaction().commit();
     }
 
     @Override
+    @Transactional
     public void remove(CityEntity city) {
-        em.getTransaction().begin();
         em.remove(city);
-        em.getTransaction().commit();
     }
 
     @Override
-    public CityEntity getCityById(long id) {
-        em.getTransaction().begin();
-        CityEntity city = em.find(CityEntity.class, id);
-        em.getTransaction().commit();
-        return city;
+    @Transactional (readOnly = true)
+    public CityEntity findById(long id) {
+        return em.find(CityEntity.class, id);
     }
 
     @Override
+    @Transactional (readOnly = true)
     public List<CityEntity> listAll() {
-        em.getTransaction().begin();
-        List<CityEntity> cityList = em.createQuery("SELECT e FROM CityEntity e", CityEntity.class).getResultList();
-        em.getTransaction().commit();
-        return cityList;
+        return em.createQuery(
+                "SELECT c FROM CityEntity c ORDER BY c.name",
+                CityEntity.class)
+                .getResultList();
     }
 }

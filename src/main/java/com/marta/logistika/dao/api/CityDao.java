@@ -9,7 +9,7 @@ public interface CityDao {
     void add(CityEntity city);
     void update(CityEntity city);
     void remove(CityEntity city);
-    CityEntity getCityById(long id);
+    CityEntity findById(long id);
     List<CityEntity> listAll();
 
 }

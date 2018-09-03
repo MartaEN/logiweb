@@ -8,9 +8,13 @@ import java.util.List;
 public interface CityService {
 
     void add(CityEntity city);
-//    void updateCity(CityRecord city);
-    List<CityRecord> listAll();
-    CityRecord getCityById(long id);
-//    void removeCity(long id);
+    void updateCity(CityEntity city);
+    void removeCity(long id);
+    List<CityEntity> listAll();
+    CityEntity getCityById(long id);
+
+    //TODO как использовать DTO?
+    CityRecord getCityRecordById(long id);
+    List<CityRecord> listAllDtos();
 
 }
