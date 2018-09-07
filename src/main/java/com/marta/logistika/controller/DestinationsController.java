@@ -1,4 +1,4 @@
-package com.marta.logistika.web;
+package com.marta.logistika.controller;
 
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
@@ -15,8 +15,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/destinations")
 public class DestinationsController {
-
-
+    
     private final CityService cityService;
     private final RoadService roadService;
 
@@ -26,7 +25,7 @@ public class DestinationsController {
         this.roadService = roadService;
     }
 
-    @RequestMapping(method=RequestMethod.GET)
+    @GetMapping
     public String home(Model uiModel){
 
         uiModel.addAttribute("cities", cityService.listAll());
@@ -34,7 +33,7 @@ public class DestinationsController {
         return "destinations/monitor";
     }
 
-    @RequestMapping(value="/{id}", method=RequestMethod.GET)
+    @GetMapping(value="/{id}")
     public String editCityLinks(@PathVariable("id") Long id, Model uiModel){
 
         CityEntity city = cityService.getCityById(id);
@@ -47,14 +46,14 @@ public class DestinationsController {
 
     }
 
-    @RequestMapping(value="/add-city", method= RequestMethod.GET)
+    @GetMapping(value="/add-city")
     public String addCityForm(Model uiModel){
         CityEntity city = new CityEntity();
         uiModel.addAttribute("city", city);
         return "destinations/add-city";
     }
 
-    @RequestMapping(value="/add-city", method=RequestMethod.POST)
+    @PostMapping(value="/add-city")
     public String addCity(
             @ModelAttribute("city") CityEntity city,
             BindingResult bindingResult){
@@ -66,7 +65,7 @@ public class DestinationsController {
         return "redirect:/destinations";
     }
 
-    @RequestMapping(value="/{id}/add-road", method= RequestMethod.GET)
+    @GetMapping(value="/{id}/add-road")
     public String addRoadForm(@PathVariable("id") Long id, Model uiModel){
         CityEntity startCity = cityService.getCityById(id);
         RoadEntity road = new RoadEntity();
@@ -79,7 +78,7 @@ public class DestinationsController {
         return "destinations/add-road";
     }
 
-    @RequestMapping(value="/{id}/add-road", method=RequestMethod.POST)
+    @PostMapping(value="/{id}/add-road")
     public String addRoad(
             @PathVariable("id") Long id,
             @ModelAttribute("road") RoadEntity road,
