@@ -1,38 +1,21 @@
 package com.marta.logistika.entity;
 
-import lombok.Data;
-
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
-@Data
 @Table(name = "roads")
-public class RoadEntity implements Serializable {
+public class RoadEntity extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
-
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "fromCity")
     private CityEntity fromCity;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "toCity")
     private CityEntity toCity;
 
     @Column
     private float distance;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public CityEntity getFromCity() {
         return fromCity;

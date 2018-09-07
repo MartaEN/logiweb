@@ -11,7 +11,7 @@
 <body>
 <h3>Добавить новый прямой путь из города ${startCity.name}</h3>
 <form:form modelAttribute="road" method="POST" action="${contextPath}/destinations/${startCity.id}/add-road">
-    <select name="toCity" required>
+    <select name="toCityId" required>
         <option value="" disabled selected>Выберите направление</option>
         <c:if test="${not empty cities}">
             <c:forEach items="${cities}" var="city">

@@ -1,5 +1,6 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.service.api.CityService;
@@ -68,8 +69,7 @@ public class DestinationsController {
     @GetMapping(value="/{id}/add-road")
     public String addRoadForm(@PathVariable("id") Long id, Model uiModel){
         CityEntity startCity = cityService.getCityById(id);
-        RoadEntity road = new RoadEntity();
-        road.setFromCity(startCity);
+        RoadRecord road = new RoadRecord();
 
         uiModel.addAttribute("startCity", startCity);
         uiModel.addAttribute("road", road);
@@ -81,7 +81,7 @@ public class DestinationsController {
     @PostMapping(value="/{id}/add-road")
     public String addRoad(
             @PathVariable("id") Long id,
-            @ModelAttribute("road") RoadEntity road,
+            @ModelAttribute("road") RoadRecord road,
             BindingResult bindingResult){
 
         //TODO сделать, чтобы записывалось
@@ -93,11 +93,11 @@ public class DestinationsController {
 
         RoadEntity newRoad = new RoadEntity();
         newRoad.setFromCity(cityService.getCityById(id));
-        newRoad.setToCity(road.getToCity());
+        newRoad.setToCity(cityService.getCityById(road.getToCityId()));
         newRoad.setDistance(road.getDistance());
         roadService.add(newRoad);
 
-        return "redirect:/destinations/edit";
+        return "redirect:/destinations/{id}";
     }
 
 

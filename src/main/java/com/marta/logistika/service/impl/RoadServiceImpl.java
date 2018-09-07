@@ -30,7 +30,7 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
         if(road == null) return;
         if(road.getFromCity() == null || road.getToCity() == null) throw new IllegalArgumentException("Road id" + road.getId() + " invalid: null end points");
         if(road.getFromCity().equals(road.getToCity())) throw new IllegalArgumentException("Road id" + road.getId() + " invalid: coinciding end points");
-        if(roadDao.getDirectRoadFromTo(road.getFromCity(), road.getToCity()) != null) throw new SuchEntityAlreadyExistsException(road.getId(), RoadEntity.class);
+//        if(roadDao.getDirectRoadFromTo(road.getFromCity(), road.getToCity()) != null) throw new SuchEntityAlreadyExistsException(road.getId(), RoadEntity.class);
         if(road.getDistance() < 0.1f) throw new IllegalArgumentException("Road id" + road.getId() + ": distance " + road.getDistance() + " invalid; should be positive");
 
         //create return road
