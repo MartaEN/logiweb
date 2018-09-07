@@ -23,16 +23,19 @@ public class CityServiceImpl extends AbstractService implements CityService {
     }
 
     @Override
+    @Transactional
     public void add(CityEntity city) {
         cityDao.add(city);
     }
 
     @Override
+    @Transactional
     public void updateCity(CityEntity city) {
         cityDao.update(city);
     }
 
     @Override
+    @Transactional
     public void removeCity(long id) {
         CityEntity city = cityDao.findById(id);
         if (city == null) throw new EntityNotFoundException(id, CityEntity.class);

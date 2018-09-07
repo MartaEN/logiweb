@@ -8,8 +8,8 @@ import java.util.List;
 public interface RoadDao {
 
     void add(RoadEntity road);
+    void update(RoadEntity road);
     void remove(RoadEntity road);
-    void setDistance(RoadEntity road, float distance);
     RoadEntity findById (long id);
     List<RoadEntity> listAll();
     List<RoadEntity> listAllRoadsFrom(CityEntity startCity);
