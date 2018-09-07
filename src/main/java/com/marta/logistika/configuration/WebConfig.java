@@ -10,7 +10,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan("com.marta.logistika.web")
+@ComponentScan("com.marta.logistika.controller")
 public class WebConfig implements WebMvcConfigurer {
 
 	public void addResourceHandlers(ResourceHandlerRegistry registry){

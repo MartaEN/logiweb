@@ -1,10 +1,11 @@
 package com.marta.logistika.dao.impl;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 
 abstract class AbstractDao {
 
-    EntityManager em = Persistence.createEntityManagerFactory("logistika-persistence-unit").createEntityManager();
+    @PersistenceContext
+    EntityManager em;
 
 }
