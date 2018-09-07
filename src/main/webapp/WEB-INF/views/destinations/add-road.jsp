@@ -9,6 +9,7 @@
     <title>Добавить</title>
 </head>
 <body>
+<a href="/destinations/${id}">Назад к центру: ${startCity.name}</a>
 <h3>Добавить новый прямой путь из города ${startCity.name}</h3>
 <form:form modelAttribute="road" method="POST" action="${contextPath}/destinations/${startCity.id}/add-road">
     <select name="toCityId" required>

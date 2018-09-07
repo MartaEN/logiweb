@@ -8,6 +8,7 @@
     <title>Создать</title>
 </head>
 <body>
+    <a href="/destinations">Назад к списку</a>
     <h3>Создание нового логистического узла</h3>
     <form method="POST" action="${contextPath}/destinations/add-city">
         <input type="text" name="name" placeholder="Название города" required>
