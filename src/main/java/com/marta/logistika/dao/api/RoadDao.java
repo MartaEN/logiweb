@@ -13,5 +13,6 @@ public interface RoadDao {
     RoadEntity findById (long id);
     List<RoadEntity> listAll();
     List<RoadEntity> listAllRoadsFrom(CityEntity fromCity);
+    List<RoadEntity> listAllRoadsTo(CityEntity toCity);
     RoadEntity getDirectRoadFromTo (CityEntity fromCity, CityEntity toCity);
 }

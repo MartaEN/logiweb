@@ -49,6 +49,16 @@ public class RoadDaoImpl extends AbstractDao implements RoadDao {
     }
 
     @Override
+    public List<RoadEntity> listAllRoadsTo(CityEntity toCity) {
+        if(toCity == null) return null;
+        return em.createQuery(
+                "SELECT r FROM RoadEntity r WHERE r.toCity=:toCity ORDER BY r.distance",
+                RoadEntity.class)
+                .setParameter("toCity", toCity)
+                .getResultList();
+    }
+
+    @Override
     public RoadEntity getDirectRoadFromTo(CityEntity fromCity, CityEntity toCity) {
         if (fromCity == null || toCity == null || fromCity.equals(toCity)) return null;
         return em.createQuery(
