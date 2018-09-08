@@ -6,16 +6,16 @@ import javax.persistence.*;
 @Table(name = "roads")
 public class RoadEntity extends AbstractEntity {
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "fromCity")
     private CityEntity fromCity;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "toCity")
     private CityEntity toCity;
 
-    @Column
-    private float distance;
+    @Column (nullable = false)
+    private int distance;
 
     public CityEntity getFromCity() {
         return fromCity;
@@ -33,11 +33,11 @@ public class RoadEntity extends AbstractEntity {
         this.toCity = toCity;
     }
 
-    public float getDistance() {
+    public int getDistance() {
         return distance;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(int distance) {
         this.distance = distance;
     }
 }

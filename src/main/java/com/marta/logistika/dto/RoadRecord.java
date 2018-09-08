@@ -7,7 +7,7 @@ public class RoadRecord {
 
     private long fromCityId;
     private long toCityId;
-    private float distance;
+    private int distance;
 
     public long getFromCityId() {
         return fromCityId;
@@ -25,11 +25,11 @@ public class RoadRecord {
         this.toCityId = toCityId;
     }
 
-    public float getDistance() {
+    public int getDistance() {
         return distance;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(int distance) {
         this.distance = distance;
     }
 }
