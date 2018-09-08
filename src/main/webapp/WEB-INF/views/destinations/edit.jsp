@@ -17,15 +17,13 @@
             <th>Город</th>
             <th>Расстояние, км</th>
             <th></th>
-            <th></th>
         </tr>
         <c:if test="${not empty roads}">
             <c:forEach items="${roads}" var="road">
                 <tr>
                     <td>${road.toCity.name}</td>
                     <td>${road.distance}</td>
-                    <%--<td><a href="destinations/${city.id}/edit-road/${road.id}">Уточнить дистанцию</a></td>--%>
-                    <%--<td><a href="destinations/${city.id}/remove-road/${road.id}">Удалить направление</a></td>--%>
+                    <td><a href="${contextPath}/destinations/${city.id}/remove-road/${road.id}">Удалить направление</a></td>
                 </tr>
             </c:forEach>
         </c:if>

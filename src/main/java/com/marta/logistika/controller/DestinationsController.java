@@ -66,6 +66,15 @@ public class DestinationsController {
         return "redirect:/destinations";
     }
 
+    @GetMapping(value="/{id}/remove")
+    public String removeCity(@PathVariable("id") Long id){
+
+        cityService.removeCity(id);
+
+        return "redirect:/destinations";
+
+    }
+
     @GetMapping(value="/{id}/add-road")
     public String addRoadForm(@PathVariable("id") Long id, Model uiModel){
         CityEntity startCity = cityService.getCityById(id);
@@ -84,7 +93,6 @@ public class DestinationsController {
             @ModelAttribute("road") RoadRecord road,
             BindingResult bindingResult){
 
-        //TODO сделать, чтобы записывалось
         System.out.println(road);
 
         if(bindingResult.hasErrors()){
@@ -100,5 +108,14 @@ public class DestinationsController {
         return "redirect:/destinations/{id}";
     }
 
+    @GetMapping(value="/{cityId}/remove-road/{roadId}")
+    public String removeRoad(
+            @PathVariable("cityId") Long cityId,
+            @PathVariable("roadId") Long roadId){
+
+        roadService.remove(roadId);
+
+        return "redirect:/destinations/{cityId}";
+    }
 
 }

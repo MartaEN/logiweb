@@ -19,6 +19,7 @@
                 <tr>
                     <td>${city.name}</td>
                     <td><a href="destinations/${city.id}">Редактировать</a></td>
+                    <td><a href="destinations/${city.id}/remove">Удалить</a></td>
                 </tr>
             </c:forEach>
         </c:if>

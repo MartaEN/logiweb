@@ -39,23 +39,23 @@ public class RoadDaoImpl extends AbstractDao implements RoadDao {
     }
 
     @Override
-    public List<RoadEntity> listAllRoadsFrom(CityEntity startCity) {
-        if(startCity == null) return null;
+    public List<RoadEntity> listAllRoadsFrom(CityEntity fromCity) {
+        if(fromCity == null) return null;
         return em.createQuery(
-                "SELECT r FROM RoadEntity r WHERE r.fromCity=:startCity ORDER BY r.distance",
+                "SELECT r FROM RoadEntity r WHERE r.fromCity=:fromCity ORDER BY r.distance",
                 RoadEntity.class)
-                .setParameter("startCity", startCity)
+                .setParameter("fromCity", fromCity)
                 .getResultList();
     }
 
     @Override
-    public RoadEntity getDirectRoadFromTo(CityEntity startCity, CityEntity finishCity) {
-        if (startCity == null || finishCity == null || startCity.equals(finishCity)) return null;
+    public RoadEntity getDirectRoadFromTo(CityEntity fromCity, CityEntity toCity) {
+        if (fromCity == null || toCity == null || fromCity.equals(toCity)) return null;
         return em.createQuery(
-                "SELECT r FROM RoadEntity r WHERE r.fromCity=:startCity AND r.toCity=:finishCity",
+                "SELECT r FROM RoadEntity r WHERE r.fromCity=:fromCity AND r.toCity=:toCity",
                 RoadEntity.class)
-                .setParameter("startCity", startCity)
-                .setParameter("finishCity", finishCity)
+                .setParameter("fromCity", fromCity)
+                .setParameter("toCity", toCity)
                 .getSingleResult();
     }
 
