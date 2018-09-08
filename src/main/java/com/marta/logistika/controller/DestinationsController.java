@@ -1,6 +1,7 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.RoadRecord;
+import com.marta.logistika.dto.RoadToForm;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.service.api.CityService;
@@ -9,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 @Controller
@@ -77,10 +80,10 @@ public class DestinationsController {
 
     @GetMapping(value="/{id}/add-road")
     public String addRoadForm(@PathVariable("id") Long id, Model uiModel){
-        CityEntity startCity = cityService.getCityById(id);
-        RoadRecord road = new RoadRecord();
+        CityEntity fromCity = cityService.getCityById(id);
+        RoadToForm road = new RoadToForm();
 
-        uiModel.addAttribute("startCity", startCity);
+        uiModel.addAttribute("fromCity", fromCity);
         uiModel.addAttribute("road", road);
         uiModel.addAttribute("cities", cityService.listAll());
 
@@ -90,32 +93,55 @@ public class DestinationsController {
     @PostMapping(value="/{id}/add-road")
     public String addRoad(
             @PathVariable("id") Long id,
-            @ModelAttribute("road") RoadRecord road,
+            @ModelAttribute("road") RoadToForm roadToForm,
             BindingResult bindingResult){
 
-        System.out.println(road);
+        System.out.println(roadToForm);
 
         if(bindingResult.hasErrors()){
             return "redirect:/destinations/{id}/add-road";
         }
 
-        RoadEntity newRoad = new RoadEntity();
-        newRoad.setFromCity(cityService.getCityById(id));
-        newRoad.setToCity(cityService.getCityById(road.getToCityId()));
-        newRoad.setDistance(road.getDistance());
-        roadService.add(newRoad);
+        RoadEntity road = new RoadEntity();
+        road.setFromCity(cityService.getCityById(id));
+        road.setToCity(roadToForm.getToCity());
+        road.setDistance(roadToForm.getDistance());
+        roadService.add(road);
 
         return "redirect:/destinations/{id}";
     }
 
     @GetMapping(value="/{cityId}/remove-road/{roadId}")
     public String removeRoad(
-            @PathVariable("cityId") Long cityId,
             @PathVariable("roadId") Long roadId){
 
         roadService.remove(roadId);
 
         return "redirect:/destinations/{cityId}";
+    }
+
+    //todo что за зверь и нельзя ли покороче
+    @InitBinder
+    public void initBinder(ServletRequestDataBinder binder) {
+
+        binder.registerCustomEditor(CityEntity.class, "toCity", new PropertyEditorSupport() {
+
+            public void setAsText(String text) {
+                Long id = Long.parseLong(text);
+                CityEntity toCity = cityService.getCityById(id);
+                setValue(toCity);
+            }
+
+            public String getAsText() {
+                Object value = getValue();
+                if (value != null) {
+                    CityEntity city = (CityEntity) value;
+                    return city.getName();
+                }
+                return null;
+            }
+        });
+
     }
 
 }
