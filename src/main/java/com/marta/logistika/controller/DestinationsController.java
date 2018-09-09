@@ -70,7 +70,8 @@ public class DestinationsController {
             return "redirect:/destinations/add-city";
         }
         cityService.add(city);
-        return "redirect:/destinations";
+        long id = city.getId();
+        return ("redirect:/destinations/"+ id);
     }
 
     @GetMapping(value="/{id}/remove")

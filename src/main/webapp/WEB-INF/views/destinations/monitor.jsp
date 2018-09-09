@@ -13,8 +13,16 @@
 </jsp:include>
 
 <body>
-    <div class="wrapper-row">
-        <section>
+
+<div class="content-wrapper">
+
+    <jsp:include page="../_fragments/header.jsp"/>
+
+    <div class="row-wrapper">
+
+        <jsp:include page="../_fragments/navigation.jsp"/>
+
+        <main>
             <h3>Перечень действующих логистических центров</h3>
             <table>
                 <tr>
@@ -32,11 +40,15 @@
                 </c:if>
             </table>
             <br>
-            <a href="${contextPath}/destinations/add-city">Добавить новый</a>
-        </section>
-        <section>
+            <a href="${contextPath}/destinations/add-city">Добавить новый</a><br>
             <a href="${contextPath}/destinations/find-route">Поиск маршрута</a>
-        </section>
+        </main>
+
     </div>
+
+</div>
+
+<jsp:include page="../_fragments/footer.jsp"/>
+
 </body>
 </html>

@@ -6,14 +6,25 @@
 
 <!DOCTYPE >
 <html>
-<head>
-    <title>Logistika</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="${resPath}/style.css"/>
-</head>
+
+<jsp:include page="../_fragments/head.jsp">
+    <jsp:param name="title" value="LogiWeb"/>
+</jsp:include>
+
 <body>
-    <menu>
-        <a href="/destinations">Логистические центры</a>
-    </menu>
+
+    <div class="content-wrapper">
+
+        <jsp:include page="../_fragments/header.jsp"/>
+
+        <div class="row-wrapper">
+            <jsp:include page="../_fragments/navigation.jsp"/>
+            <main>Здесь что-то будет</main>
+        </div>
+
+    </div>
+
+    <jsp:include page="../_fragments/footer.jsp"/>
+
 </body>
 </html>
