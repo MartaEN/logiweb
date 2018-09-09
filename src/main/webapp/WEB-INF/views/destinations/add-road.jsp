@@ -5,9 +5,9 @@
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 
 <html>
-<head>
-    <title>Добавить</title>
-</head>
+<jsp:include page="../_fragments/head.jsp">
+    <jsp:param name="title" value="Добавить"/>
+</jsp:include>
 <body>
 <a href="/destinations/${fromCity.id}">Назад к центру: ${fromCity.name}</a>
 <h3>Добавить новый прямой путь из города ${fromCity.name}</h3>

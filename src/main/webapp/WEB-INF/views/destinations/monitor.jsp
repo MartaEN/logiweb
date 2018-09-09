@@ -7,10 +7,11 @@
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 
 <html>
-<head>
-    <title>Логистические центры</title>
-    <link rel="stylesheet" href="${resourcesPath}/style.css"/>
-</head>
+
+<jsp:include page="../_fragments/head.jsp">
+    <jsp:param name="title" value="Логистические центры"/>
+</jsp:include>
+
 <body>
     <div class="wrapper-row">
         <section>

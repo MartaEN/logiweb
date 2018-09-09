@@ -4,9 +4,9 @@
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 
 <html>
-<head>
-    <title>Создать</title>
-</head>
+<jsp:include page="../_fragments/head.jsp">
+    <jsp:param name="title" value="Создать"/>
+</jsp:include>
 <body>
     <a href="/destinations">Назад к списку</a>
     <h3>Создание нового логистического узла</h3>

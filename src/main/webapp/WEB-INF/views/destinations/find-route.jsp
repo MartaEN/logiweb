@@ -6,20 +6,36 @@
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 
 <html>
-<head>
-    <title>Find route</title>
-    <script src="${resourcesPath}/js/jquery-3.3.1.min.js"></script>
+<jsp:include page="../_fragments/head.jsp">
+    <jsp:param name="title" value="Поиск маршрута"/>
+</jsp:include>
+<body>
+    <a href="/destinations">Назад к списку</a>
+    <h3>Поиск маршрута</h3>
+    <form:form id="findRouteForm" modelAttribute="road">
+        <form:select path="fromCity">
+            <form:option value="" selected="selected" disabled="true" label="Выберите город отправления"/>
+            <form:options itemValue="id" itemLabel="name" items="${cities}" />
+        </form:select>
+        <form:select path="toCity">
+            <form:option value="" selected="selected" disabled="true" label="Выберите город назначения"/>
+            <form:options itemValue="id" itemLabel="name" items="${cities}" />
+        </form:select>
+        <input type="submit" id="ajaxBtn" value="Рассчитать маршрут">
+    </form:form>
+    <div class="ajaxData" style="display: none;"></div>
+
     <script>
         $(document).ready(function() {
 
             //todo как получить и дудочку, и кувшинчик?
-            //то (1) есть сохранить binding к объекту RoadRecord и (2) сделать запрос ajax-ным?
+            //то (1) есть сохранить binding к объекту RoadRecord и (2) сделать запрос ajax
             $('#findRouteForm').submit(function (event) {
 
                 // event.preventDefault();
-
                 // let input = $("findRouteForm").serialize();
-                // let ajaxDataDiv = $('.ajaxData');
+
+                let ajaxDataDiv = $('.ajaxData');
 
                 $.post({
                     url: '${contextPath}/destinations/find-route',
@@ -38,19 +54,6 @@
             });
         });
     </script>
-</head>
-<body>
-    <form:form id="findRouteForm" modelAttribute="road">
-        <form:select path="fromCity">
-            <form:option value="" selected="selected" disabled="true" label="Выберите город отправления"/>
-            <form:options itemValue="id" itemLabel="name" items="${cities}" />
-        </form:select>
-        <form:select path="toCity">
-            <form:option value="" selected="selected" disabled="true" label="Выберите город назначения"/>
-            <form:options itemValue="id" itemLabel="name" items="${cities}" />
-        </form:select>
-        <input type="submit" id="ajaxBtn" value="Рассчитать маршрут">
-    </form:form>
-    <div class="ajaxData" style="display: none;"></div>
+
 </body>
 </html>
