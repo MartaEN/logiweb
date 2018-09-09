@@ -1,8 +1,11 @@
 package com.marta.logistika.entity;
 
+import lombok.Data;
+
 import javax.persistence.*;
 
 @Entity
+@Data
 @Table(name = "cities")
 public class CityEntity extends AbstractEntity {
 

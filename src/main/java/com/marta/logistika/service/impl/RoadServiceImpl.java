@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.RoadDao;
+import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.exception.EntityNotFoundException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("roadService")
 public class RoadServiceImpl extends AbstractService implements RoadService {
@@ -74,7 +76,7 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
     }
 
     @Override
-    public LinkedList<RoadEntity> findRouteFromTo(CityEntity fromCity, CityEntity toCity) {
+    public List<RoadRecord> findRouteFromTo(CityEntity fromCity, CityEntity toCity) {
 
         class Route {
             private LinkedList<RoadEntity> roadList;
@@ -113,18 +115,22 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
                 CityEntity nextCity = nextRoad.getFromCity();
                 Route nextCityRoute = new Route(currentCityRoute).addRoad(nextRoad);
 
-                if(!routesFound.containsKey(nextCity) || nextCityRoute.distance < routesFound.get(nextCity).distance) {
+                if( !routesFound.containsKey(nextCity)) {
                     routesFound.put(nextCity, nextCityRoute);
-                }
-                if (!nextCity.equals(fromCity)) {
-                    wave.add(nextCity);
+                    if (!nextCity.equals(fromCity)) wave.add(nextCity);
+                } else if (nextCityRoute.distance < routesFound.get(nextCity).distance) {
+                    routesFound.put(nextCity, nextCityRoute);
                 }
             });
         }
 
         if(!routesFound.containsKey(fromCity)) throw new RuntimeException("No route available from " + fromCity.getName() + " to " + toCity.getName());
 
-        return routesFound.get(fromCity).roadList;
+
+        return routesFound.get(fromCity).roadList
+                .stream()
+                .map(r -> mapper.map(r, RoadRecord.class))
+                .collect(Collectors.toList());
 
     }
 }

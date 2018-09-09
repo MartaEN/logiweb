@@ -18,7 +18,10 @@
         <spring.version>5.0.6.RELEASE</spring.version>
         <hibernate.version>5.3.0.Final</hibernate.version>
         <mysql-connector.version>5.1.46</mysql-connector.version>
+        <jsp.version>2.0</jsp.version>
         <jstl.vertion>1.2</jstl.vertion>
+        <jackson.version>2.9.6</jackson.version>
+        <dozer.version>5.4.0</dozer.version>
         <lombok.version>1.18.2</lombok.version>
     </properties>
 
@@ -54,11 +57,6 @@
             <version>${mysql-connector.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.sf.dozer</groupId>
-            <artifactId>dozer</artifactId>
-            <version>5.4.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>
@@ -71,12 +69,22 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jsp-api</artifactId>
-            <version>2.0</version>
+            <version>${jsp.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>${jstl.vertion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.dozer</groupId>
+            <artifactId>dozer</artifactId>
+            <version>${dozer.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,28 +1,29 @@
 package com.marta.logistika.dto;
 
+import com.marta.logistika.entity.CityEntity;
 import lombok.Data;
 
 @Data
 public class RoadRecord {
 
-    private long fromCityId;
-    private long toCityId;
+    private CityEntity fromCity;
+    private CityEntity toCity;
     private int distance;
 
-    public long getFromCityId() {
-        return fromCityId;
+    public CityEntity getFromCity() {
+        return fromCity;
     }
 
-    public void setFromCityId(long fromCityId) {
-        this.fromCityId = fromCityId;
+    public void setFromCity(CityEntity fromCity) {
+        this.fromCity = fromCity;
     }
 
-    public long getToCityId() {
-        return toCityId;
+    public CityEntity getToCity() {
+        return toCity;
     }
 
-    public void setToCityId(long toCityId) {
-        this.toCityId = toCityId;
+    public void setToCity(CityEntity toCity) {
+        this.toCity = toCity;
     }
 
     public int getDistance() {

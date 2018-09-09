@@ -1,5 +1,10 @@
 body {
     margin: 0 auto;
-    color: blue;
+}
+
+.wrapper-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
