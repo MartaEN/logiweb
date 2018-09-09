@@ -12,18 +12,23 @@
     <script>
         $(document).ready(function() {
 
-            $('#ajaxBtn').click(function (event) {
+            //todo как получить и дудочку, и кувшинчик?
+            //то (1) есть сохранить binding к объекту RoadRecord и (2) сделать запрос ajax-ным?
+            $('#findRouteForm').submit(function (event) {
 
                 // event.preventDefault();
 
-                let ajaxData = $('.ajaxData');
+                // let input = $("findRouteForm").serialize();
+                // let ajaxDataDiv = $('.ajaxData');
 
                 $.post({
                     url: '${contextPath}/destinations/find-route',
+                    // data: input,
                     dataType: 'json',
                     success: function (data) {
-                        ajaxData.html(JSON.stringify(data));
-                        ajaxData.show();
+                        // ajaxDataDiv.html("Some no-error response from server received");
+                        ajaxDataDiv.html(JSON.stringify(data));
+                        ajaxDataDiv.show();
                     },
                     error: function (err) {
                         console.log(err);
@@ -37,11 +42,11 @@
 <body>
     <form:form id="findRouteForm" modelAttribute="road">
         <form:select path="fromCity">
-            <form:option value="" disabled="true" label="Выберите город отправления"/>
+            <form:option value="" selected="selected" disabled="true" label="Выберите город отправления"/>
             <form:options itemValue="id" itemLabel="name" items="${cities}" />
         </form:select>
         <form:select path="toCity">
-            <form:option value="" disabled="true" label="Выберите город назначения"/>
+            <form:option value="" selected="selected" disabled="true" label="Выберите город назначения"/>
             <form:options itemValue="id" itemLabel="name" items="${cities}" />
         </form:select>
         <input type="submit" id="ajaxBtn" value="Рассчитать маршрут">
