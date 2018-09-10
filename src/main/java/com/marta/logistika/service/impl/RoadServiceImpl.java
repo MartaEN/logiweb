@@ -61,18 +61,19 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
     }
 
     @Override
-    public List<RoadEntity> listAll() {
-        return roadDao.listAll();
+    public List<RoadRecord> listAll() {
+        return roadDao.listAll()
+                .stream()
+                .map(r -> mapper.map(r, RoadRecord.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<RoadEntity> listAllRoadsFrom(CityEntity city) {
-        return roadDao.listAllRoadsFrom(city);
-    }
-
-    @Override
-    public RoadEntity getDirectRoadFromTo(CityEntity fromCity, CityEntity toCity) {
-        return roadDao.getDirectRoadFromTo(fromCity, toCity);
+    public List<RoadRecord> listAllRoadsFrom(CityEntity city) {
+        return roadDao.listAllRoadsFrom(city)
+                .stream()
+                .map(r -> mapper.map(r, RoadRecord.class))
+                .collect(Collectors.toList());
     }
 
     @Override

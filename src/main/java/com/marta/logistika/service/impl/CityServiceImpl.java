@@ -1,7 +1,6 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.CityDao;
-import com.marta.logistika.dto.CityRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.exception.EntityNotFoundException;
 import com.marta.logistika.service.api.CityService;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("cityService")
 public class CityServiceImpl extends AbstractService implements CityService {
@@ -30,13 +28,13 @@ public class CityServiceImpl extends AbstractService implements CityService {
 
     @Override
     @Transactional
-    public void updateCity(CityEntity city) {
+    public void update(CityEntity city) {
         cityDao.update(city);
     }
 
     @Override
     @Transactional
-    public void removeCity(long id) {
+    public void remove(long id) {
         CityEntity city = cityDao.findById(id);
         if (city == null) throw new EntityNotFoundException(id, CityEntity.class);
         cityDao.remove(city);
@@ -52,16 +50,4 @@ public class CityServiceImpl extends AbstractService implements CityService {
         return cityDao.findById(id);
     }
 
-    @Override
-    public CityRecord getCityRecordById(long id) {
-        return mapper.map(cityDao.findById(id), CityRecord.class);
-    }
-
-    @Override
-    public List<CityRecord> listAllDtos() {
-        return cityDao.listAll()
-                .stream()
-                .map(c -> mapper.map(c, CityRecord.class))
-                .collect(Collectors.toList());
-    }
 }

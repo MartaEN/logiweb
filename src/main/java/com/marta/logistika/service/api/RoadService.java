@@ -4,16 +4,14 @@ import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public interface RoadService {
 
     void add(RoadEntity road);
     void remove(long roadId);
-    List<RoadEntity> listAll();
-    List<RoadEntity> listAllRoadsFrom(CityEntity city);
-    RoadEntity getDirectRoadFromTo (CityEntity fromCity, CityEntity toCity);
+    List<RoadRecord> listAll();
+    List<RoadRecord> listAllRoadsFrom(CityEntity city);
     List<RoadRecord> findRouteFromTo (CityEntity fromCity, CityEntity toCity);
 
 }

@@ -45,7 +45,7 @@ public class DestinationsController {
     public String editCityLinks(@PathVariable("id") Long id, Model uiModel){
 
         CityEntity city = cityService.getCityById(id);
-        List<RoadEntity> roads = roadService.listAllRoadsFrom(city);
+        List<RoadRecord> roads = roadService.listAllRoadsFrom(city);
 
         uiModel.addAttribute("city", city);
         uiModel.addAttribute("roads", roads);
@@ -77,7 +77,7 @@ public class DestinationsController {
     @GetMapping(value="/{id}/remove")
     public String removeCity(@PathVariable("id") Long id){
 
-        cityService.removeCity(id);
+        cityService.remove(id);
 
         return "redirect:/destinations";
 
@@ -138,7 +138,7 @@ public class DestinationsController {
             @ModelAttribute("road") RoadRecord roadRecord,
             BindingResult bindingResult){
 
-        System.out.println("### ROAD RECORD RECEIVED: " + roadRecord);
+        System.out.println(String.format("### ROAD RECORD RECEIVED: %s", roadRecord));
 
         RouteJsonResponse response = new RouteJsonResponse();
 
