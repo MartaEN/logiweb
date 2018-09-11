@@ -1,9 +1,5 @@
 $(document).ready(function () {
-    //todo как получить и дудочку, и кувшинчик?
-    //то (1) есть сохранить binding к объекту RoadRecord и (2) сделать запрос ajax
     $('#findRouteBtn').on('click', (event) => {
-        // todo почитать про стрелочные функции
-        // todo add preventDefault???
 
         event.preventDefault();
 
