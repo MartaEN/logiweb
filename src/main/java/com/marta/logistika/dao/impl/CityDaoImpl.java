@@ -7,22 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository("cityRepository")
-public class CityDaoImpl extends AbstractDao implements CityDao {
-
-    @Override
-    public void add(CityEntity city) {
-        em.persist(city);
-    }
-
-    @Override
-    public void update(CityEntity city) {
-        em.merge(city);
-    }
-
-    @Override
-    public void remove(CityEntity city) {
-        em.remove(city);
-    }
+public class CityDaoImpl extends AbstractDao<CityEntity> implements CityDao {
 
     @Override
     public CityEntity findById(long id) {

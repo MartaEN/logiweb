@@ -5,11 +5,8 @@ import com.marta.logistika.entity.RoadEntity;
 
 import java.util.List;
 
-public interface RoadDao {
+public interface RoadDao extends GenericDao<RoadEntity> {
 
-    void add(RoadEntity road);
-    void update(RoadEntity road);
-    void remove(RoadEntity road);
     RoadEntity findById (long id);
     List<RoadEntity> listAll();
     List<RoadEntity> listAllRoadsFrom(CityEntity fromCity);

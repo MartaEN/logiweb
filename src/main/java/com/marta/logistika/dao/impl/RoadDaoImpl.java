@@ -8,22 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository("roadRepository")
-public class RoadDaoImpl extends AbstractDao implements RoadDao {
-
-    @Override
-    public void add(RoadEntity road) {
-        em.persist(road);
-    }
-
-    @Override
-    public void update(RoadEntity road) {
-        em.merge(road);
-    }
-
-    @Override
-    public void remove(RoadEntity road) {
-        em.remove(road);
-    }
+public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
 
     @Override
     public RoadEntity findById(long id) {

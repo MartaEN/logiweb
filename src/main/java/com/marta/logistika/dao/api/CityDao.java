@@ -4,12 +4,8 @@ import com.marta.logistika.entity.CityEntity;
 
 import java.util.List;
 
-public interface CityDao {
+public interface CityDao extends GenericDao<CityEntity> {
 
-    void add(CityEntity city);
-    void update(CityEntity city);
-    void remove(CityEntity city);
-    CityEntity findById(long id);
+    CityEntity findById (long id);
     List<CityEntity> listAll();
-
 }
