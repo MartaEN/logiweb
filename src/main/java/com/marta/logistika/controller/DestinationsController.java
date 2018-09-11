@@ -6,6 +6,7 @@ import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.RoadService;
+import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/destinations")
 public class DestinationsController {
-    
+
     private final CityService cityService;
     private final RoadService roadService;
 
@@ -34,15 +35,15 @@ public class DestinationsController {
     }
 
     @GetMapping
-    public String home(Model uiModel){
+    public String home(Model uiModel) {
 
         uiModel.addAttribute("cities", cityService.listAll());
 
         return "destinations/monitor";
     }
 
-    @GetMapping(value="/{id}")
-    public String editCityLinks(@PathVariable("id") Long id, Model uiModel){
+    @GetMapping(value = "/{id}")
+    public String editCityLinks(@PathVariable("id") Long id, Model uiModel) {
 
         CityEntity city = cityService.getCityById(id);
         List<RoadRecord> roads = roadService.listAllRoadsFrom(city);
@@ -54,28 +55,28 @@ public class DestinationsController {
 
     }
 
-    @GetMapping(value="/add-city")
-    public String addCityForm(Model uiModel){
+    @GetMapping(value = "/add-city")
+    public String addCityForm(Model uiModel) {
         CityEntity city = new CityEntity();
         uiModel.addAttribute("city", city);
         return "destinations/add-city";
     }
 
-    @PostMapping(value="/add-city")
+    @PostMapping(value = "/add-city")
     public String addCity(
             @ModelAttribute("city") CityEntity city,
-            BindingResult bindingResult){
+            BindingResult bindingResult) {
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return "redirect:/destinations/add-city";
         }
         cityService.add(city);
         long id = city.getId();
-        return ("redirect:/destinations/"+ id);
+        return ("redirect:/destinations/" + id);
     }
 
-    @GetMapping(value="/{id}/remove")
-    public String removeCity(@PathVariable("id") Long id){
+    @GetMapping(value = "/{id}/remove")
+    public String removeCity(@PathVariable("id") Long id) {
 
         cityService.remove(id);
 
@@ -83,8 +84,8 @@ public class DestinationsController {
 
     }
 
-    @GetMapping(value="/{id}/add-road")
-    public String addRoadForm(@PathVariable("id") Long id, Model uiModel){
+    @GetMapping(value = "/{id}/add-road")
+    public String addRoadForm(@PathVariable("id") Long id, Model uiModel) {
         CityEntity fromCity = cityService.getCityById(id);
         RoadRecord road = new RoadRecord();
 
@@ -95,13 +96,13 @@ public class DestinationsController {
         return "destinations/add-road";
     }
 
-    @PostMapping(value="/{id}/add-road")
+    @PostMapping(value = "/{id}/add-road")
     public String addRoad(
             @PathVariable("id") Long id,
             @ModelAttribute("road") RoadRecord roadRecord,
-            BindingResult bindingResult){
+            BindingResult bindingResult) {
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return "redirect:/destinations/{id}/add-road";
         }
 
@@ -114,9 +115,9 @@ public class DestinationsController {
         return "redirect:/destinations/{id}";
     }
 
-    @GetMapping(value="/{cityId}/remove-road/{roadId}")
+    @GetMapping(value = "/{cityId}/remove-road/{roadId}")
     public String removeRoad(
-            @PathVariable("roadId") Long roadId){
+            @PathVariable("roadId") Long roadId) {
 
         roadService.remove(roadId);
 
@@ -132,33 +133,18 @@ public class DestinationsController {
         return "destinations/find-route";
     }
 
-    @PostMapping(value="/find-route", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/find-route-result", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     public RouteJsonResponse findRouteResult(
-            @ModelAttribute("road") RoadRecord roadRecord,
-            BindingResult bindingResult){
-
-        System.out.println(String.format("### ROAD RECORD RECEIVED: %s", roadRecord));
+            @RequestParam long fromCityId,
+            @RequestParam long toCityId) {
 
         RouteJsonResponse response = new RouteJsonResponse();
-
-        if(bindingResult.hasErrors()){
-            Map<String, String> errors = bindingResult.getFieldErrors().stream()
-                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-            response.setErrorMessages(errors);
-            return response;
-        }
-
-        List<RoadRecord> list = roadService.findRouteFromTo(roadRecord.getFromCity(), roadRecord.getToCity());
-        System.out.println("### ROUTE CALCULATED");
-        list.forEach(System.out::println);
-
-        response.setRoute(roadService.findRouteFromTo(roadRecord.getFromCity(), roadRecord.getToCity()));
+        response.setRoute(roadService.findRouteFromTo(cityService.getCityById(fromCityId), cityService.getCityById(toCityId)));
         return response;
 
     }
 
-    //todo что за зверь и нельзя ли покороче
     @InitBinder
     public void initBinder(ServletRequestDataBinder binder) {
 
