@@ -5,11 +5,11 @@
 <jsp:include page="../_fragments/page_template_before_main.jsp"/>
 
 
-    <a href="${contextPath}/destinations">Назад к списку</a>
     <h3>Создание нового логистического узла</h3>
     <form method="POST" action="${contextPath}/destinations/add-city">
         <input type="text" name="name" placeholder="Название города" required>
-        <input type="submit" value="Сохранить">
+        <input type="submit" class="btn btn-warning" value="Сохранить">
+        <a class="btn btn-secondary" href="${contextPath}/destinations" role="button">Вернуться</a>
     </form>
 
 

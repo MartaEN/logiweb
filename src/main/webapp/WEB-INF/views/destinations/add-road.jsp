@@ -6,15 +6,15 @@
 <jsp:include page="../_fragments/page_template_before_main.jsp"/>
 
 
-    <a href="${contextPath}/destinations/${fromCity.id}">Назад к центру: ${fromCity.name}</a>
     <h3>Добавить новый прямой путь из города ${fromCity.name}</h3>
     <form:form modelAttribute="road" method="POST" action="${contextPath}/destinations/${fromCity.id}/add-road">
         <form:select path="toCity">
-            <form:option value="" disabled="true" label="Выберите направление"/>
+            <form:option value="" disabled="true" selected="selected" label="Выберите направление"/>
             <form:options itemValue="id" itemLabel="name" items="${cities}" />
         </form:select>
         <input type="text" name="distance" placeholder="Расстояние, км" required>
-        <input type="submit" value="Добавить">
+        <input type="submit" class="btn btn-warning" value="Добавить">
+        <a class="btn btn-secondary" href="${contextPath}/destinations/${fromCity.id}" role="button">Вернуться</a>
     </form:form>
 
 

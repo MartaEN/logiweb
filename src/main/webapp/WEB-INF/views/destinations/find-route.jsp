@@ -4,6 +4,7 @@
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 <jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<script src="${contextPath}/resources/js/find-route.js"></script>
 
 
     <a href="${contextPath}/destinations">Назад к списку</a>

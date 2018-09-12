@@ -6,20 +6,16 @@ import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.RoadService;
-import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.beans.PropertyEditorSupport;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/destinations")
@@ -39,7 +35,7 @@ public class DestinationsController {
 
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "destinations/monitor";
+        return "destinations/list";
     }
 
     @GetMapping(value = "/{id}")

@@ -5,7 +5,6 @@
 <jsp:include page="../_fragments/page_template_before_main.jsp"/>
 
 
-    <a href="${contextPath}/destinations">Назад к списку</a>
     <h3>Редактирование логистического центра</h3>
     <h4>${city.name}</h4>
     <table>
@@ -20,13 +19,14 @@
                 <tr>
                     <td>${road.toCity.name}</td>
                     <td>${road.distance}</td>
-                    <td><a href="${contextPath}/destinations/${city.id}/remove-road/${road.id}">Удалить направление</a></td>
+                    <td><a href="${contextPath}/destinations/${city.id}/remove-road/${road.id}"><i class="fas fa-trash-alt"></i></a></td>
                 </tr>
             </c:forEach>
         </c:if>
     </table>
     <br>
-    <a href="${contextPath}/destinations/${city.id}/add-road">Добавить направление</a>
+    <a class="btn btn-success" href="${contextPath}/destinations/${city.id}/add-road" role="button">Добавить направление</a>
+    <a class="btn btn-secondary" href="${contextPath}/destinations" role="button">Назад к списку</a>
 
 
 <jsp:include page="../_fragments/page_template_after_main.jsp"/>
