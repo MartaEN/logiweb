@@ -60,7 +60,7 @@ nav a:hover {
 }
 
 main {
-    padding: 10px;
+    padding: 10px 10px 10px 50px;
 }
 
 footer {
@@ -74,4 +74,30 @@ footer {
     font-size: 32px;
     font-weight: 700;
 }
+
+.form-element label {
+    width: 160px;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.icon-ok {
+    color: #8CC152;
+}
+
+.icon-error {
+    color: red;
+}
+
+.width-text-field {
+    width: 160px;
+}
+
+.width-icon-field {
+    width: 80px;
+}
+
+
 
