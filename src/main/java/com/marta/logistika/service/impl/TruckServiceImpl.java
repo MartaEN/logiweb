@@ -3,11 +3,13 @@ package com.marta.logistika.service.impl;
 import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.TruckEntity;
+import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,16 +26,36 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     @Transactional
     public void add(TruckRecord truck) {
-        truckDao.add(mapper.map(truck, TruckEntity.class));
+
+        try {
+            truckDao.findByRegNumber(truck.getRegNumber());
+            throw new ServiceException(String.format("Truck with registration number %s already exists", truck.getRegNumber()));
+        } catch (NoResultException e) {
+            if(isTruckRecordValid(truck)) {
+                truck.setParked(true);
+                truckDao.add(mapper.map(truck, TruckEntity.class));
+            } else {
+                //todo develop more informative message?
+                throw new ServiceException("Truck data invalid");
+            }
+        }
     }
 
     @Override
     @Transactional
     public void update(TruckRecord truckEditFormInput) {
-        TruckEntity truckEntity = truckDao.findByRegNumber(truckEditFormInput.getRegNumber());
-        truckEntity.setCapacity(truckEditFormInput.getCapacity());
-        truckEntity.setShiftSize(truckEditFormInput.getShiftSize());
-        truckEntity.setServiceable(truckEditFormInput.isServiceable());
+        try {
+            TruckEntity truckEntity = truckDao.findByRegNumber(truckEditFormInput.getRegNumber());
+            if(isTruckRecordValid(truckEditFormInput)) {
+                truckEntity.setCapacity(truckEditFormInput.getCapacity());
+                truckEntity.setShiftSize(truckEditFormInput.getShiftSize());
+                truckEntity.setServiceable(truckEditFormInput.isServiceable());
+            } else {
+                throw new ServiceException("Truck data invalid");
+            }
+        } catch (NoResultException e) {
+            throw new ServiceException(String.format("Truck with registration number %s does not exist", truckEditFormInput.getRegNumber()));
+        }
     }
 
     @Override
@@ -53,5 +75,12 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     public TruckRecord getTruckByRegNum(String regNum) {
         return mapper.map(truckDao.findByRegNumber(regNum), TruckRecord.class);
+    }
+
+    private boolean isTruckRecordValid (TruckRecord truckRecord) {
+        if ( ! truckRecord.getRegNumber().matches("^[a-zA-Z]{2}[0-9]{5}$")) return false;
+        if ( truckRecord.getCapacity() < 0 ) return false;
+        if ( truckRecord.getShiftSize() <0 || truckRecord.getShiftSize() > 2 ) return false;
+        return true;
     }
 }

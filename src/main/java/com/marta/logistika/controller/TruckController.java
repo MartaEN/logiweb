@@ -2,6 +2,7 @@ package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +51,14 @@ public class TruckController {
             return "redirect:/trucks/add";
         }
 
-        if( isTruckRecordValid(truck)) {
-            truck.setParked(true);
+        try {
             truckService.add(truck);
             return ("redirect:/trucks");
-        } else {
+        } catch (ServiceException e) {
+            e.printStackTrace();
+            //todo develop error reporting to user
             return "error";
         }
-
     }
 
     @GetMapping(value = "/{regNumber}")
@@ -77,13 +78,11 @@ public class TruckController {
     public String edit(
             @ModelAttribute("truck") TruckRecord truck) {
 
-        if(isTruckRecordValid(truck)) {
-
+        try {
             truckService.update(truck);
             return "redirect:/trucks";
-
-        } else {
-
+        } catch (ServiceException e) {
+            e.printStackTrace();
             return "error";
         }
     }
@@ -117,12 +116,5 @@ public class TruckController {
                 return null;
             }
         });
-    }
-
-    private boolean isTruckRecordValid (TruckRecord truckRecord) {
-        if ( ! truckRecord.getRegNumber().matches("^[a-zA-Z]{2}[0-9]{5}$")) return false;
-        if ( truckRecord.getCapacity() < 0 ) return false;
-        if ( truckRecord.getShiftSize() <0 || truckRecord.getShiftSize() > 2 ) return false;
-        return true;
     }
 }
