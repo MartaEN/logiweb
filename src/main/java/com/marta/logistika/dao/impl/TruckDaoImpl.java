@@ -10,6 +10,14 @@ import java.util.List;
 public class TruckDaoImpl extends AbstractDao<TruckEntity> implements TruckDao {
 
     @Override
+    public boolean regNumberExists(String regNumber) {
+        Long count = em.createQuery("SELECT COUNT (t) FROM TruckEntity t WHERE t.regNumber=:regNumber", Long.class)
+                .setParameter("regNumber", regNumber)
+                .getSingleResult();
+        return count > 0;
+    }
+
+    @Override
     public TruckEntity findByRegNumber(String regNumber) {
         if(regNumber == null) return null;
         return em.createQuery(

@@ -26,18 +26,13 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     @Transactional
     public void add(TruckRecord truck) {
-
-        try {
-            truckDao.findByRegNumber(truck.getRegNumber());
+        if(truckDao.regNumberExists(truck.getRegNumber())) {
             throw new ServiceException(String.format("Truck with registration number %s already exists", truck.getRegNumber()));
-        } catch (NoResultException e) {
-            if(isTruckRecordValid(truck)) {
-                truck.setParked(true);
-                truckDao.add(mapper.map(truck, TruckEntity.class));
-            } else {
-                //todo develop more informative message?
-                throw new ServiceException("Truck data invalid");
-            }
+        } else if(isTruckRecordValid(truck)) {
+            truck.setParked(true);
+            truckDao.add(mapper.map(truck, TruckEntity.class));
+        } else {
+            throw new ServiceException("Truck data invalid");
         }
     }
 
