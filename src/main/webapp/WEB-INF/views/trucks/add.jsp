@@ -3,7 +3,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
     <h3>Новая фура</h3>
@@ -18,10 +18,18 @@
         </div>
         <div class="form-element">
             <label for="shiftSize">Водителей в смене: </label>
-            <span id="shiftSize">
-                <label>1<input type="radio" name="shiftSize" value="1" checked></label>
-                <label>2<input type="radio" name="shiftSize" value="2"></label>
+            <span id="shiftSize" class="custom-control custom-radio custom-control-inline">
+                <input type="radio" value="1" id="shiftSize1" name="shiftSize" class="custom-control-input">
+                <label class="custom-control-label" for="shiftSize1"><i class="fas fa-user"></i></label>
             </span>
+            <span class="custom-control custom-radio custom-control-inline">
+                <input type="radio" value="2" id="shiftSize2" name="shiftSize" class="custom-control-input">
+                <label class="custom-control-label" for="shiftSize2"><i class="fas fa-user"></i><i class="fas fa-user"></i></label>
+            </span>
+            <%--<span id="shiftSize">--%>
+                <%--<label>1<input type="radio" name="shiftSize" value="1" checked></label>--%>
+                <%--<label>2<input type="radio" name="shiftSize" value="2"></label>--%>
+            <%--</span>--%>
         </div>
         <div class="form-element">
             <label for="location">Дислокация: </label>
@@ -39,4 +47,4 @@
     </form:form>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>
