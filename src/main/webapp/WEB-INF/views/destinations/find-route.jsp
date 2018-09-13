@@ -3,7 +3,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 <script src="${contextPath}/resources/js/find-route.js"></script>
 
 
@@ -23,4 +23,4 @@
     <div id="searchResult" style="display: none;"></div>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>

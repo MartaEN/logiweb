@@ -2,14 +2,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
     <h3>Редактирование</h3>
-    <form method="POST" action="${contextPath}/trucks/edit">
+    <form method="POST" action="${contextPath}/drivers/edit">
         <div class="form-element">
-            <label for="regNumber">Регистрационный номер: </label>
-            <input type="text" id="regNumber" name="regNumber" value="${truck.regNumber}" readonly>
+            <label for="personalId">Регистрационный номер: </label>
+            <input type="text" id="personalId" name="personalId" value="${driver.personalId}" readonly>
         </div>
         <div class="form-element">
             <label for="capacity">Вместимость, кг: </label>
@@ -18,8 +18,8 @@
         <div class="form-element">
             <label for="shiftSize">Водителей в смене: </label>
             <span id="shiftSize">
-                <label class="width-icon-field">1<input type="radio" name="shiftSize" value="1" <c:if test="${truck.shiftSize==1}">checked </c:if></label>
-                <label class="width-icon-field">2<input type="radio" name="shiftSize" value="2" <c:if test="${truck.shiftSize==2}">checked </c:if></label>
+                <label class="width40">1<input type="radio" name="shiftSize" value="1" <c:if test="${truck.shiftSize==1}">checked </c:if></label>
+                <label class="width40">2<input type="radio" name="shiftSize" value="2" <c:if test="${truck.shiftSize==2}">checked </c:if></label>
             </span>
         </div>
         <div class="form-element">
@@ -31,4 +31,4 @@
     </form>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>

@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
     <h3>Наши логистические центры</h3>
@@ -22,11 +22,11 @@
                             <input type="text"/>
                         </td>
                     </tr>
-                    <c:forEach items="${cities}" var="truck">
+                    <c:forEach items="${cities}" var="driver">
                         <tr class="table-data">
-                            <td>${truck.name}</td>
-                            <td><a href="${contextPath}/destinations/${truck.id}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="${contextPath}/destinations/${truck.id}/remove"><i class="fas fa-trash-alt"></i></a></td>
+                            <td>${driver.name}</td>
+                            <td><a href="${contextPath}/destinations/${driver.id}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td><a href="${contextPath}/destinations/${driver.id}/remove"><i class="fas fa-trash-alt"></i></a></td>
                         </tr>
                     </c:forEach>
                 </table>
@@ -41,4 +41,4 @@
     <a class="btn btn-success" href="${contextPath}/destinations/add-city" role="button">Добавить новый</a><br>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>

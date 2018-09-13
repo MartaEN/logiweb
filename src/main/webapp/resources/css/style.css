@@ -75,10 +75,6 @@ footer {
     font-weight: 700;
 }
 
-.form-element label {
-    width: 160px;
-}
-
 .hidden {
     visibility: hidden;
 }
@@ -91,12 +87,16 @@ footer {
     color: red;
 }
 
-.width-text-field {
+.width160 {
     width: 160px;
 }
 
-.width-icon-field {
+.width80 {
     width: 80px;
+}
+
+.width40 {
+    width: 40px;
 }
 
 

@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
     <h3>Редактирование логистического центра</h3>
@@ -29,4 +29,4 @@
     <a class="btn btn-secondary" href="${contextPath}/destinations" role="button">Назад к списку</a>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>

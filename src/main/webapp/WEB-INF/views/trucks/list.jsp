@@ -4,7 +4,7 @@
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 <c:set value="y" var="choiceYes" />
 <c:set value="n" var="choiceNo" />
-<jsp:include page="../_fragments/page_template_before_main.jsp"/>
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
 <h3>Наш автопарк</h3>
@@ -16,59 +16,59 @@
 <c:if test="${not empty trucks}">
     <table id="filter-table">
         <tr>
-            <th class="width-text-field">Регистрационный знак</th>
-            <th class="width-text-field">Вместимость</th>
-            <th class="width-icon-field">Смена</th>
-            <th class="width-text-field">Дислокация</th>
-            <th class="width-icon-field">Исправность</th>
+            <th class="width160">Регистрационный знак</th>
+            <th class="width160">Вместимость</th>
+            <th class="width80">Смена</th>
+            <th class="width160">Дислокация</th>
+            <th class="width80">Исправность</th>
         </tr>
         <tr class="table-filters">
             <td >
-                <input type="text" class="width-text-field"/>
+                <input type="text" class="width160"/>
             </td>
             <td>
-                <input type="text" class="width-text-field"/>
+                <input type="text" class="width160"/>
             </td>
             <td>
-                <input type="text" class="width-icon-field"/>
+                <input type="text" class="width80"/>
             </td>
             <td>
-                <input type="text" class="width-text-field"/>
+                <input type="text" class="width160"/>
             </td>
             <td>
-                <input type="text" class="width-icon-field"/>
+                <input type="text" class="width80"/>
             </td>
         </tr>
-        <c:forEach items="${trucks}" var="truck">
+        <c:forEach items="${trucks}" var="driver">
             <tr class="table-data">
-                <td>${truck.regNumber}</td>
-                <td>${truck.capacity} кг</td>
-                <td><c:forEach begin="1" end="${truck.shiftSize}" varStatus="loop">
+                <td>${driver.regNumber}</td>
+                <td>${driver.capacity} кг</td>
+                <td><c:forEach begin="1" end="${driver.shiftSize}" varStatus="loop">
                         <i class="fas fa-user"></i>
                     </c:forEach>
-                    <span class="hidden">${truck.shiftSize}</span>
+                    <span class="hidden">${driver.shiftSize}</span>
                 </td>
                 <td>
-                    <c:if test="${truck.parked}">
+                    <c:if test="${driver.parked}">
                         <i class="fas fa-parking"></i>
                     </c:if>
-                    <c:if test="${!truck.parked}">
+                    <c:if test="${!driver.parked}">
                         <i class="fas fa-road"></i>
                     </c:if>
-                    ${truck.location.name}
+                    ${driver.location.name}
                 </td>
                 <td>
-                    <c:if test="${truck.serviceable}">
+                    <c:if test="${driver.serviceable}">
                         <i class="fas fa-check-circle icon-ok"></i>
                         <span class="hidden">${choiceYes}</span>
                     </c:if>
-                    <c:if test="${!truck.serviceable}">
+                    <c:if test="${!driver.serviceable}">
                         <i class="fas fa-exclamation-triangle icon-error"></i>
                         <span class="hidden">${choiceNo}</span>
                     </c:if>
                 </td>
-                <td><a href="${contextPath}/trucks/${truck.regNumber}"><i class="fas fa-pencil-alt"></i></a></td>
-                <td><a href="${contextPath}/trucks/remove?regNumber=${truck.regNumber}"><i class="fas fa-trash-alt"></i></a></td>
+                <td><a href="${contextPath}/trucks/${driver.regNumber}"><i class="fas fa-pencil-alt"></i></a></td>
+                <td><a href="${contextPath}/trucks/remove?regNumber=${driver.regNumber}"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
         </c:forEach>
     </table>
@@ -76,7 +76,7 @@
 </c:if>
 
 <br>
-<a class="btn btn-success" href="${contextPath}/trucks/add" role="button">Добавить фуру</a>
+<a class="btn btn-success" href="${contextPath}/trucks/add" role="button">Зарегистрировать новую фуру</a>
 
 
-<jsp:include page="../_fragments/page_template_after_main.jsp"/>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>
