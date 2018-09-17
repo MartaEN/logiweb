@@ -1,9 +1,9 @@
 package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
-import lombok.Data;
 
-@Data
+import java.util.Objects;
+
 public class TruckRecord {
 
     private String regNumber;
@@ -59,5 +59,30 @@ public class TruckRecord {
 
     public void setServiceable(boolean serviceable) {
         isServiceable = serviceable;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TruckRecord that = (TruckRecord) o;
+        return Objects.equals(regNumber, that.regNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(regNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "TruckRecord{" +
+                "regNumber='" + regNumber + '\'' +
+                ", capacity=" + capacity +
+                ", shiftSize=" + shiftSize +
+                ", location=" + location +
+                ", isParked=" + isParked +
+                ", isServiceable=" + isServiceable +
+                '}';
     }
 }

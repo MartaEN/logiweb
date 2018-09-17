@@ -17,7 +17,7 @@ abstract class AbstractDao<T extends AbstractEntity> implements GenericDao<T> {
     }
 
     @Override
-    public void update(T entity) {
+    public void merge(T entity) {
         em.merge(entity);
     }
 

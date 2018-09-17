@@ -10,6 +10,6 @@ public interface CityService {
     void update(CityEntity city);
     void remove(long id);
     List<CityEntity> listAll();
-    CityEntity getCityById(long id);
+    CityEntity findById(long id);
 
 }

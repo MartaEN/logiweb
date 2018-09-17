@@ -68,7 +68,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     }
 
     @Override
-    public TruckRecord getTruckByRegNum(String regNum) {
+    public TruckRecord findTruckByRegNum(String regNum) {
         return mapper.map(truckDao.findByRegNumber(regNum), TruckRecord.class);
     }
 

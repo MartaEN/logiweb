@@ -10,5 +10,5 @@ public interface TruckService {
     void update(TruckRecord truck);
     void remove(TruckRecord truck);
     List<TruckRecord> listAll();
-    TruckRecord getTruckByRegNum(String regNum);
+    TruckRecord findTruckByRegNum(String regNum);
 }

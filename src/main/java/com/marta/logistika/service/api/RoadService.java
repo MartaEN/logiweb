@@ -13,5 +13,7 @@ public interface RoadService {
     List<RoadRecord> listAll();
     List<RoadRecord> listAllRoadsFrom(CityEntity city);
     List<RoadRecord> findRouteFromTo (CityEntity fromCity, CityEntity toCity);
+    int getDistanceFromTo (CityEntity fromCity, CityEntity toCity);
+    int getRouteDistance(List<CityEntity> route);
 
 }

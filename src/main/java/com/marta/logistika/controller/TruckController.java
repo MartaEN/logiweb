@@ -66,7 +66,7 @@ public class TruckController {
             @PathVariable("regNumber") String regNumber,
             Model uiModel) {
 
-        TruckRecord truck = truckService.getTruckByRegNum(regNumber);
+        TruckRecord truck = truckService.findTruckByRegNum(regNumber);
 
         uiModel.addAttribute("truck", truck);
 
@@ -90,7 +90,7 @@ public class TruckController {
     @GetMapping(value = "/remove")
     public String remove(@RequestParam String regNumber) {
 
-        truckService.remove(truckService.getTruckByRegNum(regNumber));
+        truckService.remove(truckService.findTruckByRegNum(regNumber));
 
         return "redirect:/trucks";
 
@@ -103,7 +103,7 @@ public class TruckController {
 
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.getCityById(id);
+                CityEntity toCity = cityService.findById(id);
                 setValue(toCity);
             }
 

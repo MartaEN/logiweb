@@ -1,11 +1,8 @@
 package com.marta.logistika.dto;
 
-import lombok.Data;
-
 import java.util.List;
 import java.util.Map;
 
-@Data
 public class RouteJsonResponse {
 
     private List<RoadRecord> route;
@@ -26,4 +23,6 @@ public class RouteJsonResponse {
     public void setErrorMessages(Map<String, String> errorMessages) {
         this.errorMessages = errorMessages;
     }
+
+
 }

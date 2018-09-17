@@ -29,7 +29,7 @@ public class CityServiceImpl extends AbstractService implements CityService {
     @Override
     @Transactional
     public void update(CityEntity city) {
-        cityDao.update(city);
+        cityDao.merge(city);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CityServiceImpl extends AbstractService implements CityService {
     }
 
     @Override
-    public CityEntity getCityById(long id) {
+    public CityEntity findById(long id) {
         return cityDao.findById(id);
     }
 

@@ -1,11 +1,9 @@
 package com.marta.logistika.entity;
 
-import lombok.Data;
-
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Data
 @Table(name = "roads")
 public class RoadEntity extends AbstractEntity {
 
@@ -42,5 +40,27 @@ public class RoadEntity extends AbstractEntity {
 
     public void setDistance(int distance) {
         this.distance = distance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoadEntity that = (RoadEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "RoadEntity{" +
+                "fromCity=" + fromCity.getName() +
+                ", toCity=" + toCity.getName() +
+                ", distance=" + distance +
+                '}';
     }
 }

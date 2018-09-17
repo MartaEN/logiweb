@@ -134,4 +134,22 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
                 .collect(Collectors.toList());
 
     }
+
+    @Override
+    public int getDistanceFromTo(CityEntity fromCity, CityEntity toCity) {
+        if (fromCity.equals(toCity)) return 0;
+        return findRouteFromTo(fromCity, toCity)
+                .stream()
+                .mapToInt(RoadRecord::getDistance)
+                .sum();
+    }
+
+    @Override
+    public int getRouteDistance(List<CityEntity> route) {
+        int distance = 0;
+        for (int i = 1; i < route.size(); i++) {
+            distance += getDistanceFromTo(route.get(i), route.get(i-1));
+        }
+        return distance;
+    }
 }

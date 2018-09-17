@@ -59,7 +59,7 @@ public class DriverController {
             @PathVariable("personalId") String personalId,
             Model uiModel) {
 
-        DriverRecord driver = driverService.getDriverByPersonalId(personalId);
+        DriverRecord driver = driverService.findDriverByPersonalId(personalId);
 
         uiModel.addAttribute("driver", driver);
 
@@ -84,7 +84,7 @@ public class DriverController {
     @GetMapping(value = "/remove")
     public String remove(@RequestParam String personalId) {
 
-        driverService.remove(driverService.getDriverByPersonalId(personalId));
+        driverService.remove(driverService.findDriverByPersonalId(personalId));
 
         return "redirect:/drivers";
 

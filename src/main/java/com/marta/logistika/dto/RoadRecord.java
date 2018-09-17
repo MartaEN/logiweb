@@ -1,9 +1,9 @@
 package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
-import lombok.Data;
 
-@Data
+import java.util.Objects;
+
 public class RoadRecord {
 
     private long id;
@@ -41,5 +41,27 @@ public class RoadRecord {
 
     public void setDistance(int distance) {
         this.distance = distance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoadRecord that = (RoadRecord) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "RoadRecord{" +
+                "fromCity=" + fromCity +
+                ", toCity=" + toCity +
+                ", distance=" + distance +
+                '}';
     }
 }

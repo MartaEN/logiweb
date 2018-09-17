@@ -10,6 +10,6 @@ public interface DriverService {
     void update(DriverRecord driver);
     void remove(DriverRecord driver);
     List<DriverRecord> listAll();
-    DriverRecord getDriverByPersonalId(String personalId);
+    DriverRecord findDriverByPersonalId(String personalId);
 
 }

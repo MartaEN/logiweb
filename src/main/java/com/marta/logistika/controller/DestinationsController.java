@@ -41,7 +41,7 @@ public class DestinationsController {
     @GetMapping(value = "/{id}")
     public String editCityLinks(@PathVariable("id") Long id, Model uiModel) {
 
-        CityEntity city = cityService.getCityById(id);
+        CityEntity city = cityService.findById(id);
         List<RoadRecord> roads = roadService.listAllRoadsFrom(city);
 
         uiModel.addAttribute("city", city);
@@ -82,7 +82,7 @@ public class DestinationsController {
 
     @GetMapping(value = "/{id}/add-road")
     public String addRoadForm(@PathVariable("id") Long id, Model uiModel) {
-        CityEntity fromCity = cityService.getCityById(id);
+        CityEntity fromCity = cityService.findById(id);
         RoadRecord road = new RoadRecord();
 
         uiModel.addAttribute("fromCity", fromCity);
@@ -103,7 +103,7 @@ public class DestinationsController {
         }
 
         RoadEntity road = new RoadEntity();
-        road.setFromCity(cityService.getCityById(id));
+        road.setFromCity(cityService.findById(id));
         road.setToCity(roadRecord.getToCity());
         road.setDistance(roadRecord.getDistance());
         roadService.add(road);
@@ -136,7 +136,7 @@ public class DestinationsController {
             @RequestParam long toCityId) {
 
         RouteJsonResponse response = new RouteJsonResponse();
-        response.setRoute(roadService.findRouteFromTo(cityService.getCityById(fromCityId), cityService.getCityById(toCityId)));
+        response.setRoute(roadService.findRouteFromTo(cityService.findById(fromCityId), cityService.findById(toCityId)));
         return response;
 
     }
@@ -148,7 +148,7 @@ public class DestinationsController {
 
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.getCityById(id);
+                CityEntity toCity = cityService.findById(id);
                 setValue(toCity);
             }
 
@@ -166,7 +166,7 @@ public class DestinationsController {
 
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.getCityById(id);
+                CityEntity toCity = cityService.findById(id);
                 setValue(toCity);
             }
 

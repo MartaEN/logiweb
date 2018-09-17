@@ -1,11 +1,10 @@
 package com.marta.logistika.entity;
 
-import lombok.Data;
-
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
-@Data
 @Table(name = "trucks")
 public class TruckEntity extends AbstractEntity {
 
@@ -21,12 +20,22 @@ public class TruckEntity extends AbstractEntity {
     @Column (nullable = false)
     private boolean isServiceable;
 
-    @Column (nullable = false, columnDefinition="tinyint(1) default 1")
+    @Column (nullable = false)
     private boolean isParked;
+
+    @Column (nullable = false)
+    private LocalDateTime bookedUntil;
+
 
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "location")
     private CityEntity location;
+
+    @PrePersist
+    public void setDefaults() {
+        isParked = true;
+        bookedUntil = LocalDateTime.now();
+    }
 
     public String getRegNumber() {
         return regNumber;
@@ -60,11 +69,55 @@ public class TruckEntity extends AbstractEntity {
         isServiceable = serviceable;
     }
 
+    public boolean isParked() {
+        return isParked;
+    }
+
+    public void setParked(boolean parked) {
+        isParked = parked;
+    }
+
+    public LocalDateTime getBookedUntil() {
+        return bookedUntil;
+    }
+
+    public void setBookedUntil(LocalDateTime bookedUntil) {
+        this.bookedUntil = bookedUntil;
+    }
+
     public CityEntity getLocation() {
         return location;
     }
 
     public void setLocation(CityEntity location) {
         this.location = location;
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TruckEntity that = (TruckEntity) o;
+        return id == that.id &&
+                Objects.equals(regNumber, that.regNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, regNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "TruckEntity{" +
+                "regNumber='" + regNumber + '\'' +
+                ", capacity=" + capacity +
+                ", shiftSize=" + shiftSize +
+                ", isServiceable=" + isServiceable +
+                ", isParked=" + isParked +
+                ", location=" + location +
+                '}';
     }
 }
