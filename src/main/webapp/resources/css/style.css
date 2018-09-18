@@ -95,6 +95,7 @@ footer {
 
 #orders {
     flex:2;
+    margin-right: 30px;
 }
 
 #tickets {
@@ -102,11 +103,12 @@ footer {
 }
 
 .ticket {
-    margin: 5px 0;
+    margin: 20px 0 10px 0;
     border: 2px dashed #8CC152;
     border-radius: 10px;
     width: 100%;
     height: 90px;
+    cursor: pointer;
     user-select: none;
 }
 
@@ -147,6 +149,10 @@ footer {
 
 .icon-error {
     color: red;
+}
+
+.width600 {
+    width: 600px;
 }
 
 .width160 {

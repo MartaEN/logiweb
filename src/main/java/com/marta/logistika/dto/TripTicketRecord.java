@@ -1,7 +1,8 @@
 package com.marta.logistika.dto;
 
+import com.marta.logistika.entity.OrderEntity;
+
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class TripTicketRecord implements Serializable {

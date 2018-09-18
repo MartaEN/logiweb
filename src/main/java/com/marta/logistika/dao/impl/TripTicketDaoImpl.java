@@ -1,6 +1,7 @@
 package com.marta.logistika.dao.impl;
 
 import com.marta.logistika.dao.api.TripTicketDao;
+import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,4 +24,5 @@ public class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements 
                 TripTicketEntity.class)
                 .getResultList();
     }
+
 }

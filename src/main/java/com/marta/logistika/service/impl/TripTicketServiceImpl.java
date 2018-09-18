@@ -3,10 +3,7 @@ package com.marta.logistika.service.impl;
 import com.marta.logistika.dao.api.*;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.dto.TruckRecord;
-import com.marta.logistika.entity.OrderEntity;
-import com.marta.logistika.entity.StopoverEntity;
-import com.marta.logistika.entity.TripTicketEntity;
-import com.marta.logistika.entity.TruckEntity;
+import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.service.ServiceException;
@@ -70,7 +67,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     @Transactional
-    public void approveTripTicket(TripTicketEntity ticket) {
+    public void approveTripTicket(long id) {
+        TripTicketEntity ticket = tripTicketDao.findById(id);
+
         if (ticket.getStatus() == TripTicketStatus.CLOSED) throw new ServiceException(String.format("Error trying to assign APPROVED status to trip ticket id %d: ticket is already closed", ticket.getId()));
         if (ticket.getDepartureDate().isBefore(LocalDateTime.now())) throw new ServiceException("Can't approve ticket with past departure date - please edit the date first");
 
@@ -86,6 +85,11 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Transactional
     public TripTicketEntity findById(long id) {
         return tripTicketDao.findById(id);
+    }
+
+    @Override
+    public TripTicketRecord findDtoById(long id) {
+        return mapper.map(tripTicketDao.findById(id), TripTicketRecord.class);
     }
 
     /**
@@ -155,6 +159,12 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .stream()
                 .map(t -> mapper.map(t, TripTicketRecord.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderEntity> listAllOrderInTicket(long id) {
+        TripTicketEntity ticket = tripTicketDao.findById(id);
+        return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
     }
 
 }

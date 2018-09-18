@@ -2,7 +2,7 @@ package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.OpenOrdersAndTicketsDTO;
 import com.marta.logistika.dto.OrderEntryForm;
-import com.marta.logistika.entity.OrderEntity;
+import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -12,7 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import java.beans.PropertyEditorSupport;
 
 @Controller
 @RequestMapping("/orders")
@@ -37,15 +41,31 @@ public class OrdersController {
         uiModel.addAttribute("cities", cityService.listAll());
         uiModel.addAttribute("orderEntryForm", new OrderEntryForm());
 
-        return "orders/list";
+        return "orders/monitor";
     }
-//
-//    @GetMapping(value = "/add")
-//    public String newOrderForm(Model uiModel) {
-//        OrderEntity order = new OrderEntity();
-//        uiModel.addAttribute("order", order);
-//        return "orders/add";
-//    }
+
+    @GetMapping(value = "/add-no-ajax")
+    public String newOrderForm(Model uiModel) {
+
+        uiModel.addAttribute("orderEntryForm",  new OrderEntryForm());
+        uiModel.addAttribute("cities", cityService.listAll());
+        return "orders/add-no-ajax";
+    }
+
+    @PostMapping(value = "/add-no-ajax")
+    public String addNewOrder(
+            @ModelAttribute("road") OrderEntryForm orderEntryForm,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return "redirect:/orders/add-no-ajax";
+        }
+
+        orderService.add(orderEntryForm);
+
+        return "redirect:/orders";
+    }
+
 
     @PostMapping("/add")
     public ResponseEntity newOrderFormProcessing(@RequestBody OrderEntryForm orderEntryForm) {
@@ -67,5 +87,45 @@ public class OrdersController {
         response.setTickets(tripTicketService.listAllUnapproved());
 
         return response;
+    }
+
+    @InitBinder
+    public void initBinder(ServletRequestDataBinder binder) {
+
+        binder.registerCustomEditor(CityEntity.class, "fromCity", new PropertyEditorSupport() {
+
+            public void setAsText(String text) {
+                Long id = Long.parseLong(text);
+                CityEntity toCity = cityService.findById(id);
+                setValue(toCity);
+            }
+
+            public String getAsText() {
+                Object value = getValue();
+                if (value != null) {
+                    CityEntity city = (CityEntity) value;
+                    return city.getName();
+                }
+                return null;
+            }
+        });
+
+        binder.registerCustomEditor(CityEntity.class, "toCity", new PropertyEditorSupport() {
+
+            public void setAsText(String text) {
+                Long id = Long.parseLong(text);
+                CityEntity toCity = cityService.findById(id);
+                setValue(toCity);
+            }
+
+            public String getAsText() {
+                Object value = getValue();
+                if (value != null) {
+                    CityEntity city = (CityEntity) value;
+                    return city.getName();
+                }
+                return null;
+            }
+        });
     }
 }

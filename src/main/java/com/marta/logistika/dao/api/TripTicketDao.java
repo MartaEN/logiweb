@@ -1,5 +1,6 @@
 package com.marta.logistika.dao.api;
 
+import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
 
 import java.util.List;

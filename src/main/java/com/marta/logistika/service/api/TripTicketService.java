@@ -12,10 +12,12 @@ import java.util.List;
 public interface TripTicketService {
 
     TripTicketEntity createTripTicket (TruckRecord truck, LocalDateTime date);
-    void approveTripTicket (TripTicketEntity ticket);
+    void approveTripTicket (long id);
     TripTicketEntity findById(long id);
+    TripTicketRecord findDtoById (long id);
     void addOrderToTicket (TripTicketEntity ticket, OrderEntity order) throws ServiceException;
     void removeOrderFromTicket (TripTicketEntity ticket, OrderEntity order);
     int getDistance(TripTicketEntity ticket);
     List<TripTicketRecord> listAllUnapproved();
+    List<OrderEntity> listAllOrderInTicket(long id);
 }

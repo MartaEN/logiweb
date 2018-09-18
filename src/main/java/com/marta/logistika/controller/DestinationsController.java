@@ -179,7 +179,6 @@ public class DestinationsController {
                 return null;
             }
         });
-
     }
 
 }

@@ -11,10 +11,10 @@
 
     <section id="orders">
 
-        <div class="d-inline-flex">
+        <div class="row-wrapper">
             <h3>Заказы</h3>
-            <button type="button" class="btn btn-success round-button" data-toggle="modal" data-target="#newOrderForm"><i class="fas fa-parachute-box"></i></button>
-            <%--<a class="btn btn-success round-button" href="${contextPath}/orders/add" role="button" data-toggle="tooltip modal" data-target="#newOrderForm" data-placement="right" title="Зарегистрировать новый заказ"><i class="fas fa-parachute-box"></i></a>--%>
+            <a class="btn btn-success" href="${contextPath}/orders/add-no-ajax" role="button">Зарегистрировать новый заказ</a><br>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newOrderForm"  style="margin-left: 5px;">То же, с AJAX</button>
         </div>
 
         <c:if test="${empty orders}">
@@ -49,7 +49,6 @@
             </table>
             <script src="${contextPath}/resources/js/filter-table.js"></script>
         </c:if>
-
     </section>
 
     <section id="tickets">
@@ -83,8 +82,8 @@
                         </c:forEach>
                     </div>
                     <div class="ticket-actions">
-                        <i class="fas fa-search-plus"></i>
-                        <i class="fas fa-clipboard-check"></i>
+                        <a href="${contextPath}/tickets/${ticket.id}/view"><i class="fas fa-search"></i></a>
+                        <a href="${contextPath}/tickets/${ticket.id}/approve"><i class="fas fa-clipboard-check"></i></a>
                     </div>
                 </div>
             </c:forEach>
@@ -143,6 +142,7 @@
         </div>
     </div>
 </div>
+
 
 
 
