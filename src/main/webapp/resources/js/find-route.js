@@ -3,11 +3,10 @@ $(document).ready(function () {
 
         event.preventDefault();
 
-        let fromCityId = document.querySelector('#fromCity').value;
-        let toCityId = document.querySelector('#toCity').value;
+        let params = $('#findRouteForm').serialize();
 
         $.ajax({
-            url: `/destinations/find-route-result?fromCityId=${fromCityId}\&toCityId=${toCityId}`,
+            url: `/destinations/find-route-result?${params}`,
             type: 'GET',
             dataType: 'json',
             success: function (data) {
@@ -21,7 +20,7 @@ $(document).ready(function () {
                     $distance += road.distance;
                 });
                 $searchResult.append($table);
-                $searchResult.append('<br><p>Общее расстояние: <b>' + $distance + ' км</b></p>')
+                $searchResult.append('<br><p>Общее расстояние: <b>' + $distance + ' км</b></p>');
                 $searchResult.show();
             },
             error: function (err) {

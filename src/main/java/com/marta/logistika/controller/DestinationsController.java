@@ -132,11 +132,11 @@ public class DestinationsController {
     @GetMapping(value = "/find-route-result", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     public RouteJsonResponse findRouteResult(
-            @RequestParam long fromCityId,
-            @RequestParam long toCityId) {
+            @RequestParam long fromCity,
+            @RequestParam long toCity) {
 
         RouteJsonResponse response = new RouteJsonResponse();
-        response.setRoute(roadService.findRouteFromTo(cityService.findById(fromCityId), cityService.findById(toCityId)));
+        response.setRoute(roadService.findRouteFromTo(cityService.findById(fromCity), cityService.findById(toCity)));
         return response;
 
     }
