@@ -35,14 +35,14 @@
                 <input type="text" class="width160"/>
             </td>
         </tr>
-        <c:forEach items="${drivers}" var="driver">
+        <c:forEach items="${drivers}" var="truck">
             <tr class="table-data">
-                <td>${driver.personalId}</td>
-                <td>${driver.lastName}</td>
-                <td>${driver.firstName}</td>
-                <td>${driver.phone}</td>
-                <td><a href="${contextPath}/drivers/${driver.personalId}"><i class="fas fa-pencil-alt"></i></a></td>
-                <td><a href="${contextPath}/drivers/remove?personalId=${driver.personalId}"><i class="fas fa-trash-alt"></i></a></td>
+                <td>${truck.personalId}</td>
+                <td>${truck.lastName}</td>
+                <td>${truck.firstName}</td>
+                <td>${truck.phone}</td>
+                <td><a href="${contextPath}/drivers/${truck.personalId}"><i class="fas fa-pencil-alt"></i></a></td>
+                <td><a href="${contextPath}/drivers/remove?personalId=${truck.personalId}"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
         </c:forEach>
     </table>

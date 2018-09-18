@@ -39,36 +39,36 @@
                 <input type="text" class="width80"/>
             </td>
         </tr>
-        <c:forEach items="${trucks}" var="driver">
+        <c:forEach items="${trucks}" var="truck">
             <tr class="table-data">
-                <td>${driver.regNumber}</td>
-                <td>${driver.capacity} кг</td>
-                <td><c:forEach begin="1" end="${driver.shiftSize}" varStatus="loop">
+                <td>${truck.regNumber}</td>
+                <td>${truck.capacity} кг</td>
+                <td><c:forEach begin="1" end="${truck.shiftSize}" varStatus="loop">
                         <i class="fas fa-user"></i>
                     </c:forEach>
-                    <span class="hidden">${driver.shiftSize}</span>
+                    <span class="hidden">${truck.shiftSize}</span>
                 </td>
                 <td>
-                    <c:if test="${driver.parked}">
+                    <c:if test="${truck.parked}">
                         <i class="fas fa-parking"></i>
                     </c:if>
-                    <c:if test="${!driver.parked}">
+                    <c:if test="${!truck.parked}">
                         <i class="fas fa-road"></i>
                     </c:if>
-                    ${driver.location.name}
+                    ${truck.location.name}
                 </td>
                 <td>
-                    <c:if test="${driver.serviceable}">
+                    <c:if test="${truck.serviceable}">
                         <i class="fas fa-check-circle icon-ok"></i>
                         <span class="hidden">${choiceYes}</span>
                     </c:if>
-                    <c:if test="${!driver.serviceable}">
+                    <c:if test="${!truck.serviceable}">
                         <i class="fas fa-exclamation-triangle icon-error"></i>
                         <span class="hidden">${choiceNo}</span>
                     </c:if>
                 </td>
-                <td><a href="${contextPath}/trucks/${driver.regNumber}"><i class="fas fa-pencil-alt"></i></a></td>
-                <td><a href="${contextPath}/trucks/remove?regNumber=${driver.regNumber}"><i class="fas fa-trash-alt"></i></a></td>
+                <td><a href="${contextPath}/trucks/${truck.regNumber}"><i class="fas fa-pencil-alt"></i></a></td>
+                <td><a href="${contextPath}/trucks/remove?regNumber=${truck.regNumber}"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
         </c:forEach>
     </table>

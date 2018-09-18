@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
+import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.StopoverEntity;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("tripTicketService")
 public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
@@ -145,6 +147,14 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             distance += roadService.getDistanceFromTo(route.get(i - 1).getCity(), route.get(i).getCity());
         }
         return distance;
+    }
+
+    @Override
+    public List<TripTicketRecord> listAllUnapproved() {
+        return tripTicketDao.listAllUnapproved()
+                .stream()
+                .map(t -> mapper.map(t, TripTicketRecord.class))
+                .collect(Collectors.toList());
     }
 
 }

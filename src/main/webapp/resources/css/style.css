@@ -59,6 +59,10 @@ nav a:hover {
     justify-content: space-between;
 }
 
+h3 {
+    margin-right: 30px;
+}
+
 main {
     padding: 10px 10px 10px 50px;
 }
@@ -73,6 +77,64 @@ footer {
 .logo {
     font-size: 32px;
     font-weight: 700;
+    user-select: none;
+}
+
+.round-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px !important;
+    font-size: 40px;
+    padding: 10px 0;
+    margin-bottom: 10px;
+}
+
+.draggable {
+    cursor: grab;
+}
+
+#orders {
+    flex:2;
+}
+
+#tickets {
+    flex: 3;
+}
+
+.ticket {
+    margin: 5px 0;
+    border: 2px dashed #8CC152;
+    border-radius: 10px;
+    width: 100%;
+    height: 90px;
+    user-select: none;
+}
+
+.ticket p {
+    margin: 0;
+}
+
+.ticket-truck-info, .ticket-departure, .ticket-route-info {
+    padding: 5px;
+}
+
+.ticket-truck-info, .ticket-departure, .ticket-route-info {
+    border-right: 2px dashed #8CC152;
+}
+
+.ticket-truck-info {
+    min-width: 110px;
+}
+
+.ticket-departure {
+    width: 60px;
+}
+
+.ticket-actions {
+    width: 80px;
+    font-size: 36px;
+    padding: 10px 10px 10px 0;
+    text-align: center;
 }
 
 .hidden {
@@ -89,6 +151,10 @@ footer {
 
 .width160 {
     width: 160px;
+}
+
+.width100 {
+    width: 100px;
 }
 
 .width80 {
