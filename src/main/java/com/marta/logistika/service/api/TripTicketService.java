@@ -1,17 +1,18 @@
 package com.marta.logistika.service.api;
 
 import com.marta.logistika.dto.TripTicketRecord;
-import com.marta.logistika.dto.TruckRecord;
+import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.service.ServiceException;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TripTicketService {
 
-    TripTicketEntity createTripTicket (TruckRecord truck, LocalDateTime date);
+    void createTripTicket (String truckRegNum, LocalDateTime date, @Nullable CityEntity toCity);
     void approveTripTicket (long id);
     TripTicketEntity findById(long id);
     TripTicketRecord findDtoById (long id);

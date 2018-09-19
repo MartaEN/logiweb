@@ -6,10 +6,10 @@
 
 
     <h3>Редактирование</h3>
-    <form method="POST" action="${contextPath}/drivers/edit">
+    <form method="POST" action="${contextPath}/trucks/edit">
         <div class="form-element">
-            <label for="personalId">Регистрационный номер: </label>
-            <input type="text" id="personalId" name="personalId" value="${driver.personalId}" readonly>
+            <label for="regNumber">Регистрационный номер: </label>
+            <input type="text" id="regNumber" name="regNumber" value="${truck.regNumber}" readonly>
         </div>
         <div class="form-element">
             <label for="capacity">Вместимость, кг: </label>

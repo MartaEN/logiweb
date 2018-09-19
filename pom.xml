@@ -22,6 +22,8 @@
         <jstl.vertion>1.2</jstl.vertion>
         <jackson.version>2.9.6</jackson.version>
         <dozer.version>5.4.0</dozer.version>
+        <dozer.jdk8.version>1.0.4</dozer.jdk8.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
@@ -86,9 +88,14 @@
             <version>${dozer.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.craftsman</groupId>
+            <artifactId>dozer-jdk8-support</artifactId>
+            <version>${dozer.jdk8.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

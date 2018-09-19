@@ -9,6 +9,8 @@
 
 <div class="row-wrapper">
 
+
+    <%-- View unassigned orders and and create new orders --%>
     <section id="orders">
 
         <div class="row-wrapper">
@@ -51,6 +53,8 @@
         </c:if>
     </section>
 
+
+    <%-- View trip tickets in progress and create new trip tickets --%>
     <section id="tickets">
 
         <h3>Маршрутные листы</h3>
@@ -61,7 +65,7 @@
 
         <c:if test="${not empty tickets}">
             <c:forEach items="${tickets}" var="ticket">
-                <div class="ticket target row-wrapper">
+                <a href="${contextPath}/tickets/${ticket.id}/view" class="ticket open-ticket target row-wrapper">
                     <div class="ticket-truck-info">
                         <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> ${ticket.truck.regNumber}</p>
                         <p><i class="fas fa-truck-loading"></i> ${ticket.truck.capacity} кг</p>
@@ -72,24 +76,18 @@
                         </p>
                     </div>
                     <div class="ticket-departure">
-                        <p><i class="far fa-calendar-alt"></i></p>
-                        <p>${ticket.departureDate.substring(5,10)}</p>
-                        <p>${ticket.departureDate.substring(11,16)}</p>
+                        <i class="far fa-calendar-alt"></i> ${ticket.departureDate.substring(0,10)} <i class="far fa-clock"></i> ${ticket.departureDate.substring(11,16)}
                     </div>
                     <div class="ticket-route-info">
                         <c:forEach items="${ticket.stopovers}" var="stopover">
                             ${stopover.city.name}(${stopover.totalWeight})
                         </c:forEach>
                     </div>
-                    <div class="ticket-actions">
-                        <a href="${contextPath}/tickets/${ticket.id}/view"><i class="fas fa-search"></i></a>
-                        <a href="${contextPath}/tickets/${ticket.id}/approve"><i class="fas fa-clipboard-check"></i></a>
-                    </div>
-                </div>
+                </a>
             </c:forEach>
         </c:if>
 
-        <div id="new-ticket" class="ticket target">Новый маршрутный лист</div>
+        <a href="${contextPath}/tickets/create" id="new-ticket" class="ticket new-ticket target">Новый маршрутный лист</a>
 
     </section>
 

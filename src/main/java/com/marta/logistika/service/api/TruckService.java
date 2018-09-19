@@ -1,5 +1,6 @@
 package com.marta.logistika.service.api;
 
+import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
 
 import java.util.List;
@@ -10,5 +11,6 @@ public interface TruckService {
     void update(TruckRecord truck);
     void remove(TruckRecord truck);
     List<TruckRecord> listAll();
+    List<TruckRecord> listAllFilteredBy (TruckFilterForm filter);
     TruckRecord findTruckByRegNum(String regNum);
 }

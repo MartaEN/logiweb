@@ -13,15 +13,15 @@
         </div>
         <div class="form-element">
             <label for="lastName">Фамилия: </label>
-            <input type="lastName" id="lastName" name="lastName" value="${driver.lastName}" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
+            <input type="text" id="lastName" name="lastName" value="${driver.lastName}" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
         </div>
         <div class="form-element">
             <label for="firstName">Имя: </label>
-            <input type="firstName" id="firstName" name="firstName"  value="${driver.firstName}" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
+            <input type="text" id="firstName" name="firstName"  value="${driver.firstName}" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
         </div>
         <div class="form-element">
             <label for="phone">Телефон: </label>
-            <input type="phone" id="phone" name="phone" value="${driver.phone}" required>
+            <input type="text" id="phone" name="phone" value="${driver.phone}" required>
         </div>
         <input type="submit" class="btn btn-warning" value="Сохранить">
         <a class="btn btn-secondary" href="${contextPath}/drivers" role="button">Вернуться</a>

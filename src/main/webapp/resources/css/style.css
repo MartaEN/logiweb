@@ -104,39 +104,53 @@ footer {
 
 .ticket {
     margin: 20px 0 10px 0;
-    border: 2px dashed #8CC152;
-    border-radius: 10px;
-    width: 100%;
-    height: 90px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    color: black;
+    text-decoration: none;
     cursor: pointer;
     user-select: none;
+
 }
+
+.ticket:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.open-ticket {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    grid-template-rows: 36px 1fr;
+    grid-template-areas: "truck info" "truck route";
+}
+
+.new-ticket {
+    display: block;
+    height: 80px;
+    padding: 28px;
+}
+
+.ticket-truck-info {
+    grid-area: truck;
+    border-right: 1px solid #ced4da;
+
+}
+
+.ticket-departure {
+    grid-area: info;
+    border-bottom: 1px solid #ced4da;
+}
+
+.ticket-route-info {
+    grid-area: route; }
 
 .ticket p {
     margin: 0;
 }
 
 .ticket-truck-info, .ticket-departure, .ticket-route-info {
-    padding: 5px;
-}
-
-.ticket-truck-info, .ticket-departure, .ticket-route-info {
-    border-right: 2px dashed #8CC152;
-}
-
-.ticket-truck-info {
-    min-width: 110px;
-}
-
-.ticket-departure {
-    width: 60px;
-}
-
-.ticket-actions {
-    width: 80px;
-    font-size: 36px;
-    padding: 10px 10px 10px 0;
-    text-align: center;
+    padding: .375rem .75rem;
 }
 
 .hidden {

@@ -8,41 +8,49 @@
 
     <h3>Новая фура</h3>
     <form:form modelAttribute="truck" action="${contextPath}/trucks/add" method="post">
-        <div class="form-element">
-            <label for="regNumber">Регистрационный номер: </label>
-            <input type="text" id="regNumber" name="regNumber" placeholder="AA00000" pattern="^[a-zA-Z]{2}[0-9]{5}$" required>
+        <div class="form-group row">
+            <label for="regNumber" class="col-sm-2 col-form-label">Регистрационный номер: </label>
+            <div class="col-sm-4">
+                <input type="text" id="regNumber" name="regNumber" required placeholder="AA00000" pattern="^[a-zA-Z]{2}[0-9]{5}$" class="form-control" >
+            </div>
         </div>
-        <div class="form-element">
-            <label for="capacity">Вместимость, кг: </label>
-            <input type="number" id="capacity" name="capacity" min="1" required>
+        <div class="form-group row">
+            <label for="capacity" class="col-sm-2 col-form-label">Вместимость, кг: </label>
+            <div class="col-sm-4">
+                <input type="number" id="capacity" name="capacity" required min="1" class="form-control">
+            </div>
         </div>
-        <div class="form-element">
-            <label for="shiftSize">Водителей в смене: </label>
-            <span id="shiftSize" class="custom-control custom-radio custom-control-inline">
-                <input type="radio" value="1" id="shiftSize1" name="shiftSize" class="custom-control-input">
-                <label class="custom-control-label" for="shiftSize1"><i class="fas fa-user"></i></label>
-            </span>
-            <span class="custom-control custom-radio custom-control-inline">
-                <input type="radio" value="2" id="shiftSize2" name="shiftSize" class="custom-control-input">
-                <label class="custom-control-label" for="shiftSize2"><i class="fas fa-user"></i><i class="fas fa-user"></i></label>
-            </span>
-            <%--<span id="shiftSize">--%>
-                <%--<label>1<input type="radio" name="shiftSize" value="1" checked></label>--%>
-                <%--<label>2<input type="radio" name="shiftSize" value="2"></label>--%>
-            <%--</span>--%>
+        <div class="form-group row">
+            <legend class="col-form-label col-sm-2 pt-0">Водителей в смене:</legend>
+            <div class="col-sm-4">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="shiftSize" id="shiftSize1" value="1" checked>
+                    <label class="form-check-label" for="shiftSize1"><i class="fas fa-user"></i></label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="shiftSize" id="shiftSize2" value="2">
+                    <label class="form-check-label" for="shiftSize2"><i class="fas fa-user"></i><i class="fas fa-user"></i></label>
+                </div>
+            </div>
         </div>
-        <div class="form-element">
-            <label for="location">Дислокация: </label>
-            <form:select path="location" id="location" name="location" required="required">
-                <form:option value="" disabled="true" selected="selected" label="Выберите город"/>
-                <form:options itemValue="id" itemLabel="name" items="${cities}" />
-            </form:select>
+        <div class="form-group row">
+            <label for="location" class="col-sm-2 col-form-label">Дислокация: </label>
+            <div class="col-sm-4">
+                <form:select class="form-control" path="location" id="location" name="location" required="required">
+                    <form:option value="" disabled="true" selected="selected" label="Выберите город"/>
+                    <form:options itemValue="id" itemLabel="name" items="${cities}" />
+                </form:select>
+            </div>
         </div>
-        <div class="form-element">
-            <label for="serviceable">Исправна: </label>
-            <input type="checkbox" id="serviceable" name="serviceable" checked="checked" />
+        <div class="form-group row">
+            <div class="col-sm-2">Исправна: </div>
+            <div class="col-sm-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="serviceable" name="serviceable" checked="checked">
+                </div>
+            </div>
         </div>
-        <input type="submit" class="btn btn-warning" value="Сохранить">
+        <input type="submit" class="btn btn-success" value="Сохранить">
         <a class="btn btn-secondary" href="${contextPath}/trucks" role="button">Вернуться</a>
     </form:form>
 

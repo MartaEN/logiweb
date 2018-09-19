@@ -10,6 +10,7 @@ import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,7 +40,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     @Transactional
-    public TripTicketEntity createTripTicket(TruckRecord truck, LocalDateTime departureDateTime) {
+    public void createTripTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) {
 
         TripTicketEntity ticket = new TripTicketEntity();
         ticket.setStatus(TripTicketStatus.CREATED);
@@ -49,20 +50,23 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setDepartureDate(departureDateTime);
 
         //validate and assign truck and mark it as booked
-        TruckEntity truckEntity = truckDao.findByRegNumber(truck.getRegNumber());
-        if(!truckEntity.isServiceable()) throw new ServiceException(String.format(
-                "Can't book truck %s - it is out of service", truckEntity.getRegNumber()));
-        if(truckEntity.getBookedUntil().isAfter(departureDateTime)) throw new ServiceException(String.format(
-                "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truckEntity.getRegNumber(), departureDateTime, truckEntity.getBookedUntil()));
-        truckEntity.setBookedUntil(MAX_FUTURE_DATE);
-        ticket.setTruck(truckEntity);
+        TruckEntity truck = truckDao.findByRegNumber(truckRegNum);
+        if(!truck.isServiceable()) throw new ServiceException(String.format(
+                "Can't book truck %s - it is out of service", truck.getRegNumber()));
+        if(truck.getBookedUntil().isAfter(departureDateTime)) throw new ServiceException(String.format(
+                "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truck.getRegNumber(), departureDateTime, truck.getBookedUntil()));
+        truck.setBookedUntil(MAX_FUTURE_DATE);
+        ticket.setTruck(truck);
 
-        //assign start and finish points (currently all trips are planned as round ones)
+        //if no destination city is specified - the trip will be planned as the round one
         ticket.getStopovers().add(new StopoverEntity(truck.getLocation(), 0));
-        ticket.getStopovers().add(new StopoverEntity(truck.getLocation(), 1));
+        if (toCity == null) {
+            ticket.getStopovers().add(new StopoverEntity(truck.getLocation(), 1));
+        } else {
+            ticket.getStopovers().add(new StopoverEntity(toCity, 1));
+        }
 
         tripTicketDao.add(ticket);
-        return ticket;
     }
 
     @Override

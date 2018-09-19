@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.TruckDao;
+import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.TruckEntity;
 import com.marta.logistika.service.ServiceException;
@@ -62,6 +63,14 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     public List<TruckRecord> listAll() {
         return truckDao.listAll()
+                .stream()
+                .map(truck -> mapper.map(truck, TruckRecord.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TruckRecord> listAllFilteredBy(TruckFilterForm filter) {
+        return truckDao.listAllFilteredBy(filter)
                 .stream()
                 .map(truck -> mapper.map(truck, TruckRecord.class))
                 .collect(Collectors.toList());

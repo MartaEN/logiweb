@@ -1,9 +1,11 @@
 package com.marta.logistika.dao.impl;
 
 import com.marta.logistika.dao.api.TruckDao;
+import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.entity.TruckEntity;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository("truckRepository")
@@ -33,5 +35,23 @@ public class TruckDaoImpl extends AbstractDao<TruckEntity> implements TruckDao {
                 "SELECT t FROM TruckEntity t",
                 TruckEntity.class)
                 .getResultList();
+    }
+
+    @Override
+    public List<TruckEntity> listAllFilteredBy(TruckFilterForm filter) {
+        return em.createQuery(
+                "SELECT t FROM TruckEntity t WHERE " +
+                        "t.isServiceable = true " +
+                        "AND t.bookedUntil < :departureDate " +
+                        "AND t.capacity >= :minCapacity " +
+                        "AND t.capacity <= :maxCapacity " +
+                        "AND t.location = :fromCity",
+                TruckEntity.class)
+                .setParameter("departureDate", filter.getDepartureDate())
+                .setParameter("minCapacity", filter.getMinCapacity())
+                .setParameter("maxCapacity", filter.getMaxCapacity())
+                .setParameter("fromCity", filter.getFromCity())
+                .getResultList();
+
     }
 }

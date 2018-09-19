@@ -1,11 +1,13 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.beans.PropertyEditorSupport;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/trucks")
@@ -28,7 +32,7 @@ public class TruckController {
     }
 
     @GetMapping
-    public String home(Model uiModel) {
+    public String showTruckList(Model uiModel) {
 
         uiModel.addAttribute("trucks", truckService.listAll());
 
@@ -94,6 +98,23 @@ public class TruckController {
 
         return "redirect:/trucks";
 
+    }
+
+    @GetMapping(value = "/find-truck-list", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public List<TruckRecord> findTruckList(
+            @RequestParam String departureDate,
+            @RequestParam long fromCity,
+            @RequestParam int minCapacity,
+            @RequestParam int maxCapacity) {
+
+        TruckFilterForm filterForm = new TruckFilterForm();
+        filterForm.setDepartureDate(LocalDateTime.parse(departureDate));
+        filterForm.setFromCity(cityService.findById(fromCity));
+        filterForm.setMinCapacity(minCapacity);
+        filterForm.setMaxCapacity(maxCapacity);
+
+        return truckService.listAllFilteredBy(filterForm);
     }
 
     @InitBinder

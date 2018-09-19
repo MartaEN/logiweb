@@ -2,7 +2,9 @@ package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
 
-public class OrderEntryForm {
+import java.io.Serializable;
+
+public class OrderEntryForm implements Serializable {
 
     private String description;
     private int weight;
