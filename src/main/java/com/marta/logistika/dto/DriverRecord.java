@@ -1,5 +1,7 @@
 package com.marta.logistika.dto;
 
+import com.marta.logistika.entity.CityEntity;
+
 import java.util.Objects;
 
 public class DriverRecord {
@@ -7,7 +9,7 @@ public class DriverRecord {
     private String personalId;
     private String firstName;
     private String lastName;
-    private String phone;
+    private CityEntity location;
 
     public String getPersonalId() {
         return personalId;
@@ -33,12 +35,12 @@ public class DriverRecord {
         this.lastName = lastName;
     }
 
-    public String getPhone() {
-        return phone;
+    public CityEntity getLocation() {
+        return location;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setLocation(CityEntity location) {
+        this.location = location;
     }
 
     @Override

@@ -22,11 +22,11 @@
                             <input type="text"/>
                         </td>
                     </tr>
-                    <c:forEach items="${cities}" var="truck">
+                    <c:forEach items="${cities}" var="city">
                         <tr class="table-data">
-                            <td>${truck.name}</td>
-                            <td><a href="${contextPath}/destinations/${truck.id}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="${contextPath}/destinations/${truck.id}/remove"><i class="fas fa-trash-alt"></i></a></td>
+                            <td>${city.name}</td>
+                            <td><a href="${contextPath}/destinations/${city.id}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td><a href="${contextPath}/destinations/${city.id}/remove"><i class="fas fa-trash-alt"></i></a></td>
                         </tr>
                     </c:forEach>
                 </table>

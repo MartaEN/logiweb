@@ -1,10 +1,13 @@
 package com.marta.logistika.dao.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
+import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
 import org.springframework.stereotype.Repository;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @Repository("driverRepository")
 public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDao {
@@ -34,4 +37,19 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
                 DriverEntity.class)
                 .getResultList();
     }
+
+//    @Override
+//    public List<DriverEntity> listAll(CityEntity fromCity, Map<YearMonth, Long> requiredMinutes) {
+//        return em.createQuery(
+//                "SELECT d FROM DriverEntity d WHERE" +
+//                        "" +
+//                        "" +
+//                        "ORDER BY d.lastName",
+//                DriverEntity.class)
+//                .getResultList();
+//
+//
+//
+//        return null;
+//    }
 }

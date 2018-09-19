@@ -41,7 +41,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
             if(isDriverRecordValid(driverEditFormInput)) {
                 driverEntity.setFirstName(driverEditFormInput.getFirstName());
                 driverEntity.setLastName(driverEditFormInput.getLastName());
-                driverEntity.setPhone(driverEditFormInput.getPhone());
+                driverEntity.setLocation(driverEditFormInput.getLocation());
             } else {
                 throw new ServiceException("Driver data invalid");
             }
@@ -52,20 +52,21 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
 
     @Override
     @Transactional
-    public void remove(DriverRecord driver) {
-        driverDao.remove(driverDao.findByPersonalId(driver.getPersonalId()));
+    public void remove(String personalId) {
+        driverDao.remove(driverDao.findByPersonalId(personalId));
     }
 
-    @Override
-    public DriverRecord findDriverByPersonalId(String personalId) {
-        return mapper.map(driverDao.findByPersonalId(personalId), DriverRecord.class);
-    }
 
     @Override
     public List<DriverRecord> listAll() {
         return driverDao.listAll().stream()
                 .map(d -> mapper.map(d, DriverRecord.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DriverRecord findDriverByPersonalId(String personalId) {
+        return mapper.map(driverDao.findByPersonalId(personalId), DriverRecord.class);
     }
 
     private boolean isDriverRecordValid (DriverRecord driverRecord) {

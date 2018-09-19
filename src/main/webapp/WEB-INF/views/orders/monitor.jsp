@@ -39,13 +39,13 @@
                     <td><input type="text" class="width100"/></td>
                     <td><input type="text" class="width80"/></td>
                 </tr>
-                <c:forEach items="${orders}" var="truck">
+                <c:forEach items="${orders}" var="order">
                     <tr class="table-data draggable source" draggable=true>
-                        <td>${truck.id}</td>
-                        <td class="width100">${truck.creationDate.toString().substring(0,10)}</td>
-                        <td>${truck.fromCity.name}</td>
-                        <td>${truck.toCity.name}</td>
-                        <td>${truck.weight}</td>
+                        <td>${order.id}</td>
+                        <td class="width100">${order.creationDate.toString().substring(0,10)}</td>
+                        <td>${order.fromCity.name}</td>
+                        <td>${order.toCity.name}</td>
+                        <td>${order.weight}</td>
                     </tr>
                 </c:forEach>
             </table>

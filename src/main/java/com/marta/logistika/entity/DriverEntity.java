@@ -1,6 +1,7 @@
 package com.marta.logistika.entity;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -16,8 +17,17 @@ public class DriverEntity extends AbstractEntity {
     @Column (nullable = false, length = 65)
     private String lastName;
 
-    @Column (nullable = false, length = 16)
-    private String phone;
+    @Column (nullable = false)
+    private LocalDateTime bookedUntil;
+
+    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "location")
+    private CityEntity location;
+
+    @PrePersist
+    public void setDefaults() {
+        bookedUntil = LocalDateTime.now();
+    }
 
     public String getPersonalId() {
         return personalId;
@@ -43,12 +53,20 @@ public class DriverEntity extends AbstractEntity {
         this.lastName = lastName;
     }
 
-    public String getPhone() {
-        return phone;
+    public LocalDateTime getBookedUntil() {
+        return bookedUntil;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setBookedUntil(LocalDateTime bookedUntil) {
+        this.bookedUntil = bookedUntil;
+    }
+
+    public CityEntity getLocation() {
+        return location;
+    }
+
+    public void setLocation(CityEntity location) {
+        this.location = location;
     }
 
     @Override

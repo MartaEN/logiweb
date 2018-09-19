@@ -6,27 +6,36 @@
 <jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
-    <h3>Регистрация нового водителя</h3>
+<div class="col-sm-6">
+    <h3 class="modal-header">Регистрация нового водителя</h3>
     <form:form modelAttribute="driver" action="${contextPath}/drivers/add" method="post">
-        <div class="form-element">
-            <label for="personalId">Табельный номер: </label>
-            <input type="text" id="personalId" name="personalId" placeholder="123456" pattern="^[0-9]{6}$" required>
+        <div class="form-group">
+            <label for="personalId" class="col-form-label">Табельный номер: </label>
+            <input type="text" id="personalId" name="personalId" placeholder="123456" pattern="^[0-9]{6}$" required class="form-control">
         </div>
-        <div class="form-element">
-            <label for="lastName">Фамилия: </label>
-            <input type="lastName" id="lastName" name="lastName" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
+        <div class="form-group">
+            <label for="lastName" class="col-form-label">Фамилия: </label>
+            <input type="text" id="lastName" name="lastName" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required class="form-control">
         </div>
-        <div class="form-element">
-            <label for="firstName">Имя: </label>
-            <input type="firstName" id="firstName" name="firstName" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required>
+        <div class="form-group">
+            <label for="firstName" class="col-form-label">Имя: </label>
+            <input type="text" id="firstName" name="firstName" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required class="form-control">
         </div>
-        <div class="form-element">
-            <label for="phone">Телефон: </label>
-            <input type="phone" id="phone" name="phone" required>
+        <div class="form-group">
+            <label for="location" class="col-form-label">Дислокация: </label>
+            <div>
+                <form:select class="form-control" path="location" id="location" name="location" required="required">
+                    <form:option value="" disabled="true" selected="selected" label="Выберите город"/>
+                    <form:options itemValue="id" itemLabel="name" items="${cities}" />
+                </form:select>
+            </div>
         </div>
-        <input type="submit" class="btn btn-warning" value="Сохранить">
-        <a class="btn btn-secondary" href="${contextPath}/drivers" role="button">Вернуться</a>
+        <div class="modal-footer">
+            <a class="btn btn-secondary" href="${contextPath}/drivers" role="button">Вернуться</a>
+            <input type="submit" class="btn btn-success" value="Сохранить">
+        </div>
     </form:form>
+</div>
 
 
 <jsp:include page="../_fragments/page-template-after-main.jsp"/>

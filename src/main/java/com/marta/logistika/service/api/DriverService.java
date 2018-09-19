@@ -8,7 +8,7 @@ public interface DriverService {
 
     void add(DriverRecord driver);
     void update(DriverRecord driver);
-    void remove(DriverRecord driver);
+    void remove(String personalId);
     List<DriverRecord> listAll();
     DriverRecord findDriverByPersonalId(String personalId);
 

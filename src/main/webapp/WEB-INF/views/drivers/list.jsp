@@ -19,7 +19,7 @@
             <th class="width160">Табельный номер</th>
             <th class="width160">Фамилия</th>
             <th class="width160">Имя</th>
-            <th class="width160">Телефон</th>
+            <th class="width160">Дислокация</th>
         </tr>
         <tr class="table-filters">
             <td >
@@ -35,14 +35,14 @@
                 <input type="text" class="width160"/>
             </td>
         </tr>
-        <c:forEach items="${drivers}" var="truck">
+        <c:forEach items="${drivers}" var="driver">
             <tr class="table-data">
-                <td>${truck.personalId}</td>
-                <td>${truck.lastName}</td>
-                <td>${truck.firstName}</td>
-                <td>${truck.phone}</td>
-                <td><a href="${contextPath}/drivers/${truck.personalId}"><i class="fas fa-pencil-alt"></i></a></td>
-                <td><a href="${contextPath}/drivers/remove?personalId=${truck.personalId}"><i class="fas fa-trash-alt"></i></a></td>
+                <td>${driver.personalId}</td>
+                <td>${driver.lastName}</td>
+                <td>${driver.firstName}</td>
+                <td>${driver.location.name}</td>
+                <td><a href="${contextPath}/drivers/${driver.personalId}"><i class="fas fa-pencil-alt"></i></a></td>
+                <td><a href="${contextPath}/drivers/remove?personalId=${driver.personalId}"><i class="fas fa-trash-alt"></i></a></td>
             </tr>
         </c:forEach>
     </table>
