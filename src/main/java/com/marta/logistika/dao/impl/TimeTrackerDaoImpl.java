@@ -13,7 +13,8 @@ import java.time.YearMonth;
 public class TimeTrackerDaoImpl extends AbstractDao<TimeTrackerEntity> implements TimeTrackerDao {
 
     @Override
-    public long calculateMonthlyMinutes(DriverEntity driver, YearMonth month) {
+    public long
+    calculateMonthlyMinutes(DriverEntity driver, YearMonth month) {
 
         LocalDateTime start = month.atDay(1).atStartOfDay();
         LocalDateTime finish = month.atEndOfMonth().atTime(LocalTime.MAX);

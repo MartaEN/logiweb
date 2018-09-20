@@ -29,6 +29,16 @@ header {
     align-items: center;
 }
 
+header a {
+    color: white;
+    text-decoration: none;
+}
+
+header a:hover {
+    color: #A0D468;
+    text-decoration: none;
+}
+
 nav {
     background-color: #A0D468;
     color: white;

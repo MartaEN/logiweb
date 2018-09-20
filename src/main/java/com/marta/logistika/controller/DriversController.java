@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.beans.PropertyEditorSupport;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class DriversController {
 
     @PostMapping(value = "/add")
     public String addDriver(
-            @ModelAttribute("driver") DriverRecord driver,
+            @Valid DriverRecord driver,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {

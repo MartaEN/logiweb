@@ -2,14 +2,30 @@ package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class DriverRecord implements Serializable {
 
+    @NotNull
+    @Size(min = 6, max = 6)
+    @Pattern(regexp = "^[0-9]{6}$")
     private String personalId;
+
+    @NotNull
+    @Size(min = 1, max = 65)
+    @Pattern(regexp = "^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")
     private String firstName;
+
+    @NotNull
+    @Size(min = 1, max = 65)
+    @Pattern(regexp = "^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")
     private String lastName;
+
+    @NotNull
     private CityEntity location;
 
     public String getPersonalId() {

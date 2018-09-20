@@ -19,7 +19,9 @@
         <hibernate.version>5.3.0.Final</hibernate.version>
         <mysql-connector.version>5.1.46</mysql-connector.version>
         <jsp.version>2.0</jsp.version>
-        <jstl.vertion>1.2</jstl.vertion>
+        <jstl.version>1.2</jstl.version>
+        <javax.validation>2.0.1.Final</javax.validation>
+        <hibernate.validator.version>6.0.13.Final</hibernate.validator.version>
         <jackson.version>2.9.6</jackson.version>
         <dozer.version>5.4.0</dozer.version>
         <dozer.jdk8.version>1.0.4</dozer.jdk8.version>
@@ -75,7 +77,17 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
-            <version>${jstl.vertion}</version>
+            <version>${jstl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${javax.validation}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate.validator.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

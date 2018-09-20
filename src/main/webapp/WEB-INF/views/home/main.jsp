@@ -1,37 +1,14 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>
-
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<c:set value="${contextPath}/resources" var="resPath" />
+<c:set value="${contextPath}/resources" var="resourcesPath" />
+<jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
-<%--<fmt:setLocale value = "en"/>--%>
-<fmt:bundle basename = "Locale"/>
-<%--<fmt:setBundle basename = "com.marta.logistika" var = "lang"/>--%>
 
-<!DOCTYPE >
-<html>
 
-<jsp:include page="../_fragments/head.jsp">
-    <jsp:param name="title" value="LogiWeb"/>
-</jsp:include>
+<spring:message code="test.stub"/>
 
-<body>
 
-    <div class="content-wrapper">
-
-        <jsp:include page="../_fragments/header.jsp"/>
-
-        <div class="row-wrapper">
-            <jsp:include page="../_fragments/navigation.jsp"/>
-            <main>
-                <fmt:message key = "stub-text"/>
-            </main>
-        </div>
-
-    </div>
-
-    <jsp:include page="../_fragments/footer.jsp"/>
-
-</body>
-</html>
+<jsp:include page="../_fragments/page-template-after-main.jsp"/>

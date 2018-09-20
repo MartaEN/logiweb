@@ -1,20 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 <jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
-
-    <h3>Наши логистические центры</h3>
+<div class="col-sm-4">
+    <h3 class="modal-header"><spring:message code="destinations.pageTitle"/></h3>
     <c:if test="${empty cities}">
-          <p>На карте пока нет ни одного логистического центра</p>
+          <p><spring:message code="destinations.noYetCenters"/></p>
     </c:if>
     <c:if test="${not empty cities}">
-        <div class="row-wrapper">
             <div>
                 <table id="filter-table">
                     <tr>
-                        <th>Город</th>
+                        <th><spring:message code="destinations.cities.city"/></th>
                         <th></th>
                     </tr>
                     <tr class='table-filters'>
@@ -32,13 +32,14 @@
                 </table>
                 <script src="${contextPath}/resources/js/filter-table.js"></script>
             </div>
-            <div>
-                <a class="btn btn-warning" href="${contextPath}/destinations/find-route" role="button">Поиск маршрута</a>
-            </div>
-        </div>
     </c:if>
     <br>
-    <a class="btn btn-success" href="${contextPath}/destinations/add-city" role="button">Добавить новый</a><br>
-
+    <div class="modal-footer">
+        <c:if test="${not empty cities}">
+            <a class="btn btn-warning" href="${contextPath}/destinations/find-route" role="button"><spring:message code="destinations.findRoute"/></a>
+        </c:if>
+        <a class="btn btn-success" href="${contextPath}/destinations/add-city" role="button"><spring:message code="buttons.addNew"/></a><br>
+    </div>
+</div>
 
 <jsp:include page="../_fragments/page-template-after-main.jsp"/>
