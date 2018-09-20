@@ -103,25 +103,4 @@ public class DriversController {
         return driverService.findDrivers(ticketId);
     }
 
-    @InitBinder
-    public void initBinder(ServletRequestDataBinder binder) {
-
-        binder.registerCustomEditor(CityEntity.class, "location", new PropertyEditorSupport() {
-
-            public void setAsText(String text) {
-                Long id = Long.parseLong(text);
-                CityEntity location = cityService.findById(id);
-                setValue(location);
-            }
-
-            public String getAsText() {
-                Object value = getValue();
-                if (value != null) {
-                    CityEntity location = (CityEntity) value;
-                    return location.getName();
-                }
-                return null;
-            }
-        });
-    }
 }

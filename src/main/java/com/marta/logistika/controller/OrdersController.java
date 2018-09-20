@@ -89,43 +89,4 @@ public class OrdersController {
         return response;
     }
 
-    @InitBinder
-    public void initBinder(ServletRequestDataBinder binder) {
-
-        binder.registerCustomEditor(CityEntity.class, "fromCity", new PropertyEditorSupport() {
-
-            public void setAsText(String text) {
-                Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.findById(id);
-                setValue(toCity);
-            }
-
-            public String getAsText() {
-                Object value = getValue();
-                if (value != null) {
-                    CityEntity city = (CityEntity) value;
-                    return city.getName();
-                }
-                return null;
-            }
-        });
-
-        binder.registerCustomEditor(CityEntity.class, "toCity", new PropertyEditorSupport() {
-
-            public void setAsText(String text) {
-                Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.findById(id);
-                setValue(toCity);
-            }
-
-            public String getAsText() {
-                Object value = getValue();
-                if (value != null) {
-                    CityEntity city = (CityEntity) value;
-                    return city.getName();
-                }
-                return null;
-            }
-        });
-    }
 }
