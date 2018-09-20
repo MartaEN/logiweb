@@ -13,7 +13,7 @@
     <%-- View unassigned orders and and create new orders --%>
     <section id="orders">
 
-        <div class="row-wrapper">
+        <div class="row-wrapper modal-header">
             <h3>Заказы</h3>
             <a class="btn btn-success" href="${contextPath}/orders/add-no-ajax" role="button">Зарегистрировать новый заказ</a><br>
             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newOrderForm"  style="margin-left: 5px;">То же, с AJAX</button>
@@ -24,7 +24,8 @@
         </c:if>
 
         <c:if test="${not empty orders}">
-            <table id="filter-table">
+            <table id="filter-table" class="table table-hover">
+                <thead>
                 <tr>
                     <th class="width40">№</th>
                     <th class="width100">Дата</th>
@@ -39,6 +40,7 @@
                     <td><input type="text" class="width100"/></td>
                     <td><input type="text" class="width80"/></td>
                 </tr>
+                </thead>
                 <c:forEach items="${orders}" var="order">
                     <tr class="table-data draggable source" property="${order.id}" draggable=true>
                         <td>${order.id}</td>
@@ -57,7 +59,10 @@
     <%-- View trip tickets in progress and create new trip tickets --%>
     <section id="tickets">
 
-        <h3>Маршрутные листы</h3>
+        <div class="modal-header">
+            <h3>Маршрутные листы</h3>
+            <a class="btn btn-success" href="${contextPath}/tickets/create" role="button">Создать новый маршрутный лист</a>
+        </div>
 
         <c:if test="${empty tickets}">
             <p>Несохраненных маршрутных листов нет</p>

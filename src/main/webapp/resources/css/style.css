@@ -80,26 +80,21 @@ footer {
     user-select: none;
 }
 
-.round-button {
-    width: 60px;
-    height: 60px;
-    border-radius: 30px !important;
-    font-size: 40px;
-    padding: 10px 0;
-    margin-bottom: 10px;
-}
-
 .draggable {
     cursor: grab;
 }
 
 #orders {
-    flex:2;
-    margin-right: 30px;
+    flex:3;
+    margin-right: 50px;
 }
 
 #tickets {
-    flex: 3;
+    flex: 4;
+}
+
+#orders thead tr:nth-child(1) th {
+    border-top: none;
 }
 
 .ticket {

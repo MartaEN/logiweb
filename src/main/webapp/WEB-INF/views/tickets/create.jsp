@@ -48,6 +48,7 @@
         </div>
 
         <div class="modal-footer modal-header">
+            <a class="btn btn-secondary" href="${contextPath}/orders" role="button">Назад</a>
             <input id="findTrucksBtn" type="submit" class="btn btn-success" value="Искать свободные фуры">
         </div>
 
