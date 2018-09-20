@@ -21,10 +21,11 @@ function makeDnD(zones) {
                 e.preventDefault();
 
                 if (currentDrag.source !== zone) {
-
+                    let orderId = currentDrag.attr('property');
+                    let ticketId = zone.attr('property');
                     $.ajax({
                         //todo как собрать данные с вьюшки для отправки запроса
-                        url: `/orders/add-order-to-ticket?orderId=3\&ticketId=2`,
+                        url: `/orders/add-order-to-ticket?orderId=` + orderId + `\&ticketId=` + ticketId,
                         type: 'GET',
                         dataType: 'json',
                         cache: false,
@@ -45,6 +46,7 @@ function makeDnD(zones) {
     });
 }
 
+//todo и как корректно сгенерировать html код из js...
 function fillOrdersSection(orders) {
     let section = $('#orders');
     section.html("");

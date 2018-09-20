@@ -40,7 +40,7 @@
                     <td><input type="text" class="width80"/></td>
                 </tr>
                 <c:forEach items="${orders}" var="order">
-                    <tr class="table-data draggable source" draggable=true>
+                    <tr class="table-data draggable source" property="${order.id}" draggable=true>
                         <td>${order.id}</td>
                         <td class="width100">${order.creationDate.toString().substring(0,10)}</td>
                         <td>${order.fromCity.name}</td>
@@ -65,7 +65,7 @@
 
         <c:if test="${not empty tickets}">
             <c:forEach items="${tickets}" var="ticket">
-                <a href="${contextPath}/tickets/${ticket.id}" class="ticket open-ticket target row-wrapper">
+                <a href="${contextPath}/tickets/${ticket.id}" class="ticket open-ticket target row-wrapper" property="${ticket.id}">
                     <div class="ticket-truck-info">
                         <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> ${ticket.truck.regNumber}</p>
                         <p><i class="fas fa-truck-loading"></i> ${ticket.truck.capacity} кг</p>
