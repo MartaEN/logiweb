@@ -2,25 +2,39 @@ package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dto.DriverRecord;
+import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
+import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.DriverService;
+import com.marta.logistika.service.api.TimeTrackerService;
+import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("driverService")
 public class DriverServiceImpl extends AbstractService implements DriverService {
 
+    private final static int MIN_REST_INTERVAL_IN_HOURS = 12;
+    private final static int MAX_MONHTLY_WORK_LIMIT_IN_MINUTES = 176 * 60;
+
     private final DriverDao driverDao;
+    private final TripTicketService ticketService;
+    private final TimeTrackerService timeService;
 
     @Autowired
-    public DriverServiceImpl(DriverDao driverDao) {
+    public DriverServiceImpl(DriverDao driverDao, TripTicketService ticketService, TimeTrackerService timeService) {
         this.driverDao = driverDao;
+        this.ticketService = ticketService;
+        this.timeService = timeService;
     }
 
     @Override
@@ -56,6 +70,10 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
         driverDao.remove(driverDao.findByPersonalId(personalId));
     }
 
+    @Override
+    public DriverRecord findDriverByPersonalId(String personalId) {
+        return mapper.map(driverDao.findByPersonalId(personalId), DriverRecord.class);
+    }
 
     @Override
     public List<DriverRecord> listAll() {
@@ -65,9 +83,27 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     }
 
     @Override
-    public DriverRecord findDriverByPersonalId(String personalId) {
-        return mapper.map(driverDao.findByPersonalId(personalId), DriverRecord.class);
+    public List<DriverRecord> findDrivers(long ticketId) {
+
+        TripTicketEntity ticket = ticketService.findById(ticketId);
+        CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
+        LocalDateTime departureDateTime = ticket.getDepartureDateTime();
+
+        List<DriverEntity> driversList = driverDao.listAllAvailable(fromCity, departureDateTime.minusHours(MIN_REST_INTERVAL_IN_HOURS));
+
+        Map<YearMonth, Long> plannedTripTimeInMinutes = ticketService.getPlannedMinutesByYearMonth(ticket);
+
+        plannedTripTimeInMinutes.keySet().forEach(month -> {
+            driversList.removeIf(driver ->
+                    timeService.calculateMonthlyMinutes(driver, month) + plannedTripTimeInMinutes.get(month)
+                            > MAX_MONHTLY_WORK_LIMIT_IN_MINUTES);
+        });
+
+        return driversList.stream()
+                .map(d -> mapper.map(d, DriverRecord.class))
+                .collect(Collectors.toList());
     }
+
 
     private boolean isDriverRecordValid (DriverRecord driverRecord) {
         if ( ! driverRecord.getPersonalId().matches("^[0-9]{6}$")) return false;

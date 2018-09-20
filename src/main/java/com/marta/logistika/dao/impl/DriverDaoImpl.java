@@ -5,6 +5,7 @@ import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
@@ -38,18 +39,15 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
                 .getResultList();
     }
 
-//    @Override
-//    public List<DriverEntity> listAll(CityEntity fromCity, Map<YearMonth, Long> requiredMinutes) {
-//        return em.createQuery(
-//                "SELECT d FROM DriverEntity d WHERE" +
-//                        "" +
-//                        "" +
-//                        "ORDER BY d.lastName",
-//                DriverEntity.class)
-//                .getResultList();
-//
-//
-//
-//        return null;
-//    }
+    @Override
+    public List<DriverEntity> listAllAvailable(CityEntity fromCity, LocalDateTime time) {
+        return em.createQuery(
+                "SELECT d FROM DriverEntity d " +
+                        "WHERE d.location =: fromCity AND d.bookedUntil <= :time " +
+                        "ORDER BY d.lastName",
+                DriverEntity.class)
+                .setParameter("fromCity", fromCity)
+                .setParameter("time", time)
+                .getResultList();
+    }
 }

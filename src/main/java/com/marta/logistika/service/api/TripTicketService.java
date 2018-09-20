@@ -8,7 +8,9 @@ import com.marta.logistika.service.ServiceException;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 public interface TripTicketService {
 
@@ -19,6 +21,7 @@ public interface TripTicketService {
     void addOrderToTicket (TripTicketEntity ticket, OrderEntity order) throws ServiceException;
     void removeOrderFromTicket (TripTicketEntity ticket, OrderEntity order);
     int getDistance(TripTicketEntity ticket);
+    Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket);
     List<TripTicketRecord> listAllUnapproved();
     List<OrderEntity> listAllOrderInTicket(long id);
 }

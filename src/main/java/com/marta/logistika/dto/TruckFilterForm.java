@@ -11,7 +11,6 @@ public class TruckFilterForm {
     private int maxCapacity;
     private CityEntity fromCity;
     private CityEntity toCity;
-//    private String truckRegNumber;
 
     public LocalDateTime getDepartureDate() {
         return departureDate;
@@ -53,11 +52,4 @@ public class TruckFilterForm {
         this.toCity = toCity;
     }
 
-    //    public String getTruckRegNumber() {
-//        return truckRegNumber;
-//    }
-//
-//    public void setTruckRegNumber(String truckRegNumber) {
-//        this.truckRegNumber = truckRegNumber;
-//    }
 }

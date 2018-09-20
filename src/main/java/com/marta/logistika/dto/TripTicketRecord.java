@@ -1,8 +1,7 @@
 package com.marta.logistika.dto;
 
-import com.marta.logistika.entity.OrderEntity;
-
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class TripTicketRecord implements Serializable {
@@ -10,7 +9,7 @@ public class TripTicketRecord implements Serializable {
     private long id;
     private TruckShortRecord truck;
     private List<StopoverShortRecord> stopovers;
-    private String departureDate;
+    private String departureDateTime;
 
     public long getId() {
         return id;
@@ -36,11 +35,11 @@ public class TripTicketRecord implements Serializable {
         this.stopovers = stopovers;
     }
 
-    public String getDepartureDate() {
-        return departureDate;
+    public String getDepartureDateTime() {
+        return departureDateTime;
     }
 
-    public void setDepartureDate(String departureDate) {
-        this.departureDate = departureDate;
+    public void setDepartureDateTime(String departureDateTime) {
+        this.departureDateTime = departureDateTime;
     }
 }

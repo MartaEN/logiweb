@@ -2,9 +2,10 @@ package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DriverRecord {
+public class DriverRecord implements Serializable {
 
     private String personalId;
     private String firstName;

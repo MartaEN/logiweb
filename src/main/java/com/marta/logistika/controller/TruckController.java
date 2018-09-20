@@ -55,14 +55,9 @@ public class TruckController {
             return "redirect:/trucks/add";
         }
 
-        try {
-            truckService.add(truck);
-            return ("redirect:/trucks");
-        } catch (ServiceException e) {
-            e.printStackTrace();
-            //todo develop error reporting to user
-            return "error";
-        }
+        truckService.add(truck);
+        return ("redirect:/trucks");
+
     }
 
     @GetMapping(value = "/{regNumber}")
@@ -124,15 +119,15 @@ public class TruckController {
 
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
-                CityEntity toCity = cityService.findById(id);
-                setValue(toCity);
+                CityEntity location = cityService.findById(id);
+                setValue(location);
             }
 
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {
-                    CityEntity city = (CityEntity) value;
-                    return city.getName();
+                    CityEntity location = (CityEntity) value;
+                    return location.getName();
                 }
                 return null;
             }

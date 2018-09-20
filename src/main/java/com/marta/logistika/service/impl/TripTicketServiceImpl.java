@@ -2,7 +2,6 @@ package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
 import com.marta.logistika.dto.TripTicketRecord;
-import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
@@ -16,7 +15,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +49,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         //validate and assign trip departure date
         if(departureDateTime.isBefore(LocalDateTime.now())) throw new ServiceException("Trip starting date should be in the future");
-        ticket.setDepartureDate(departureDateTime);
+        ticket.setDepartureDateTime(departureDateTime);
 
         //validate and assign truck and mark it as booked
         TruckEntity truck = truckDao.findByRegNumber(truckRegNum);
@@ -59,12 +61,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setTruck(truck);
 
         //if no destination city is specified - the trip will be planned as the round one
+        //truck location is changed to "on the way to destination city"
         ticket.getStopovers().add(new StopoverEntity(truck.getLocation(), 0));
         if (toCity == null) {
             ticket.getStopovers().add(new StopoverEntity(truck.getLocation(), 1));
         } else {
             ticket.getStopovers().add(new StopoverEntity(toCity, 1));
+            truck.setLocation(toCity);
         }
+        truck.setParked(false);
 
         tripTicketDao.add(ticket);
     }
@@ -75,7 +80,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         TripTicketEntity ticket = tripTicketDao.findById(id);
 
         if (ticket.getStatus() == TripTicketStatus.CLOSED) throw new ServiceException(String.format("Error trying to assign APPROVED status to trip ticket id %d: ticket is already closed", ticket.getId()));
-        if (ticket.getDepartureDate().isBefore(LocalDateTime.now())) throw new ServiceException("Can't approve ticket with past departure date - please edit the date first");
+        if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) throw new ServiceException("Can't approve ticket with past departure date - please edit the date first");
 
         helper.calculateDurationAndArrivalDateTime(ticket);
 
@@ -155,6 +160,36 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             distance += roadService.getDistanceFromTo(route.get(i - 1).getCity(), route.get(i).getCity());
         }
         return distance;
+    }
+
+    @Override
+    @Transactional
+    public Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket) {
+
+        Map<YearMonth, Long> result = new HashMap<>();
+
+        helper.calculateDurationAndArrivalDateTime(ticket);
+        long totalPlannedMinutes = ticket.getStopovers().stream()
+                .map(StopoverEntity::getEstimatedDuration)
+                .mapToLong(Duration::toMinutes)
+                .sum();
+
+        YearMonth month = YearMonth.from(ticket.getDepartureDateTime());
+        LocalDateTime start = ticket.getDepartureDateTime();
+        LocalDateTime finish = month.atEndOfMonth().atTime(LocalTime.MAX);
+
+        while (totalPlannedMinutes > 0) {
+
+            long monthlyPlannedMinutes = Math.min(totalPlannedMinutes, Duration.between(start, finish).toMinutes());
+            result.put(month, monthlyPlannedMinutes);
+
+            totalPlannedMinutes -= monthlyPlannedMinutes;
+            month = month.plusMonths(1);
+            start = month.atDay(1).atStartOfDay();
+            finish = month.atEndOfMonth().atTime(LocalTime.MAX);
+        }
+
+        return result;
     }
 
     @Override

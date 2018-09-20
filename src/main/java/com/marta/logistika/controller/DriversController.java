@@ -12,6 +12,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.beans.PropertyEditorSupport;
+import java.util.List;
 
 
 @Controller
@@ -92,6 +93,13 @@ public class DriversController {
 
         return "redirect:/drivers";
 
+    }
+
+    @GetMapping(value = "/find-drivers")
+    @ResponseBody
+    public List<DriverRecord> findDrivers (@RequestParam long ticketId) {
+
+        return driverService.findDrivers(ticketId);
     }
 
     @InitBinder

@@ -12,9 +12,9 @@
 
     <form:form id="findTruckForm" modelAttribute="filterForm" method="post" action="${contextPath}/tickets/create">
         <div class="form-group row">
-            <label for="departureDate" class="col-sm-4 col-form-label">Дата и время отправления: </label>
+            <label for="departureDateTime" class="col-sm-4 col-form-label">Дата и время отправления: </label>
             <div class="col-sm-8">
-                <input type="datetime-local" id="departureDate" name="departureDate" class="form-control" >
+                <input type="datetime-local" id="departureDateTime" name="departureDateTime" class="form-control" >
             </div>
         </div>
         <div class="form-group row">
@@ -51,7 +51,7 @@
             <input id="findTrucksBtn" type="submit" class="btn btn-success" value="Искать свободные фуры">
         </div>
 
-        <div id="searchResult"></div>
+        <div id="trucksSearchResult"></div>
 
     </form:form>
 

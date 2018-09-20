@@ -126,6 +126,6 @@ class TripTicketServiceHelper {
             totalTripDuration = totalTripDuration.plus(currentStopoverDuration);
         }
 
-        ticket.setArrivalDate(ticket.getDepartureDate().plusMinutes(totalTripDuration.toMinutes()));
+        ticket.setArrivalDateTime(ticket.getDepartureDateTime().plusMinutes(totalTripDuration.toMinutes()));
     }
 }

@@ -10,7 +10,7 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                showResult(data);
+                showTruckList(data);
             },
             error: function (err) {
                 console.log(err);
@@ -19,8 +19,8 @@ $(document).ready(function () {
     })
 });
 
-function showResult (trucks) {
-    let $searchResult = $('#searchResult');
+function showTruckList (trucks) {
+    let $searchResult = $('#trucksSearchResult');
     $searchResult.html("");
     let output = '';
     if(trucks.length === 0) {

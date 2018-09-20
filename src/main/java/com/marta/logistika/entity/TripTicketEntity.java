@@ -5,7 +5,6 @@ import com.marta.logistika.enums.TripTicketStatus;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -18,10 +17,10 @@ public class TripTicketEntity extends AbstractEntity {
     private TripTicketStatus status;
 
     @Column (name = "departure", nullable = false)
-    private LocalDateTime departureDate;
+    private LocalDateTime departureDateTime;
 
     @Column (name = "arrival")
-    private LocalDateTime arrivalDate;
+    private LocalDateTime arrivalDateTime;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "truck")
@@ -46,20 +45,20 @@ public class TripTicketEntity extends AbstractEntity {
         this.status = status;
     }
 
-    public LocalDateTime getDepartureDate() {
-        return departureDate;
+    public LocalDateTime getDepartureDateTime() {
+        return departureDateTime;
     }
 
-    public void setDepartureDate(LocalDateTime departureDate) {
-        this.departureDate = departureDate;
+    public void setDepartureDateTime(LocalDateTime departureDate) {
+        this.departureDateTime = departureDate;
     }
 
-    public LocalDateTime getArrivalDate() {
-        return arrivalDate;
+    public LocalDateTime getArrivalDateTime() {
+        return arrivalDateTime;
     }
 
-    public void setArrivalDate(LocalDateTime arrivalDate) {
-        this.arrivalDate = arrivalDate;
+    public void setArrivalDateTime(LocalDateTime arrivalDate) {
+        this.arrivalDateTime = arrivalDate;
     }
 
     public TruckEntity getTruck() {
@@ -115,7 +114,7 @@ public class TripTicketEntity extends AbstractEntity {
         return "TripTicketEntity{" +
                 "id=" + id +
                 ", status=" + status.name() +
-                ", startingDate=" + departureDate +
+                ", startingDate=" + departureDateTime +
                 ", truck=" + truck.getRegNumber() +
                 ", drivers=" + drivers +
                 ", stopovers=" + stopovers +

@@ -65,7 +65,7 @@
 
         <c:if test="${not empty tickets}">
             <c:forEach items="${tickets}" var="ticket">
-                <a href="${contextPath}/tickets/${ticket.id}/view" class="ticket open-ticket target row-wrapper">
+                <a href="${contextPath}/tickets/${ticket.id}" class="ticket open-ticket target row-wrapper">
                     <div class="ticket-truck-info">
                         <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> ${ticket.truck.regNumber}</p>
                         <p><i class="fas fa-truck-loading"></i> ${ticket.truck.capacity} кг</p>
@@ -76,7 +76,7 @@
                         </p>
                     </div>
                     <div class="ticket-departure">
-                        <i class="far fa-calendar-alt"></i> ${ticket.departureDate.substring(0,10)} <i class="far fa-clock"></i> ${ticket.departureDate.substring(11,16)}
+                        <i class="far fa-calendar-alt"></i> ${ticket.departureDateTime.substring(0,10)} <i class="far fa-clock"></i> ${ticket.departureDateTime.substring(11,16)}
                     </div>
                     <div class="ticket-route-info">
                         <c:forEach items="${ticket.stopovers}" var="stopover">
