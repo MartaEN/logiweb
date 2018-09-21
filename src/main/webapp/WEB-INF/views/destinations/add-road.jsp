@@ -27,8 +27,7 @@
 
         <div class="modal-footer">
             <a class="btn btn-secondary" href="${contextPath}/destinations/${fromCity.id}" role="button"><spring:message code="buttons.return"/></a>
-                <%--//todo как загнать spring message в атрибуты другого тега ?--%>
-            <input type="submit" class="btn btn-success" value="Добавить">
+            <input type="submit" class="btn btn-success" value="<spring:message code='buttons.save'/>">
         </div>
 
     </form:form>

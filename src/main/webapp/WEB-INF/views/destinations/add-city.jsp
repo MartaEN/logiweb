@@ -15,11 +15,9 @@
             <label for="name" class="col-form-label"><spring:message code="destinations.cities.cityName"/></label>
             <input id="name" type="text" class="form-control" name="name" required>
         </div>
-
         <div class="modal-footer">
             <a class="btn btn-secondary" href="${contextPath}/destinations" role="button"><spring:message code="buttons.back"/></a>
-            <%--//todo как загнать spring message в атрибуты другого тега ?--%>
-            <input type="submit" class="btn btn-success" value="Сохранить">
+            <input type="submit" class="btn btn-success" value="<spring:message code='buttons.save'/>">
         </div>
 
     </form>
