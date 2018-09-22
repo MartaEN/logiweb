@@ -32,7 +32,11 @@ public class OrdersController {
     }
 
     @GetMapping
-    public String showOrdersAndTicketsPage() {
+    public String showOrdersAndTicketsPage(Model uiModel) {
+
+        uiModel.addAttribute("orderEntryForm",  new OrderEntryForm());
+        uiModel.addAttribute("cities", cityService.listAll());
+
         return "orders/monitor";
     }
 
