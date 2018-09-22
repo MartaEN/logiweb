@@ -6,18 +6,18 @@ import java.time.LocalDateTime;
 
 public class TruckFilterForm {
 
-    private LocalDateTime departureDate;
+    private LocalDateTime departureDateTime;
     private int minCapacity;
     private int maxCapacity;
     private CityEntity fromCity;
     private CityEntity toCity;
 
-    public LocalDateTime getDepartureDate() {
-        return departureDate;
+    public LocalDateTime getDepartureDateTime() {
+        return departureDateTime;
     }
 
-    public void setDepartureDate(LocalDateTime departureDate) {
-        this.departureDate = departureDate;
+    public void setDepartureDateTime(LocalDateTime departureDateTime) {
+        this.departureDateTime = departureDateTime;
     }
 
     public int getMinCapacity() {

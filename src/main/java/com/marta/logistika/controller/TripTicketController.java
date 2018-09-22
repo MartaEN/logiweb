@@ -1,7 +1,6 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.DriverIdRecord;
-import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.dto.TripTicketCreateForm;
 import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.service.api.CityService;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 @RequestMapping("/tickets")
@@ -51,7 +49,7 @@ public class TripTicketController {
 
         ticketService.createTripTicket(
                 ticketCreateForm.getTruckRegNumber(),
-                LocalDateTime.parse(ticketCreateForm.getDepartureDate()),
+                LocalDateTime.parse(ticketCreateForm.getDepartureDateTime()),
                 ticketCreateForm.getToCity() == null ? null : cityService.findById(ticketCreateForm.getToCity()));
 
         return "redirect:/orders";

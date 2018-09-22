@@ -7,8 +7,10 @@
 <jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
+<h3>Sandbox page so far...</h3>
 
 <spring:message code="test.stub"/>
+<spring:message code="com.marta.logistika.validator.UniquePersonalIdValidator.message"/>
 
 
 <jsp:include page="../_fragments/page-template-after-main.jsp"/>

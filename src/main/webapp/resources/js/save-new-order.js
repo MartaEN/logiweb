@@ -6,10 +6,7 @@ $(document).ready(function () {
             url: "/orders/add",
             type: "POST",
             data : $('form[name=orderEntryForm]').serialize(),
-            dataType: 'json',
             success: function (data) {
-                console.log("succes so far");
-                console.log(data);
                 alert("saved");
             },
             error: function (err) {

@@ -2,16 +2,16 @@ package com.marta.logistika.dto;
 
 public class TripTicketCreateForm {
 
-    private String departureDate;
+    private String departureDateTime;
     private Long toCity;
     private String truckRegNumber;
 
-    public String getDepartureDate() {
-        return departureDate;
+    public String getDepartureDateTime() {
+        return departureDateTime;
     }
 
-    public void setDepartureDate(String departureDate) {
-        this.departureDate = departureDate;
+    public void setDepartureDateTime(String departureDateTime) {
+        this.departureDateTime = departureDateTime;
     }
 
     public Long getToCity() {
