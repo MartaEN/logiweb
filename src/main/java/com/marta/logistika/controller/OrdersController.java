@@ -1,8 +1,8 @@
 package com.marta.logistika.controller;
 
-import com.marta.logistika.dto.OpenOrdersAndTicketsDTO;
+import com.marta.logistika.dto.MonitorDataDTO;
 import com.marta.logistika.dto.OrderEntryForm;
-import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.dto.OrderEntryResponse;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -13,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.beans.PropertyEditorSupport;
 
 @Controller
 @RequestMapping("/orders")
@@ -34,15 +32,36 @@ public class OrdersController {
     }
 
     @GetMapping
-    public String home(Model uiModel) {
-
-        uiModel.addAttribute("orders", orderService.listAllUnassigned());
-        uiModel.addAttribute("tickets", tripTicketService.listAllUnapproved());
-        uiModel.addAttribute("cities", cityService.listAll());
-        uiModel.addAttribute("orderEntryForm", new OrderEntryForm());
-
+    public String showOrdersAndTicketsPage() {
         return "orders/monitor";
     }
+
+    @GetMapping(value = "/monitor", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public MonitorDataDTO provideDataForMonitor () {
+
+        MonitorDataDTO response = new MonitorDataDTO();
+        response.setOrders(orderService.listAllUnassigned());
+        response.setTickets(tripTicketService.listAllUnapproved());
+
+        return response;
+    }
+
+    @GetMapping(value = "/add-order-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public MonitorDataDTO addOrderToTicket(
+            @RequestParam long orderId,
+            @RequestParam long ticketId) {
+
+        tripTicketService.addOrderToTicket(tripTicketService.findById(ticketId), orderService.findById(orderId));
+
+        MonitorDataDTO response = new MonitorDataDTO();
+        response.setOrders(orderService.listAllUnassigned());
+        response.setTickets(tripTicketService.listAllUnapproved());
+
+        return response;
+    }
+
 
     @GetMapping(value = "/add-no-ajax")
     public String newOrderForm(Model uiModel) {
@@ -67,26 +86,15 @@ public class OrdersController {
     }
 
 
-    @PostMapping("/add")
-    public ResponseEntity newOrderFormProcessing(@RequestBody OrderEntryForm orderEntryForm) {
-        orderService.add(orderEntryForm);
+    @PostMapping(value = "/add", consumes = {"application/x-www-form-urlencoded"})
+    public ResponseEntity newOrderFormProcessing(OrderEntryResponse orderEntryResponse) {
+        OrderEntryForm order = new OrderEntryForm();
+        order.setDescription(orderEntryResponse.getDescription());
+        order.setWeight(orderEntryResponse.getWeight());
+        order.setFromCity(cityService.findById(orderEntryResponse.getFromCity()));
+        order.setToCity(cityService.findById(orderEntryResponse.getToCity()));
+        orderService.add(order);
         return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-
-    @GetMapping(value = "/add-order-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
-    @ResponseBody
-    public OpenOrdersAndTicketsDTO addOrderToTicket(
-            @RequestParam long orderId,
-            @RequestParam long ticketId) {
-
-        tripTicketService.addOrderToTicket(tripTicketService.findById(ticketId), orderService.findById(orderId));
-
-        OpenOrdersAndTicketsDTO response = new OpenOrdersAndTicketsDTO();
-        response.setOrders(orderService.listAllUnassigned());
-        response.setTickets(tripTicketService.listAllUnapproved());
-
-        return response;
     }
 
 }

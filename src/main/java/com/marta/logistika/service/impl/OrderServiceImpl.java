@@ -1,8 +1,8 @@
 package com.marta.logistika.service.impl;
 
-import com.marta.logistika.dao.api.CityDao;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dto.OrderEntryForm;
+import com.marta.logistika.dto.OrderRecordShort;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.service.api.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service ("orderService")
 public class OrderServiceImpl extends AbstractService implements OrderService {
@@ -33,7 +34,9 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     }
 
     @Override
-    public List<OrderEntity> listAllUnassigned() {
-        return orderDao.listAllUnassigned();
+    public List<OrderRecordShort> listAllUnassigned() {
+        return orderDao.listAllUnassigned().stream()
+                .map(o -> mapper.map(o, OrderRecordShort.class))
+                .collect(Collectors.toList());
     }
 }
