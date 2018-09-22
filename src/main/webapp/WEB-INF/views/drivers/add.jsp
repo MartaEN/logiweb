@@ -10,8 +10,9 @@
     <h3 class="modal-header">Регистрация нового водителя</h3>
     <form:form modelAttribute="driver" action="${contextPath}/drivers/add" method="post">
         <div class="form-group">
-            <label for="personalId" class="col-form-label">Табельный номер: </label>
-            <input type="text" id="personalId" name="personalId" placeholder="123456" pattern="^[0-9]{6}$" required class="form-control">
+            <form:label path="personalId" cssClass="col-form-label">Табельный номер: </form:label>
+            <form:input path="personalId" cssClass="form-control" type="text" placeholder="123456" pattern="^[0-9]{6}$" required="required"/>
+            <form:errors path="personalId" />
         </div>
         <div class="form-group">
             <label for="lastName" class="col-form-label">Фамилия: </label>

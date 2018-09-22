@@ -1,6 +1,7 @@
 package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.validator.UniquePersonalId;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -13,6 +14,7 @@ public class DriverRecord implements Serializable {
     @NotNull
     @Size(min = 6, max = 6)
     @Pattern(regexp = "^[0-9]{6}$")
+    @UniquePersonalId
     private String personalId;
 
     @NotNull
