@@ -6,13 +6,6 @@ public class DriverIdRecord implements Serializable {
 
     private String personalId;
 
-    public DriverIdRecord() {
-    }
-
-    public DriverIdRecord(String personalId) {
-        this.personalId = personalId;
-    }
-
     public String getPersonalId() {
         return personalId;
     }

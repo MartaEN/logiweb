@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
+import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
@@ -8,6 +9,7 @@ import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.service.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TripTicketService;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -27,14 +29,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     private final TripTicketDao tripTicketDao;
     private final TruckDao truckDao;
+    private final DriverDao driverDao;
     private final OrderDao orderDao;
     private final RoadService roadService;
     private final TripTicketServiceHelper helper;
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao tripTicketDao, TruckDao truckDao, OrderDao orderDao, RoadService roadService) {
+    public TripTicketServiceImpl(TripTicketDao tripTicketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, RoadService roadService) {
         this.tripTicketDao = tripTicketDao;
         this.truckDao = truckDao;
+        this.driverDao = driverDao;
         this.orderDao = orderDao;
         this.roadService = roadService;
         this.helper = new TripTicketServiceHelper(roadService);
@@ -76,6 +80,33 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     @Transactional
+    public void signTicket(long ticketId) {
+
+        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
+
+        if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
+
+            // correcting the date to the future if necessary
+            if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) {
+                ticket.setDepartureDateTime(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
+            }
+
+            // assigning drivers
+            CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
+            int shiftSize = ticket.getTruck().getShiftSize();
+            List<DriverEntity> availableDrivers = driverDao.listAllAvailable(fromCity, ticket.getDepartureDateTime());
+            if (availableDrivers.size() < shiftSize) throw new ServiceException("No drivers available for the ticket");
+            ticket.setDrivers(availableDrivers.subList(0, shiftSize));
+
+            // updating ticket and its orders statuses
+            ticket.setStatus(TripTicketStatus.APPROVED);
+            ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
+        }
+
+    }
+
+    @Override
+    @Transactional
     public void approveTripTicket(long id) {
         TripTicketEntity ticket = tripTicketDao.findById(id);
 
@@ -97,6 +128,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     }
 
     @Override
+    @Transactional
     public TripTicketRecord findDtoById(long id) {
         return mapper.map(tripTicketDao.findById(id), TripTicketRecord.class);
     }
@@ -136,7 +168,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             throw new ServiceException(String.format("### Order id %d does not fit into trip ticket %d: %s", order.getId(), ticket.getId(), e.getMessage()));
         }
 
-        order.setStatus(OrderStatus.READY_TO_SHIP);
+        order.setStatus(OrderStatus.ASSIGNED);
 
         orderDao.merge(order);
         tripTicketDao.merge(ticket);
@@ -193,6 +225,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     }
 
     @Override
+    @Transactional
     public List<TripTicketRecord> listAllUnapproved() {
         return tripTicketDao.listAllUnapproved()
                 .stream()

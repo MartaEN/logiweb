@@ -77,7 +77,7 @@ public class OrdersController {
 
     @PostMapping(value = "/add-no-ajax")
     public String addNewOrder(
-            @ModelAttribute("road") OrderEntryForm orderEntryForm,
+            @ModelAttribute OrderEntryForm orderEntryForm,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {

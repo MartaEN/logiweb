@@ -15,6 +15,7 @@ import java.util.Map;
 public interface TripTicketService {
 
     void createTripTicket (String truckRegNum, LocalDateTime date, @Nullable CityEntity toCity);
+    void signTicket(long ticketId);
     void approveTripTicket (long id);
     TripTicketEntity findById(long id);
     TripTicketRecord findDtoById (long id);
@@ -24,4 +25,5 @@ public interface TripTicketService {
     Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket);
     List<TripTicketRecord> listAllUnapproved();
     List<OrderEntity> listAllOrderInTicket(long id);
+
 }

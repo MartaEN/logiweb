@@ -1,7 +1,9 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.service.api.CityService;
+import com.marta.logistika.service.api.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,13 +12,15 @@ import org.springframework.web.bind.annotation.InitBinder;
 import java.beans.PropertyEditorSupport;
 
 @ControllerAdvice
-public class CityBindingControllerAdvice {
+public class DataBindingControllerAdvice {
 
     private final CityService cityService;
+    private final DriverService driverService;
 
     @Autowired
-    public CityBindingControllerAdvice(CityService cityService) {
+    public DataBindingControllerAdvice(CityService cityService, DriverService driverService) {
         this.cityService = cityService;
+        this.driverService = driverService;
     }
 
     @InitBinder
@@ -71,6 +75,23 @@ public class CityBindingControllerAdvice {
                 if (value != null) {
                     CityEntity city = (CityEntity) value;
                     return city.getName();
+                }
+                return null;
+            }
+        });
+
+        binder.registerCustomEditor(DriverRecord.class, "personalId", new PropertyEditorSupport() {
+
+            public void setAsText(String personalId) {
+                DriverRecord driver= driverService.findDriverByPersonalId(personalId);
+                setValue(driver);
+            }
+
+            public String getAsText() {
+                Object value = getValue();
+                if (value != null) {
+                    DriverRecord driver = (DriverRecord) value;
+                    return driver.getPersonalId();
                 }
                 return null;
             }

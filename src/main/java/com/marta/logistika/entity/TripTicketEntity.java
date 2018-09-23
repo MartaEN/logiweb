@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "trips")
+@Table(name = "tickets")
 public class TripTicketEntity extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
