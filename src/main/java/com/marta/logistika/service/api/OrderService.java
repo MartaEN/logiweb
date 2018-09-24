@@ -11,4 +11,6 @@ public interface OrderService {
     void add (OrderEntryForm order);
     OrderEntity findById(long id);
     List<OrderRecordShort> listAllUnassigned();
+    List<OrderRecordShort> getOrdersPage(int page);
+    int countPages();
 }

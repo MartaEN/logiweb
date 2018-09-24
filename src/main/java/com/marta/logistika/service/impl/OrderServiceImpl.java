@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
+    private final static int ROWS_PER_PAGE = 6;
 
     @Autowired
     public OrderServiceImpl(OrderDao orderDao) {
@@ -38,5 +39,20 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         return orderDao.listAllUnassigned().stream()
                 .map(o -> mapper.map(o, OrderRecordShort.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderRecordShort> getOrdersPage(int page) {
+        int index = (page - 1) * ROWS_PER_PAGE + 1;
+        return orderDao.getOrdersPage(index, ROWS_PER_PAGE).stream()
+                .map(o -> mapper.map(o, OrderRecordShort.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int countPages() {
+        long rowCount = orderDao.count();
+        int pageCount = (int) Math.ceil ( (float) rowCount / ROWS_PER_PAGE );
+        return pageCount;
     }
 }

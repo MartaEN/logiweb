@@ -1,8 +1,7 @@
 package com.marta.logistika.controller;
 
-import com.marta.logistika.dto.MonitorDataDTO;
-import com.marta.logistika.dto.OrderEntryForm;
-import com.marta.logistika.dto.OrderEntryResponse;
+import com.marta.logistika.dto.*;
+import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -14,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @Controller
@@ -91,7 +92,7 @@ public class OrdersController {
 
 
     @PostMapping(value = "/add", consumes = {"application/x-www-form-urlencoded"})
-    public ResponseEntity newOrderFormProcessing(OrderEntryResponse orderEntryResponse) {
+    public ResponseEntity processNewOrderForm(OrderEntryResponse orderEntryResponse) {
         OrderEntryForm order = new OrderEntryForm();
         order.setDescription(orderEntryResponse.getDescription());
         order.setWeight(orderEntryResponse.getWeight());
@@ -101,4 +102,19 @@ public class OrdersController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
+    @GetMapping (value = "/view")
+    public String viewNumberedPage (@RequestParam ("page") int page, Model uiModel) {
+        long totalPageCount = orderService.countPages();
+        if(page > orderService.countPages() || page < 1) return "redirect:/orders/view?page=1";
+
+        List<OrderRecordShort> orders = orderService.getOrdersPage(page);
+        uiModel.addAttribute("orders", orders);
+        if(orders.size() != 0) {
+            OrderEntity firstOrderInList = orderService.findById(orders.get(0).getId());
+            uiModel.addAttribute("orderViewForm", firstOrderInList);
+            uiModel.addAttribute("page", page);
+            uiModel.addAttribute("totalPages", totalPageCount);
+        }
+        return "orders/list";
+    }
 }

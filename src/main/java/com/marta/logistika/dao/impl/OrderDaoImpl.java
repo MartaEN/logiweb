@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.marta.logistika.enums.OrderStatus.NEW;
-
 @Repository("orderRepository")
 public class OrderDaoImpl extends AbstractDao<OrderEntity> implements OrderDao {
 
@@ -22,5 +20,22 @@ public class OrderDaoImpl extends AbstractDao<OrderEntity> implements OrderDao {
                 "SELECT o FROM OrderEntity o WHERE o.status='NEW'",
                 OrderEntity.class)
                 .getResultList();
+    }
+
+    @Override
+    public List<OrderEntity> getOrdersPage(int index, int maxRecordsOnPage) {
+        return em.createQuery(
+                "SELECT o FROM OrderEntity o ORDER BY o.id DESC",
+                OrderEntity.class)
+                .setFirstResult(index)
+                .setMaxResults(maxRecordsOnPage)
+                .getResultList();
+    }
+
+    @Override
+    public long count() {
+        return em.createQuery("SELECT COUNT (o) FROM OrderEntity o",
+                Long.class)
+                .getSingleResult();
     }
 }

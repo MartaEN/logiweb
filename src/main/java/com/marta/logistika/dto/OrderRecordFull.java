@@ -1,18 +1,18 @@
 package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
-import com.marta.logistika.enums.OrderStatus;
 
 import java.io.Serializable;
 
-public class OrderRecordShort implements Serializable {
+public class OrderRecordFull implements Serializable {
 
     private long id;
     private String creationDate;
+    private String description;
+    private int weight;
     private CityEntity fromCity;
     private CityEntity toCity;
-    private int weight;
-    private OrderStatus status;
+    private String status;
 
     public long getId() {
         return id;
@@ -28,6 +28,22 @@ public class OrderRecordShort implements Serializable {
 
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
     public CityEntity getFromCity() {
@@ -46,19 +62,11 @@ public class OrderRecordShort implements Serializable {
         this.toCity = toCity;
     }
 
-    public int getWeight() {
-        return weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
-
-    public OrderStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(OrderStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }

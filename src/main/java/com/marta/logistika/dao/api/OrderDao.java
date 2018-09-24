@@ -8,4 +8,6 @@ public interface OrderDao extends GenericDao<OrderEntity> {
 
     OrderEntity findById (long id);
     List<OrderEntity> listAllUnassigned();
+    List<OrderEntity> getOrdersPage(int index, int maxRecordsOnPage);
+    long count();
 }

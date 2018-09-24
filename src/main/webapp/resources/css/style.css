@@ -39,7 +39,7 @@ header a:hover {
     text-decoration: none;
 }
 
-nav {
+.sideNav {
     background-color: #A0D468;
     color: white;
     width: 60px;
@@ -48,7 +48,7 @@ nav {
     justify-content: flex-start;
 }
 
-nav a {
+.sideNav a {
     display: block;
     height: 60px;
     width: 60px;
@@ -59,7 +59,7 @@ nav a {
     box-sizing: border-box;
 }
 
-nav a:hover {
+.sideNav a:hover {
     color: white;
 }
 
