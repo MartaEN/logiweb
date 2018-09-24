@@ -1,10 +1,7 @@
-</main>
 
-</div>
+    </main>
 
-</div>
-
-<jsp:include page="../_fragments/footer.jsp"/>
+    <jsp:include page="../_fragments/footer.jsp"/>
 
 </body>
 </html>

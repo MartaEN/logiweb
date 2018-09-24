@@ -6,12 +6,8 @@
 
 <body>
 
-<div class="content-wrapper">
-
     <jsp:include page="../_fragments/header.jsp"/>
 
-    <div class="row-wrapper">
+    <jsp:include page="../_fragments/navigation.jsp"/>
 
-        <jsp:include page="../_fragments/navigation.jsp"/>
-
-        <main>
+    <main>

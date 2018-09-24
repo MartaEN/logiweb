@@ -1,29 +1,23 @@
-body {
+html, body {
+    height: 100%;
     margin: 0 auto;
     min-width: 980px;
 }
 
-html, body, nav, main {
-    height: 100%;
-}
-
 body {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 80px 1fr 20px;
+    grid-template-columns: 60px 1fr;
+    grid-template-areas:    "header  header"
+                            "nav     main"
+                            "footer  footer";
 }
 
-.content-wrapper {
-    flex: 1;
-}
-
-.content-wrapper, main, footer {
-    width: 100%;
-}
 
 header {
+    grid-area: header;
     background-color: #8CC152;
     color: white;
-    height: 80px;
     padding: 12px;
     box-sizing: border-box;
     align-items: center;
@@ -37,6 +31,10 @@ header a {
 header a:hover {
     color: #A0D468;
     text-decoration: none;
+}
+
+#mainNav {
+    grid-area: nav;
 }
 
 .sideNav {
@@ -78,11 +76,12 @@ h3 {
 }
 
 main {
+    grid-area: main;
     padding: 10px 10px 10px 50px;
 }
 
 footer {
-    height: 60px;
+    grid-area: footer;
     background-color: #E6E9ED;
     text-align: center;
     font-size: 12px;
