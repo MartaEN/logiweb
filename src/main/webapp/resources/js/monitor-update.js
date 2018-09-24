@@ -31,52 +31,51 @@ function fillTripTicketsSection(tickets) {
     $('#ticket-list').html(template(tickets));
 }
 
-//todo вешает слушатели только на первый заказ и первый маршрутный лист в списке - исправить
 function addDragAndDropListening() {
-    const source = document.querySelector('.source');
-    const target = document.querySelector('.target');
-    processDragAndDrop([source, target]);
-}
 
-function processDragAndDrop(zones) {
-
+    let sources = $('.source');
+    let targets = $('.target');
     let currentDrag;
 
-    zones.forEach(zone => {
-        zone.addEventListener('dragstart', (e) => {
-            currentDrag = {source: zone, node: e.target};
+    for (let i = 0; i < sources.length; i++) {
+        sources[i].addEventListener('dragstart', (event) => {
+            currentDrag = {source: sources[i], node: event.target};
+        });
+    }
+
+    for (let i = 0; i < targets.length; i++) {
+        targets[i].addEventListener('dragover', (event) => {
+            event.preventDefault();
         });
 
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        zone.addEventListener('drop', (e) => {
+        targets[i].addEventListener('drop', (event) => {
             if (currentDrag) {
-                e.preventDefault();
 
-                if (currentDrag.source !== zone) {
-                    let orderId = currentDrag.source.getAttribute('property');
-                    let ticketId = e.currentTarget.getAttribute('property');
-                    $.ajax({
-                        url: `/orders/add-order-to-ticket?orderId=` + orderId + `\&ticketId=` + ticketId,
-                        type: 'GET',
-                        dataType: 'json',
-                        cache: false,
-                        success: function (data) {
-                            console.log(data);
-                            fillOrdersSection(data.orders);
-                            fillTripTicketsSection(data.tickets);
-                        },
-                        error: function (err) {
-                            console.log(err);
-                        }
-                    });
-                    currentDrag = null;
-                }
+                event.preventDefault();
+
+                let orderId = currentDrag.source.getAttribute('property');
+                let ticketId = event.currentTarget.getAttribute('property');
+
+                $.ajax({
+                    url: `/orders/add-order-to-ticket?orderId=` + orderId + `\&ticketId=` + ticketId,
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        console.log(data);
+                        fillOrdersSection(data.orders);
+                        fillTripTicketsSection(data.tickets);
+                        addDragAndDropListening();
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+
+                currentDrag = null;
             }
         });
-    });
+    }
 }
 
 
