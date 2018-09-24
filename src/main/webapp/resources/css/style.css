@@ -69,6 +69,10 @@ header a:hover {
     justify-content: space-between;
 }
 
+.form-control:disabled {
+    background-color: white !important;
+}
+
 h3 {
     margin-right: 30px;
 }

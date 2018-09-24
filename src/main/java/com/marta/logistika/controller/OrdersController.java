@@ -58,7 +58,7 @@ public class OrdersController {
             @RequestParam long orderId,
             @RequestParam long ticketId) {
 
-        tripTicketService.addOrderToTicket(tripTicketService.findById(ticketId), orderService.findById(orderId));
+        tripTicketService.addOrderToTicket(ticketId, orderId);
 
         MonitorDataDTO response = new MonitorDataDTO();
         response.setOrders(orderService.listAllUnassigned());
@@ -104,17 +104,23 @@ public class OrdersController {
 
     @GetMapping (value = "/view")
     public String viewNumberedPage (@RequestParam ("page") int page, Model uiModel) {
+
         long totalPageCount = orderService.countPages();
         if(page > orderService.countPages() || page < 1) return "redirect:/orders/view?page=1";
 
-        List<OrderRecordShort> orders = orderService.getOrdersPage(page);
-        uiModel.addAttribute("orders", orders);
-        if(orders.size() != 0) {
-            OrderEntity firstOrderInList = orderService.findById(orders.get(0).getId());
-            uiModel.addAttribute("orderViewForm", firstOrderInList);
+        uiModel.addAttribute("orders", orderService.getOrdersPage(page));
+
+        if(totalPageCount != 0) {
             uiModel.addAttribute("page", page);
             uiModel.addAttribute("totalPages", totalPageCount);
         }
+
         return "orders/list";
+    }
+
+    @GetMapping (value = "/show-order")
+    @ResponseBody
+    public OrderRecordFull showOrder (@RequestParam ("id") long id) {
+        return orderService.findById(id);
     }
 }

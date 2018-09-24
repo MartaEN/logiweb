@@ -3,7 +3,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<c:set value="${contextPath}/resources" var="resourcesPath" />
 <jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 
@@ -11,12 +10,14 @@
 
     <div class="row-wrapper modal-header">
         <h3 class="col-md-8">Заказы</h3>
-        <div class="input-group mb-3">
-            <input type="number" class="form-control" placeholder="Номер заказа" aria-label="orderId" aria-describedby="showOrderId">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" id="showOrderId">Найти</button>
+        <c:if test="${not empty orders}">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Номер заказа" id="orderId" aria-describedby="showOrderId">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#viewOrderModal">Найти</button>
+                </div>
             </div>
-        </div>
+        </c:if>
     </div>
 
     <c:if test="${empty orders}">
@@ -50,26 +51,47 @@
         </table>
 
 
-        <nav>
-            <ul class="pagination">
-                <c:forEach begin="1" end="${totalPages}" var="i" varStatus="loop">
-                    <c:if test="${i != page}">
-                        <li class="page-item"><a class="page-link" href="/orders/view?page=${i}">${i}</a></li>
-                    </c:if>
-                    <c:if test="${i == page}">
-                        <li class="page-item active">
-                            <a class="page-link" href="#">${i}<span class="sr-only">(current)</span></a>
-                        </li>
-                    </c:if>
-                </c:forEach>
-            </ul>
-        </nav>
+        <div class="modal-footer justify-content-center">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <c:forEach begin="1" end="${totalPages}" var="i" varStatus="loop">
+                        <c:if test="${i != page}">
+                            <li class="page-item"><a class="page-link" href="/orders/view?page=${i}">${i}</a></li>
+                        </c:if>
+                        <c:if test="${i == page}">
+                            <li class="page-item active">
+                                <a class="page-link" href="#">${i}<span class="sr-only">(current)</span></a>
+                            </li>
+                        </c:if>
+                    </c:forEach>
+                </ul>
+            </nav>
+        </div>
 
         <%-- Modal window to view a selected order --%>
-        <jsp:include page="modal-view.jsp"/>
+        <div class="modal fade" id="viewOrderModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewOrderTitle">Просмотр заказа</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="viewOrderDataPlaceholder"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <jsp:include page="template-order.jsp"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+        <script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
+        <script src="${contextPath}/resources/js/show-order.js"></script>
 
     </c:if>
-
 
 </div>
 

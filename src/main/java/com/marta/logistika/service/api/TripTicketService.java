@@ -19,7 +19,7 @@ public interface TripTicketService {
     void approveTripTicket (long id);
     TripTicketEntity findById(long id);
     TripTicketRecord findDtoById (long id);
-    void addOrderToTicket (TripTicketEntity ticket, OrderEntity order) throws ServiceException;
+    void addOrderToTicket (long ticketId, long orderId) throws ServiceException;
     void removeOrderFromTicket (TripTicketEntity ticket, OrderEntity order);
     int getDistance(TripTicketEntity ticket);
     Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket);

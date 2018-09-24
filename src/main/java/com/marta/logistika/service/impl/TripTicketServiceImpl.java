@@ -135,13 +135,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Adds order to trip ticket, minimizing the total trip distance and checking truck capacity limits
-     * @param ticket trip ticket to intake new order
-     * @param order order to be placed to the ticket
+     * @param ticketId id of the trip ticket that has to intake new order
+     * @param orderId id of the order that has to be placed to the ticket
      * @throws ServiceException is thrown in case of weight limit breakage
      */
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
-    public void addOrderToTicket(TripTicketEntity ticket, OrderEntity order) throws ServiceException {
+    public void addOrderToTicket(long ticketId, long orderId) throws ServiceException {
+
+        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
+        OrderEntity order = orderDao.findById(orderId);
 
         if (ticket.getStatus() != TripTicketStatus.CREATED) throw new ServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
         if (order.getStatus() != OrderStatus.NEW) throw new ServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
