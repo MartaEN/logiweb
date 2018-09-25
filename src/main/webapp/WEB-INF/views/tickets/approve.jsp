@@ -55,8 +55,8 @@
     <p></p>
 
     <div class="modal-header modal-footer">
-        <a class="btn btn-secondary" href="${contextPath}/orders" role="button">Назад</a>
         <form action="/tickets/${ticket.id}/sign" method="post">
+            <a class="btn btn-secondary" href="${contextPath}/orders" role="button">Назад</a>
             <input type="submit" class="btn btn-success" name="sign" value="Утвердить маршрутный лист" />
         </form>
         <%--Неудавшийся multiple select через ajax и обычную форму--%>

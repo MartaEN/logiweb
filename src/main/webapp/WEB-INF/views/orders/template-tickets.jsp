@@ -14,7 +14,7 @@
         <div class="ticket-truck-info">
             <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> {{truck.regNumber}}</p>
             <p><i class="fas fa-truck-loading"></i> {{truck.capacity}} кг</p>
-            <p>{{{showDrivers truck.shiftSize}}}</p>
+            <p><i class="fas fa-luggage-cart"></i> <b><big><big><big>{{avgLoad}}%</big></big></big></b></p>
         </div>
         <div class="ticket-departure">
             <i class="far fa-calendar-alt"></i> {{{trimDate departureDateTime}}} <i class="far fa-clock"></i> {{{trimTime departureDateTime}}}

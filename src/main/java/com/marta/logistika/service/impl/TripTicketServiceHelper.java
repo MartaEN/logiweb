@@ -1,9 +1,10 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.StopoverEntity;
 import com.marta.logistika.entity.TripTicketEntity;
-import com.marta.logistika.service.ServiceException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class TripTicketServiceHelper {
 
@@ -24,29 +26,60 @@ class TripTicketServiceHelper {
     }
 
     /**
-     * Method suggests best placement of new load and unload points on the route to minimize total route distance
-     * @param currentRoute - current route (list of cities)
-     * @param fromCity - new stopover to be added for loading
-     * @param toCity - new stopover to be added for unloading
+     * Method suggests best placement of new load and unload points on the route
+     * to minimize total route distance and average load on the way.
+     * @param ticketEntity - ticket to be updated
+     * @param order - order to be placed to ticket
      * @return returns an array containing suggested load and unload points:
      *             load on or immediately after current route element number "load"
-     *             unload on or immediately after current route element number "unload"
+     *             unload on or immediately before current route element number "unload"
      */
-    int[] suggestLoadUnloadPoints (List<CityEntity> currentRoute, CityEntity fromCity, CityEntity toCity) {
+    int[] suggestLoadUnloadPoints (TripTicketEntity ticketEntity, OrderEntity order) {
+
+        List<CityEntity> currentRoute = ticketEntity.getCities();
+        List<Integer> weights = ticketEntity.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
+        CityEntity fromCity = order.getFromCity();
+        CityEntity toCity = order.getToCity();
+        int newWeight = order.getWeight();
 
         int loadPoint = 0;
         int unloadPoint = 0;
         int distance = Integer.MAX_VALUE;
+        float load = (float) Integer.MAX_VALUE;
 
         for (int i = 0; i < currentRoute.size() - 1; i++) {
+            if (currentRoute.size() > 2 && currentRoute.get(i+1).equals(fromCity)) continue;
             currentRoute.add(i + 1, fromCity);
+
             for (int j = i + 1; j < currentRoute.size() - 1; j++) {
+                if(currentRoute.get(j).equals(toCity)) continue;
                 currentRoute.add(j + 1, toCity);
                 int tmpRouteDistance = roadService.getRouteDistance(currentRoute);
-                if (tmpRouteDistance < distance) {
-                    loadPoint = i;
-                    unloadPoint = j - 1;
-                    distance = tmpRouteDistance;
+
+                if (tmpRouteDistance <= distance) {
+                    weights.add(i + 1, weights.get(i));
+                    weights.add(j + 1, weights.get(j));
+                    for (int k = i + 1; k < currentRoute.size(); k++) {
+                        weights.set(k, weights.get(k) + newWeight);
+                    }
+                    for (int k = j + 1; k < currentRoute.size(); k++) {
+                        weights.set(k, weights.get(k) - newWeight);
+                    }
+                    float tmpLoad = getAvgLoad(currentRoute, weights);
+                    if (tmpLoad < load) {
+                        loadPoint = i;
+                        unloadPoint = j;
+                        distance = tmpRouteDistance;
+                        load = tmpLoad;
+                    }
+                    for (int k = j + 1; k < currentRoute.size(); k++) {
+                        weights.set(k, weights.get(k) + newWeight);
+                    }
+                    for (int k = i + 1; k < currentRoute.size(); k++) {
+                        weights.set(k, weights.get(k) - newWeight);
+                    }
+                    weights.remove(j + 1);
+                    weights.remove(i + 1);
                 }
                 currentRoute.remove(j + 1);
             }
@@ -54,6 +87,24 @@ class TripTicketServiceHelper {
         }
 
         return new int[] {loadPoint, unloadPoint};
+
+    }
+
+    float getAvgLoad (TripTicketEntity ticket) {
+        List<CityEntity> route = ticket.getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
+        List<Integer> weights = ticket.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
+        return getAvgLoad(route, weights);
+    }
+
+    private float getAvgLoad (List<CityEntity> route, List<Integer> weights) {
+        int totalDistance = 0;
+        float totalLoad = 0;
+        for (int i = 0; i < route.size() - 1; i++) {
+            int distance = roadService.getDistanceFromTo(route.get(i), route.get(i+1));
+            totalDistance += distance;
+            totalLoad += distance * weights.get(i);
+        }
+        return (float) totalLoad / totalDistance;
     }
 
     /**

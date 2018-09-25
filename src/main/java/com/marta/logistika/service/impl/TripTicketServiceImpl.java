@@ -1,15 +1,13 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
-import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
-import com.marta.logistika.service.ServiceException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TripTicketService;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -44,10 +42,20 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         this.helper = new TripTicketServiceHelper(roadService);
     }
 
+    /**
+     * Method creates new trip ticket and books the truck.
+     * Departure city is defined as truck location city.
+     * Arrival city, if not specified, is set the same as departure city (round-trip).
+     * @param truckRegNum truck to be booked
+     * @param departureDateTime departure date and time
+     * @param toCity destination city (may be omitted)
+     * @throws ServiceException in case truck is not available or departure time is in the past
+     */
     @Override
     @Transactional
-    public void createTripTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) {
+    public void createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) throws ServiceException {
 
+        //create new ticket entity
         TripTicketEntity ticket = new TripTicketEntity();
         ticket.setStatus(TripTicketStatus.CREATED);
 
@@ -78,81 +86,29 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         tripTicketDao.add(ticket);
     }
 
-    @Override
-    @Transactional
-    public void signTicket(long ticketId) {
-
-        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
-
-        if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
-
-            // correcting the date to the future if necessary
-            if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) {
-                ticket.setDepartureDateTime(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
-            }
-
-            // assigning drivers
-            CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
-            int shiftSize = ticket.getTruck().getShiftSize();
-            List<DriverEntity> availableDrivers = driverDao.listAllAvailable(fromCity, ticket.getDepartureDateTime());
-            if (availableDrivers.size() < shiftSize) throw new ServiceException("No drivers available for the ticket");
-            ticket.setDrivers(availableDrivers.subList(0, shiftSize));
-
-            // updating ticket and its orders statuses
-            ticket.setStatus(TripTicketStatus.APPROVED);
-            ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
-        }
-
-    }
-
-    @Override
-    @Transactional
-    public void approveTripTicket(long id) {
-        TripTicketEntity ticket = tripTicketDao.findById(id);
-
-        if (ticket.getStatus() == TripTicketStatus.CLOSED) throw new ServiceException(String.format("Error trying to assign APPROVED status to trip ticket id %d: ticket is already closed", ticket.getId()));
-        if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) throw new ServiceException("Can't approve ticket with past departure date - please edit the date first");
-
-        helper.calculateDurationAndArrivalDateTime(ticket);
-
-        //todo check route - capacity - drivers
-
-        ticket.setStatus(TripTicketStatus.APPROVED);
-        tripTicketDao.merge(ticket);
-    }
-
-    @Override
-    @Transactional
-    public TripTicketEntity findById(long id) {
-        return tripTicketDao.findById(id);
-    }
-
-    @Override
-    @Transactional
-    public TripTicketRecord findDtoById(long id) {
-        return mapper.map(tripTicketDao.findById(id), TripTicketRecord.class);
-    }
-
     /**
      * Adds order to trip ticket, minimizing the total trip distance and checking truck capacity limits
      * @param ticketId id of the trip ticket that has to intake new order
      * @param orderId id of the order that has to be placed to the ticket
-     * @throws ServiceException is thrown in case of weight limit breakage
+     * @throws ServiceException is thrown in case ticket and / or order are have wrong status
+     * and in case of weight limit breakage
      */
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public void addOrderToTicket(long ticketId, long orderId) throws ServiceException {
 
+        // find ticket and order and check their statuses
         TripTicketEntity ticket = tripTicketDao.findById(ticketId);
         OrderEntity order = orderDao.findById(orderId);
-
         if (ticket.getStatus() != TripTicketStatus.CREATED) throw new ServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
         if (order.getStatus() != OrderStatus.NEW) throw new ServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
 
-        int [] suggestedLoadUnloadForNewOrder = helper.suggestLoadUnloadPoints(ticket.getCities(), order.getFromCity(), order.getToCity());
+        // find suggested load and unload stopovers for the order
+        int [] suggestedLoadUnloadForNewOrder = helper.suggestLoadUnloadPoints(ticket, order);
         int loadPoint = suggestedLoadUnloadForNewOrder[0];
         int unloadPoint = suggestedLoadUnloadForNewOrder [1];
 
+        // add load and unload operations for the order
         if ( ! ticket.getStopoverWithSequenceNo(loadPoint).getCity().equals(order.getFromCity())) {
             ++unloadPoint;
             helper.insertNewStopover(ticket, order.getFromCity(), ++loadPoint);
@@ -160,64 +116,88 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.getStopoverWithSequenceNo(loadPoint).addLoadFor(order);
 
         if ( ! ticket.getStopoverWithSequenceNo(unloadPoint).getCity().equals(order.getToCity())) {
-            helper.insertNewStopover(ticket, order.getToCity(), ++unloadPoint);
+            helper.insertNewStopover(ticket, order.getToCity(), unloadPoint);
         }
         ticket.getStopoverWithSequenceNo(unloadPoint).addUnloadFor(order);
 
+        // update weights and check against truck capacity
         helper.updateWeights(ticket);
         try {
             helper.checkWeightLimit(ticket);
         } catch (ServiceException e) {
             throw new ServiceException(String.format("### Order id %d does not fit into trip ticket %d: %s", order.getId(), ticket.getId(), e.getMessage()));
         }
+        ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
 
+        // update order status in case of successful weight check
         order.setStatus(OrderStatus.ASSIGNED);
-
-        orderDao.merge(order);
-        tripTicketDao.merge(ticket);
+//        orderDao.merge(order);
+//        tripTicketDao.merge(ticket);
     }
 
+
     @Override
-    public void removeOrderFromTicket(TripTicketEntity ticket, OrderEntity order) {
+    public void removeOrderFromTicket(long ticketId, long orderId) {
         //todo
-        helper.updateWeights(ticket);
+    }
+
+
+    /**
+     * Method finalizes trip ticket and marks it as approved for execution.
+     * Finalization includes correction of the departure date to the future (if necessary)
+     * and assigning the drivers.
+     * @param ticketId ticket id to be approved
+     * @throws ServiceException is thrown in case no drivers are available
+     */
+    @Override
+    @Transactional
+    public void signTicket(long ticketId) throws ServiceException {
+        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
+
+        if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
+
+            // correct the date to the future if necessary
+            if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) {
+                ticket.setDepartureDateTime(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
+            }
+
+            // assign drivers
+            CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
+            int shiftSize = ticket.getTruck().getShiftSize();
+            List<DriverEntity> availableDrivers = driverDao.listAllAvailable(fromCity, ticket.getDepartureDateTime());
+            if (availableDrivers.size() < shiftSize) throw new ServiceException("No drivers available for the ticket");
+            ticket.setDrivers(availableDrivers.subList(0, shiftSize));
+
+            // calculate estimated arrival time
+            helper.calculateDurationAndArrivalDateTime(ticket);
+
+            // update ticket and its orders statuses
+            ticket.setStatus(TripTicketStatus.APPROVED);
+            ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
+        }
     }
 
     @Override
-    public int getDistance(TripTicketEntity ticket) {
-        List<StopoverEntity> route = ticket.getStopovers();
-
-        if (route.size() < 2) return 0;
-
-        int distance = 0;
-        route.sort(StopoverEntity::compareTo);
-        for (int i = 1; i < route.size(); i++) {
-            distance += roadService.getDistanceFromTo(route.get(i - 1).getCity(), route.get(i).getCity());
-        }
-        return distance;
+    public void deleteTicket(long ticketId) {
+        //todo
     }
 
     @Override
     @Transactional
     public Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket) {
-
         Map<YearMonth, Long> result = new HashMap<>();
-
         helper.calculateDurationAndArrivalDateTime(ticket);
         long totalPlannedMinutes = ticket.getStopovers().stream()
                 .map(StopoverEntity::getEstimatedDuration)
                 .mapToLong(Duration::toMinutes)
                 .sum();
-
         YearMonth month = YearMonth.from(ticket.getDepartureDateTime());
         LocalDateTime start = ticket.getDepartureDateTime();
         LocalDateTime finish = month.atEndOfMonth().atTime(LocalTime.MAX);
 
         while (totalPlannedMinutes > 0) {
-
             long monthlyPlannedMinutes = Math.min(totalPlannedMinutes, Duration.between(start, finish).toMinutes());
             result.put(month, monthlyPlannedMinutes);
-
             totalPlannedMinutes -= monthlyPlannedMinutes;
             month = month.plusMonths(1);
             start = month.atDay(1).atStartOfDay();
@@ -225,6 +205,18 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
 
         return result;
+    }
+
+    @Override
+    @Transactional
+    public TripTicketEntity findById(long ticketId) {
+        return tripTicketDao.findById(ticketId);
+    }
+
+    @Override
+    @Transactional
+    public TripTicketRecord findDtoById(long ticketId) {
+        return mapper.map(tripTicketDao.findById(ticketId), TripTicketRecord.class);
     }
 
     @Override
@@ -241,5 +233,4 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         TripTicketEntity ticket = tripTicketDao.findById(id);
         return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
     }
-
 }

@@ -48,7 +48,7 @@ public class TripTicketController {
     @PostMapping(value = "/create")
     public String newTicketCreate(@ModelAttribute TripTicketCreateForm ticketCreateForm) {
 
-        ticketService.createTripTicket(
+        ticketService.createTicket(
                 ticketCreateForm.getTruckRegNumber(),
                 LocalDateTime.parse(ticketCreateForm.getDepartureDateTime()),
                 ticketCreateForm.getToCity() == null ? null : cityService.findById(ticketCreateForm.getToCity()));

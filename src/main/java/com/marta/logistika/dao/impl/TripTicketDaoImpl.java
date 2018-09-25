@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Repository("tripRepository")
+@Repository("ticketRepository")
 public class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements TripTicketDao {
 
     @Override

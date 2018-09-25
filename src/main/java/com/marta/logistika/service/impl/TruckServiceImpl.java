@@ -4,7 +4,7 @@ import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
 import com.marta.logistika.entity.TruckEntity;
-import com.marta.logistika.service.ServiceException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

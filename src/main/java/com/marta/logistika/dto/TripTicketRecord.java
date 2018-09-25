@@ -13,6 +13,7 @@ public class TripTicketRecord implements Serializable {
     private List<DriverRecord> drivers;
     private String departureDateTime;
     private TripTicketStatus status;
+    private int avgLoad;
 
     public long getId() {
         return id;
@@ -60,5 +61,13 @@ public class TripTicketRecord implements Serializable {
 
     public void setStatus(TripTicketStatus status) {
         this.status = status;
+    }
+
+    public int getAvgLoad() {
+        return avgLoad;
+    }
+
+    public void setAvgLoad(int avgLoad) {
+        this.avgLoad = avgLoad;
     }
 }

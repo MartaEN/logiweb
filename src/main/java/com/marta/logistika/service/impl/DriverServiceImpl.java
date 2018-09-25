@@ -5,7 +5,7 @@ import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
 import com.marta.logistika.entity.TripTicketEntity;
-import com.marta.logistika.service.ServiceException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;

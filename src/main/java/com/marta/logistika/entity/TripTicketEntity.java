@@ -37,6 +37,8 @@ public class TripTicketEntity extends AbstractEntity {
     @JoinColumn(name = "trip", nullable = false)
     private List<StopoverEntity> stopovers = new ArrayList<>();
 
+    private int avgLoad;
+
     public TripTicketStatus getStatus() {
         return status;
     }
@@ -94,6 +96,14 @@ public class TripTicketEntity extends AbstractEntity {
 
     public List<CityEntity> getCities() {
         return getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
+    }
+
+    public int getAvgLoad() {
+        return avgLoad;
+    }
+
+    public void setAvgLoad(int avgLoad) {
+        this.avgLoad = avgLoad;
     }
 
     @Override

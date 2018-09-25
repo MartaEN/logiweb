@@ -1,4 +1,4 @@
-package com.marta.logistika.service;
+package com.marta.logistika.exception;
 
 public class ServiceException extends RuntimeException {
 

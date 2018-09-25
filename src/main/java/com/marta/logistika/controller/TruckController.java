@@ -2,7 +2,7 @@ package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
-import com.marta.logistika.service.ServiceException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
