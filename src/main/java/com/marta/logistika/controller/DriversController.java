@@ -1,18 +1,15 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.DriverRecord;
-import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 
@@ -48,11 +45,13 @@ public class DriversController {
 
     @PostMapping(value = "/add")
     public String addDriver(
-            @Valid DriverRecord driver,
-            BindingResult bindingResult) {
+            @Valid @ModelAttribute("driver") DriverRecord driver,
+            BindingResult bindingResult,
+            Model uiModel) {
 
         if (bindingResult.hasErrors()) {
-            return "redirect:/drivers/add";
+            uiModel.addAttribute("cities", cityService.listAll());
+            return "drivers/add";
         }
 
         driverService.add(driver);

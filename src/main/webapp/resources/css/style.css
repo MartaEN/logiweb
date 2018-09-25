@@ -193,5 +193,6 @@ footer {
     width: 40px;
 }
 
-
-
+.error-message {
+    color: red;
+}
