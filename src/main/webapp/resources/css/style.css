@@ -196,3 +196,15 @@ footer {
 .error-message {
     color: red;
 }
+
+.logout {
+    margin: 0;
+    padding: 0 3px;
+    border: 0;
+    color: white;
+    text-decoration: none;
+}
+
+.logout:hover {
+    color: #A0D468;
+}
