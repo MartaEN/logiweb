@@ -4,7 +4,7 @@
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 <c:set value="y" var="choiceYes" />
 <c:set value="n" var="choiceNo" />
-<jsp:include page="../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
 
 
 <h3>Наш автопарк</h3>
@@ -79,4 +79,4 @@
 <a class="btn btn-success" href="${contextPath}/trucks/add" role="button">Зарегистрировать новую фуру</a>
 
 
-<jsp:include page="../_fragments/page-template-after-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-after-main.jsp"/>

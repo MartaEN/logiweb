@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/reports")
-public class ReportsController {
+@RequestMapping("/logiweb")
+public class OnTheRoadController {
 
     @GetMapping
     public String home(){
-        return "redirect: /orders/list";
+        return "drivers/view";
     }
 }

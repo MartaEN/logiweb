@@ -1,7 +1,6 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.*;
-import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @Controller
@@ -38,7 +35,7 @@ public class OrdersController {
         uiModel.addAttribute("orderEntryForm",  new OrderEntryForm());
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "orders/monitor";
+        return "office/orders/monitor";
     }
 
     @GetMapping(value = "/monitor", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -73,7 +70,7 @@ public class OrdersController {
 
         uiModel.addAttribute("orderEntryForm",  new OrderEntryForm());
         uiModel.addAttribute("cities", cityService.listAll());
-        return "orders/add-no-ajax";
+        return "office/orders/add-no-ajax";
     }
 
     @PostMapping(value = "/add-no-ajax")
@@ -115,7 +112,7 @@ public class OrdersController {
             uiModel.addAttribute("totalPages", totalPageCount);
         }
 
-        return "orders/list";
+        return "office/orders/list";
     }
 
     @GetMapping (value = "/show-order")

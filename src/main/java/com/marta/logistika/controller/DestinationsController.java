@@ -11,10 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 @Controller
@@ -35,7 +33,7 @@ public class DestinationsController {
 
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "destinations/list";
+        return "office/destinations/list";
     }
 
     @GetMapping(value = "/{id}")
@@ -47,7 +45,7 @@ public class DestinationsController {
         uiModel.addAttribute("city", city);
         uiModel.addAttribute("roads", roads);
 
-        return "destinations/edit";
+        return "office/destinations/edit";
 
     }
 
@@ -55,7 +53,7 @@ public class DestinationsController {
     public String addCityForm(Model uiModel) {
         CityEntity city = new CityEntity();
         uiModel.addAttribute("city", city);
-        return "destinations/add-city";
+        return "office/destinations/add-city";
     }
 
     @PostMapping(value = "/add-city")
@@ -89,7 +87,7 @@ public class DestinationsController {
         uiModel.addAttribute("road", road);
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "destinations/add-road";
+        return "office/destinations/add-road";
     }
 
     @PostMapping(value = "/{id}/add-road")
@@ -126,7 +124,7 @@ public class DestinationsController {
         uiModel.addAttribute("road", new RoadRecord());
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "destinations/find-route";
+        return "office/destinations/find-route";
     }
 
     @GetMapping(value = "/find-route-result", produces = {MediaType.APPLICATION_JSON_VALUE})

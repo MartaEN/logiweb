@@ -33,7 +33,7 @@ public class TripTicketController {
         uiModel.addAttribute("ticket", ticketService.findDtoById(id));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
 
-        return "tickets/approve";
+        return "office/tickets/approve";
     }
 
     @GetMapping(value = "/create")
@@ -42,7 +42,7 @@ public class TripTicketController {
         uiModel.addAttribute("filterForm", new TruckFilterForm());
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "tickets/create";
+        return "office/tickets/create";
     }
 
     @PostMapping(value = "/create")
@@ -64,7 +64,7 @@ public class TripTicketController {
         uiModel.addAttribute("ticket", ticketService.findDtoById(ticketId));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
 
-        return "tickets/view";
+        return "office/tickets/view";
     }
 
 
@@ -79,7 +79,7 @@ public class TripTicketController {
         uiModel.addAttribute("driverList", driverService.findDrivers(ticketId));
         uiModel.addAttribute("driverSelectForm", new DriverSelectForm());
 
-        return "drivers/select";
+        return "office/drivers/select";
 
     }
 

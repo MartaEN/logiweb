@@ -4,7 +4,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
 <script src="${contextPath}/resources/js/find-route.js"></script>
 
 <div class="col-sm-6">
@@ -32,4 +32,4 @@
 
 </div>
 
-<jsp:include page="../_fragments/page-template-after-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-after-main.jsp"/>

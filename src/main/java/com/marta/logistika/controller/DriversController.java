@@ -31,7 +31,7 @@ public class DriversController {
 
         uiModel.addAttribute("drivers", driverService.listAll());
 
-        return "drivers/list";
+        return "office/drivers/list";
     }
 
     @GetMapping(value = "/add")
@@ -40,7 +40,7 @@ public class DriversController {
         uiModel.addAttribute("driver", new DriverRecord());
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "drivers/add";
+        return "office/drivers/add";
     }
 
     @PostMapping(value = "/add")
@@ -51,7 +51,7 @@ public class DriversController {
 
         if (bindingResult.hasErrors()) {
             uiModel.addAttribute("cities", cityService.listAll());
-            return "drivers/add";
+            return "office/drivers/add";
         }
 
         driverService.add(driver);
@@ -68,7 +68,7 @@ public class DriversController {
         uiModel.addAttribute("driver", driver);
         uiModel.addAttribute("cities", cityService.listAll());
 
-        return "drivers/edit";
+        return "office/drivers/edit";
 
     }
 

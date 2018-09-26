@@ -33,14 +33,14 @@ public class TruckController {
 
         uiModel.addAttribute("trucks", truckService.listAll());
 
-        return "trucks/list";
+        return "office/trucks/list";
     }
 
     @GetMapping(value = "/add")
     public String addTruckForm(Model uiModel) {
         uiModel.addAttribute("truck", new TruckRecord());
         uiModel.addAttribute("cities", cityService.listAll());
-        return "trucks/add";
+        return "office/trucks/add";
     }
 
     @PostMapping(value = "/add")
@@ -66,7 +66,7 @@ public class TruckController {
 
         uiModel.addAttribute("truck", truck);
 
-        return "trucks/edit";
+        return "office/trucks/edit";
 
     }
 
@@ -74,13 +74,9 @@ public class TruckController {
     public String edit(
             @ModelAttribute("truck") TruckRecord truck) {
 
-        try {
-            truckService.update(truck);
-            return "redirect:/trucks";
-        } catch (ServiceException e) {
-            e.printStackTrace();
-            return "error";
-        }
+        truckService.update(truck);
+
+        return "redirect:/trucks";
     }
 
     @GetMapping(value = "/remove")

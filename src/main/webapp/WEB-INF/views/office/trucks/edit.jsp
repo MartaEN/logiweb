@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
 
 
     <h3>Редактирование</h3>
@@ -31,4 +31,4 @@
     </form>
 
 
-<jsp:include page="../_fragments/page-template-after-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-after-main.jsp"/>

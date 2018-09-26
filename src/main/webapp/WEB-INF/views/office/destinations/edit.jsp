@@ -3,7 +3,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
 
 <div class="col-sm-6">
     <h3 class="modal-header"><spring:message code="destinations.cities.edit.pageTitle"/></h3>
@@ -34,4 +34,4 @@
 </div>
 
 
-<jsp:include page="../_fragments/page-template-after-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-after-main.jsp"/>
