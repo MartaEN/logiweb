@@ -5,7 +5,7 @@ INSERT INTO `cities` VALUES (6,'Вологда'),(4,'Москва'),(1,'Санк
 UNLOCK TABLES;
 
 LOCK TABLES `drivers` WRITE;
-INSERT INTO `drivers` (`bookedUntil`, `firstName`, `lastName`, `personalId`, `location`) VALUES ('2018-09-01 00:00', 'Адам', 'Козлевич', '000123', '1'), ('2018-09-01 00:00', 'Фрэнк', 'Мартин', '000777', '1'), ('2018-09-01 00:00', 'Михаэль', 'Шумахер', '000999', '1');
+INSERT INTO `drivers` (`bookedUntil`, `firstName`, `lastName`, `personalId`, `location`) VALUES ('2018-09-01 00:00', 'Адам', 'Козлевич', '000123', '1'), ('2018-09-01 00:00', 'Александр', 'Балаганов', '000345', '1'), ('2018-09-01 00:00', 'Михаил', 'Паниковский', '000013', '1');
 UNLOCK TABLES;
 
 LOCK TABLES `orders` WRITE;

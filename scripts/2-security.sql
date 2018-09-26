@@ -15,6 +15,7 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(68) NOT NULL,
   `enabled` tinyint(1) NOT NULL,
+  `personalId` varchar(12) NOT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -24,15 +25,9 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` 
 VALUES 
-('obender','{noop}go2rio',1),
-('akozlevich','{noop}antilopa',1),
-('abalaganov','{noop}suhar34users',1);
-
---- INSERT INTO `users` 
---- VALUES 
---- ('obender','{bcrypt}$2y$12$DJDkC.IMLcXvLBub2nMOQODCLMffZ18nLcq/1nj4JKdTDQcGBCNKK',1),
---- ('akozlevich','{bcrypt}$2y$12$ZJY2pB60uDNCew3WbLs3XubzUfIxXCNw3nGVYrAP7cWrgjLp2MIjK',1),
---- ('abalaganov','{bcrypt}$2y$12$PMKqkEZsS9rLcROjCHL/huIWqJBYKBnLx8HMJuc/jggQE7gW4T5TS',1);
+('obender','{bcrypt}$2a$10$0VswPVRBzNvQvxRQDOpzJeIFgcGZeNvURN0wd8z6S88NWjOdijiRm',1,'000001'),
+('akozlevich','{bcrypt}$2a$10$lSxOGZAcNBq7CRiiJs/IKuY6B2YAPpOKT97ojwKUyMZJ.olzv2HkO',1,'000123'),
+('abalaganov','{bcrypt}$2a$10$CgUHYU7TCNwV45hEz9H92OITn3R9zgS6LMXACJsUb0KSzM0SbL0pS',1,'000345');
 
 --
 -- Table structure for table `authorities`
