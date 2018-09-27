@@ -12,6 +12,23 @@ import java.time.YearMonth;
 @Repository("timeRepository")
 public class TimeTrackerDaoImpl extends AbstractDao<TimeTrackerEntity> implements TimeTrackerDao {
 
+
+    @Override
+    public boolean hasOpenTimeRecord(DriverEntity driver) {
+        Long count = em.createQuery("SELECT COUNT (t) FROM TimeTrackerEntity t WHERE t.driver=:driver AND t.finish IS NULL", Long.class)
+                .setParameter("driver", driver)
+                .getSingleResult();
+        return count > 0;
+    }
+
+    @Override
+    public TimeTrackerEntity getOpenTimeRecord(DriverEntity driver) {
+        return em.createQuery("SELECT t FROM TimeTrackerEntity t WHERE t.driver=:driver AND t.finish IS NULL",
+                TimeTrackerEntity.class)
+                .setParameter("driver", driver)
+                .getSingleResult();
+    }
+
     @Override
     public long
     calculateMonthlyMinutes(DriverEntity driver, YearMonth month) {

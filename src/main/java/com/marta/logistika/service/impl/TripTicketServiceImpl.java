@@ -9,9 +9,11 @@ import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
+import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.marta.logistika.dto.Instruction.Command.*;
+import static com.marta.logistika.enums.DriverStatus.*;
 
 @Service("tripTicketService")
 public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
@@ -32,15 +35,17 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final TripTicketDao ticketDao;
     private final TruckDao truckDao;
     private final DriverDao driverDao;
+    private final TimeTrackerService timeService;
     private final OrderDao orderDao;
     private final RoadService roadService;
     private final TripTicketServiceHelper helper;
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, RoadService roadService) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, RoadService roadService) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
+        this.timeService = timeService;
         this.orderDao = orderDao;
         this.roadService = roadService;
         this.helper = new TripTicketServiceHelper(roadService);
@@ -334,7 +339,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     }
 
     /**
-     * Method records a move to the new stopover
+     * Method records a move to the new stopover and updates time tracking for the driver
      * @param ticketId ticket id
      * @param step sequence number of the stopover to move to
      */
@@ -344,11 +349,21 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step)
             ticket.setCurrentStep(step);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        DriverEntity driver = driverDao.findByUsername(username);
+
+        if (step == 0) {
+            timeService.openNewTimeRecord(driver);
+        } else {
+            timeService.closeReopenTimeRecord(driver, DRIVING);
+        }
+
     }
 
     /**
      * Method marks all load operations at the given stopover as completed
-     * (order statuses changed to shipped)
+     * (order statuses changed to shipped), and updates time tracking for the driver
      * @param ticketId ticket id
      * @param step sequence number of the stopover
      */
@@ -360,11 +375,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getLoads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToLoad.forEach(o -> o.setStatus(OrderStatus.SHIPPED));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        DriverEntity driver = driverDao.findByUsername(username);
+        timeService.closeReopenTimeRecord(driver, HANDLING);
     }
 
     /**
      * Method marks all unload operations at the given stopover as completed
-     * (order statuses changed to delivered)
+     * (order statuses changed to delivered), and updates time tracking for the driver
      * @param ticketId ticket id
      * @param step sequence number of the stopover
      */
@@ -376,6 +395,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getUnloads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        DriverEntity driver = driverDao.findByUsername(username);
+        timeService.closeReopenTimeRecord(driver, HANDLING);
     }
 
     /**
@@ -388,16 +411,21 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         ticket.setStatus(TripTicketStatus.CLOSED);
 
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        DriverEntity driver = driverDao.findByUsername(username);
+        timeService.closeTimeRecord(driver, HANDLING);
+
+
         TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), TripTicketStatus.APPROVED);
         if(nextTripForThisTruck == null) {
             ticket.getTruck().setBookedUntil(LocalDateTime.now());
             ticket.getTruck().setParked(true);
         }
 
-        ticket.getDrivers().forEach(driver -> {
-            TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.APPROVED);
+        ticket.getDrivers().forEach(d -> {
+            TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(d.getPersonalId(), TripTicketStatus.APPROVED);
             if(nextTripForThisDriver == null) {
-                driver.setBookedUntil(LocalDateTime.now());
+                d.setBookedUntil(LocalDateTime.now());
             }
         });
     }
