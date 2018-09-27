@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
+import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
@@ -22,10 +23,12 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.marta.logistika.dto.Instruction.Command.*;
+
 @Service("tripTicketService")
 public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
 
-    private final TripTicketDao tripTicketDao;
+    private final TripTicketDao ticketDao;
     private final TruckDao truckDao;
     private final DriverDao driverDao;
     private final OrderDao orderDao;
@@ -33,8 +36,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final TripTicketServiceHelper helper;
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao tripTicketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, RoadService roadService) {
-        this.tripTicketDao = tripTicketDao;
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, RoadService roadService) {
+        this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
         this.orderDao = orderDao;
@@ -82,8 +85,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             truck.setLocation(toCity);
         }
         truck.setParked(false);
+        ticket.setCurrentStep(-1);
 
-        tripTicketDao.add(ticket);
+        ticketDao.add(ticket);
     }
 
     /**
@@ -98,7 +102,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     public void addOrderToTicket(long ticketId, long orderId) throws ServiceException {
 
         // find ticket and order and check their statuses
-        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
         OrderEntity order = orderDao.findById(orderId);
         if (ticket.getStatus() != TripTicketStatus.CREATED) throw new ServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
         if (order.getStatus() != OrderStatus.NEW) throw new ServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
@@ -131,14 +135,41 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         // update order status in case of successful weight check
         order.setStatus(OrderStatus.ASSIGNED);
-//        orderDao.merge(order);
-//        tripTicketDao.merge(ticket);
     }
 
 
+    /**
+     * Method removes order from the ticket and updates route and truck load data.
+     * @param ticketId ticket id
+     * @param orderId order id
+     */
     @Override
+    @Transactional
     public void removeOrderFromTicket(long ticketId, long orderId) {
-        //todo
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        OrderEntity order = orderDao.findById(orderId);
+
+        for (int i = 0; i < ticket.getStopovers().size(); i++) {
+
+            StopoverEntity stopover = ticket.getStopovers().get(i);
+
+            for (int j = 0; j < stopover.getLoads().size(); j++) {
+                if(stopover.getLoads().get(j).getOrder().equals(order))
+                    stopover.getLoads().remove(j);
+            }
+
+            for (int j = 0; j < stopover.getUnloads().size(); j++) {
+                if(stopover.getUnloads().get(j).getOrder().equals(order))
+                    stopover.getUnloads().remove(j);
+            }
+
+        }
+
+        helper.removeEmptyStopovers(ticket);
+        helper.updateWeights(ticket);
+        ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
+
+        order.setStatus(OrderStatus.NEW);
     }
 
 
@@ -151,8 +182,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void signTicket(long ticketId) throws ServiceException {
-        TripTicketEntity ticket = tripTicketDao.findById(ticketId);
+    public void approveTicket(long ticketId) throws ServiceException {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
 
         if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
 
@@ -168,8 +199,11 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             if (availableDrivers.size() < shiftSize) throw new ServiceException("No drivers available for the ticket");
             ticket.setDrivers(availableDrivers.subList(0, shiftSize));
 
-            // calculate estimated arrival time
-            helper.calculateDurationAndArrivalDateTime(ticket);
+            // calculate estimated arrival time and record it for truck and drivers
+            LocalDateTime estimatedArrival = helper.calculateDurationAndArrivalDateTime(ticket);
+            ticket.setArrivalDateTime(estimatedArrival);
+            ticket.getTruck().setBookedUntil(estimatedArrival);
+            ticket.getDrivers().forEach(d -> d.setBookedUntil(estimatedArrival));
 
             // update ticket and its orders statuses
             ticket.setStatus(TripTicketStatus.APPROVED);
@@ -209,20 +243,14 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     @Transactional
-    public TripTicketEntity findById(long ticketId) {
-        return tripTicketDao.findById(ticketId);
-    }
-
-    @Override
-    @Transactional
-    public TripTicketRecord findDtoById(long ticketId) {
-        return mapper.map(tripTicketDao.findById(ticketId), TripTicketRecord.class);
+    public TripTicketRecord findById(long ticketId) {
+        return mapper.map(ticketDao.findById(ticketId), TripTicketRecord.class);
     }
 
     @Override
     @Transactional
     public List<TripTicketRecord> listAllUnapproved() {
-        return tripTicketDao.listAllUnapproved()
+        return ticketDao.listAllUnapproved()
                 .stream()
                 .map(t -> mapper.map(t, TripTicketRecord.class))
                 .collect(Collectors.toList());
@@ -230,7 +258,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     public List<OrderEntity> listAllOrderInTicket(long id) {
-        TripTicketEntity ticket = tripTicketDao.findById(id);
+        TripTicketEntity ticket = ticketDao.findById(id);
         return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
     }
+
+
+
 }

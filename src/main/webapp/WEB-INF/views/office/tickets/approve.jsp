@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <c:set value="${contextPath}/resources" var="resourcesPath" />
 <jsp:include page="../../_fragments/page-template-before-main.jsp"/>
@@ -39,6 +40,7 @@
                 <th>Из</th>
                 <th>В</th>
                 <th>Вес</th>
+                <th></th>
             </tr>
             <c:forEach items="${orders}" var="order">
                 <tr>
@@ -48,6 +50,14 @@
                     <td>${order.fromCity.name}</td>
                     <td>${order.toCity.name}</td>
                     <td>${order.weight}</td>
+                    <td>
+                        <%--@elvariable id="ticketAndOrder" type="com.marta.logistika.dto.TicketAndOrder"--%>
+                        <form:form modelAttribute="ticketAndOrder" class="d-inline-flex" action="${pageContext.request.contextPath}/tickets/remove-order" method="POST">
+                            <input type="submit" value="Удалить" class="btn btn-link"/>
+                            <form:input path="ticketId" type="hidden" value="${ticket.id}"/>
+                            <form:input path="orderId" type="hidden" value="${order.id}"/>
+                        </form:form>
+                    </td>
                 </tr>
             </c:forEach>
         </table>
@@ -57,7 +67,8 @@
     <div class="modal-header modal-footer">
         <form action="/tickets/${ticket.id}/sign" method="post">
             <a class="btn btn-secondary" href="${contextPath}/orders" role="button">Назад</a>
-            <input type="submit" class="btn btn-success" name="sign" value="Утвердить маршрутный лист" />
+            <input id="findDriversBtn" property="${ticket.id}" type="submit" class="btn btn-success" name="sign" value="Утвердить маршрутный лист" />
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         </form>
         <%--Неудавшийся multiple select через ajax и обычную форму--%>
         <%--<button id="findDriversBtn" property="${ticket.id}" type="button" class="btn btn-success">Перейти к оформлению маршрутного листа</button>--%>

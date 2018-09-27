@@ -30,8 +30,9 @@ public class TripTicketController {
     @GetMapping(value = "/{id}")
     public String viewTicket(@PathVariable("id") Long id, Model uiModel) {
 
-        uiModel.addAttribute("ticket", ticketService.findDtoById(id));
+        uiModel.addAttribute("ticket", ticketService.findById(id));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
+        uiModel.addAttribute("ticketAndOrder", new TicketAndOrder());
 
         return "office/tickets/approve";
     }
@@ -56,12 +57,18 @@ public class TripTicketController {
         return "redirect:/orders";
     }
 
+    @PostMapping(value = "/remove-order")
+    public String removeOrderFromTicket(@ModelAttribute TicketAndOrder ticketAndOrder) {
+        ticketService.removeOrderFromTicket(ticketAndOrder.getTicketId(), ticketAndOrder.getOrderId());
+        return "redirect:/tickets/" + ticketAndOrder.getTicketId();
+    }
+
     @PostMapping(value = "/{ticketId}/sign")
     public String signTicket (@PathVariable("ticketId") long ticketId, Model uiModel) {
 
-        ticketService.signTicket(ticketId);
+        ticketService.approveTicket(ticketId);
 
-        uiModel.addAttribute("ticket", ticketService.findDtoById(ticketId));
+        uiModel.addAttribute("ticket", ticketService.findById(ticketId));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
 
         return "office/tickets/view";
@@ -75,7 +82,7 @@ public class TripTicketController {
             Model uiModel) {
 
         uiModel.addAttribute("ticketId", ticketId);
-        uiModel.addAttribute("shiftSize", ticketService.findDtoById(ticketId).getTruck().getShiftSize());
+        uiModel.addAttribute("shiftSize", ticketService.findById(ticketId).getTruck().getShiftSize());
         uiModel.addAttribute("driverList", driverService.findDrivers(ticketId));
         uiModel.addAttribute("driverSelectForm", new DriverSelectForm());
 
@@ -98,8 +105,7 @@ public class TripTicketController {
     public String approveTicket (
             @PathVariable("ticketId") long ticketId,
             ArrayList<DriverIdRecord> drivers) {
-
-        //todo принимает список нулевой длины - как правильно принять данные?
+        //принимает список нулевой длины - как правильно принять данные?
         System.out.println(ticketId);
         return "redirect:/orders";
     }

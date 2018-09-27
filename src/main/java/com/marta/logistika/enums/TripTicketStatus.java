@@ -1,5 +1,8 @@
 package com.marta.logistika.enums;
 
 public enum TripTicketStatus {
-    CREATED, APPROVED, CLOSED
+    CREATED,
+    APPROVED,
+    RUNNING,
+    CLOSED
 }

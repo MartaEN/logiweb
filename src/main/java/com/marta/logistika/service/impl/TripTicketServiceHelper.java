@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ class TripTicketServiceHelper {
                         weights.set(k, weights.get(k) - newWeight);
                     }
                     float tmpLoad = getAvgLoad(currentRoute, weights);
-                    if (tmpLoad < load) {
+                    if (tmpRouteDistance < distance || (tmpRouteDistance == distance && tmpLoad < load)) {
                         loadPoint = i;
                         unloadPoint = j;
                         distance = tmpRouteDistance;
@@ -162,7 +163,7 @@ class TripTicketServiceHelper {
      * @param ticket trip ticket to be processed
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    void calculateDurationAndArrivalDateTime(TripTicketEntity ticket) {
+    LocalDateTime calculateDurationAndArrivalDateTime(TripTicketEntity ticket) {
 
         List<StopoverEntity> stopovers = ticket.getStopovers();
         stopovers.sort(StopoverEntity::compareTo);
@@ -177,6 +178,25 @@ class TripTicketServiceHelper {
             totalTripDuration = totalTripDuration.plus(currentStopoverDuration);
         }
 
-        ticket.setArrivalDateTime(ticket.getDepartureDateTime().plusMinutes(totalTripDuration.toMinutes()));
+        LocalDateTime estimatedArrivalTime = ticket.getDepartureDateTime().plusMinutes(totalTripDuration.toMinutes());
+        ticket.setArrivalDateTime(estimatedArrivalTime);
+        return estimatedArrivalTime;
+    }
+
+    /**
+     * Method removes stopovers with no load / unload operations from the trip tickets.
+     * The endpoints (start and finish) are not removed even if empty.
+     * @param ticket ticket to be processed
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    void removeEmptyStopovers(TripTicketEntity ticket) {
+        for (int i = ticket.getStopovers().size() - 2 ; i > 0 ; i--) {
+            StopoverEntity stopover = ticket.getStopovers().get(i);
+            if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0)
+                ticket.getStopovers().remove(stopover);
+        }
+        for (int i = 0; i < ticket.getStopovers().size(); i++) {
+            ticket.getStopovers().get(i).setSequenceNo(i);
+        }
     }
 }
