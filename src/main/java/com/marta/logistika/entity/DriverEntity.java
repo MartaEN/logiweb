@@ -11,6 +11,9 @@ public class DriverEntity extends AbstractEntity {
     @Column (nullable = false, unique = true, length = 12)
     private String personalId;
 
+    @Column (nullable = false, unique = true, length = 50)
+    private String username;
+
     @Column (nullable = false, length = 65)
     private String firstName;
 
@@ -35,6 +38,14 @@ public class DriverEntity extends AbstractEntity {
 
     public void setPersonalId(String personalId) {
         this.personalId = personalId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirstName() {

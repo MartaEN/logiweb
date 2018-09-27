@@ -46,9 +46,9 @@
 
     <div>
         <p>Подсказка...</p>
-        <p>username = <b>obender</b> password = <b>go2rio</b>  для роли LOGIST</p>
-        <p>username = <b>akozlevich</b> password = <b>antilopa</b>  для роли DRIVER</p>
-        <p>username = <b>abalaganov</b> password = <b>suhar34</b>  для роли DRIVER</p>
+        <p>username = <b>"obender"</b> password = <b>"go2rio"</b>  для роли LOGIST</p>
+        <p>username = <b>"akozlevich"</b> password = <b>"antilopa"</b>  для роли DRIVER</p>
+        <p>username = <b>"abalaganov"</b> password = <b>"suhar34"</b>  для роли DRIVER</p>
     </div>
 
 </div>

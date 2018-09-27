@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
+import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
@@ -27,12 +28,14 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     private final static int MAX_MONHTLY_WORK_LIMIT_IN_MINUTES = 176 * 60;
 
     private final DriverDao driverDao;
+    private final TripTicketDao ticketDao;
     private final TripTicketService ticketService;
     private final TimeTrackerService timeService;
 
     @Autowired
-    public DriverServiceImpl(DriverDao driverDao, TripTicketService ticketService, TimeTrackerService timeService) {
+    public DriverServiceImpl(DriverDao driverDao, TripTicketDao ticketDao, TripTicketService ticketService, TimeTrackerService timeService) {
         this.driverDao = driverDao;
+        this.ticketDao = ticketDao;
         this.ticketService = ticketService;
         this.timeService = timeService;
     }
@@ -81,6 +84,11 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     }
 
     @Override
+    public String findPersonalIdByUsername(String username) {
+        return driverDao.findByUsername(username).getPersonalId();
+    }
+
+    @Override
     public List<DriverRecord> listAll() {
         return driverDao.listAll().stream()
                 .map(d -> mapper.map(d, DriverRecord.class))
@@ -90,7 +98,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     @Override
     public List<DriverRecord> findDrivers(long ticketId) {
 
-        TripTicketEntity ticket = ticketService.findById(ticketId);
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
         CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
         LocalDateTime departureDateTime = ticket.getDepartureDateTime();
 

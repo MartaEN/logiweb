@@ -12,6 +12,7 @@ public interface DriverDao extends GenericDao<DriverEntity> {
 
     boolean personalIdExists (String personalId);
     DriverEntity findByPersonalId (String personalId);
+    DriverEntity findByUsername (String username);
     List<DriverEntity> listAll();
     List<DriverEntity> listAllAvailable(CityEntity fromCity, LocalDateTime time);
 }

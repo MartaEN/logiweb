@@ -262,6 +262,134 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
     }
 
+    /**
+     * Method looks up for a current trip ticket assigned to the driver
+     * and compiles the instruction to the driver based on current ticket step and its loads / unloads list
+     * @param personalId driver's personal Id
+     * @return instruction to the driver usable in OnTheRoadController
+     */
+    @Override
+    @Transactional
+    public Instruction getInstructionForDriver(String personalId) {
+
+        Instruction instruction = new Instruction();
+
+        TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.RUNNING);
+        if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.APPROVED);
+        if (currentTicket == null) {
+            instruction.setDirectiveMessage("Маршрутных заданий нет. Отдыхайте!");
+            return instruction;
+        }
+
+        instruction.setTicketId(currentTicket.getId());
+        int step = currentTicket.getCurrentStep();
+
+        if(step == -1) {
+            instruction.setCommand(GOTO);
+            instruction.setStep(0);
+            instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
+                    currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
+                    currentTicket.getDepartureDateTime().toString().substring(0, 10),
+                    currentTicket.getDepartureDateTime().toString().substring(11, 16)));
+            instruction.setRequestedActionMessage("Подтвердить прибытие");
+        } else {
+            StopoverEntity currentStopover = currentTicket.getStopoverWithSequenceNo(step);
+            if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) {
+                instruction.setCommand(UNLOAD);
+                instruction.setStep(step);
+                instruction.setDirectiveMessage("Произведите выгрузку");
+                instruction.setRequestedActionMessage("Подтвердить отгрузку");
+            } else if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) {
+                instruction.setCommand(LOAD);
+                instruction.setStep(step);
+                instruction.setDirectiveMessage("Получите груз:");
+                instruction.setRequestedActionMessage("Подтвердить погрузку");
+            } else {
+                if(currentTicket.getStopovers().size() > step + 1) {
+                    instruction.setCommand(GOTO);
+                    instruction.setStep(step + 1);
+                    instruction.setDirectiveMessage(String.format("Следуйте в город %s",
+                            currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
+                    instruction.setRequestedActionMessage("Подтвердить прибытие");
+                } else {
+                    instruction.setCommand(FINISH);
+                    instruction.setStep(step + 1);
+                    instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
+                    instruction.setRequestedActionMessage("Закрыть");
+                }
+            }
+        }
+        return instruction;
+    }
+
+    /**
+     * Method records a move to the new stopover
+     * @param ticketId ticket id
+     * @param step sequence number of the stopover to move to
+     */
+    @Override
+    @Transactional
+    public void moveToStopover(long ticketId, int step) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        if(ticket.getCurrentStep() + 1 == step)
+            ticket.setCurrentStep(step);
+    }
+
+    /**
+     * Method marks all load operations at the given stopover as completed
+     * (order statuses changed to shipped)
+     * @param ticketId ticket id
+     * @param step sequence number of the stopover
+     */
+    @Override
+    @Transactional
+    public void loadAtStopover(long ticketId, int step) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        List<OrderEntity> ordersToLoad = ticket.getStopoverWithSequenceNo(step)
+                .getLoads().stream()
+                .map(TransactionEntity::getOrder).collect(Collectors.toList());
+        ordersToLoad.forEach(o -> o.setStatus(OrderStatus.SHIPPED));
+    }
+
+    /**
+     * Method marks all unload operations at the given stopover as completed
+     * (order statuses changed to delivered)
+     * @param ticketId ticket id
+     * @param step sequence number of the stopover
+     */
+    @Override
+    @Transactional
+    public void unloadAtStopover(long ticketId, int step) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        List<OrderEntity> ordersToUnload = ticket.getStopoverWithSequenceNo(step)
+                .getUnloads().stream()
+                .map(TransactionEntity::getOrder).collect(Collectors.toList());
+        ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
+    }
+
+    /**
+     * Method closes the trip ticket and updates booking for the truck and the drivers
+     * @param ticketId id of the ticket to be closed
+     */
+    @Override
+    @Transactional
+    public void closeTicket(long ticketId) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        ticket.setStatus(TripTicketStatus.CLOSED);
+
+        TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), TripTicketStatus.APPROVED);
+        if(nextTripForThisTruck == null) {
+            ticket.getTruck().setBookedUntil(LocalDateTime.now());
+            ticket.getTruck().setParked(true);
+        }
+
+        ticket.getDrivers().forEach(driver -> {
+            TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.APPROVED);
+            if(nextTripForThisDriver == null) {
+                driver.setBookedUntil(LocalDateTime.now());
+            }
+        });
+    }
 
 
 }

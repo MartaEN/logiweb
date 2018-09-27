@@ -1,5 +1,8 @@
 package com.marta.logistika.enums;
 
 public enum DriverStatus {
-    DRIVING, SECONDING, HANDLING, RESTING
+    DRIVING,
+    SECONDING,
+    HANDLING,
+    RESTING
 }

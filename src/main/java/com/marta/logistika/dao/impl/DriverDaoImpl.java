@@ -6,9 +6,7 @@ import com.marta.logistika.entity.DriverEntity;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
 
 @Repository("driverRepository")
 public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDao {
@@ -28,6 +26,16 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
                 "SELECT d FROM DriverEntity d WHERE d.personalId=:personalId",
                 DriverEntity.class)
                 .setParameter("personalId", personalId)
+                .getSingleResult();
+    }
+
+    @Override
+    public DriverEntity findByUsername(String username) {
+        if(username == null) return null;
+        return em.createQuery(
+                "SELECT d FROM DriverEntity d WHERE d.username=:username",
+                DriverEntity.class)
+                .setParameter("username", username)
                 .getSingleResult();
     }
 
