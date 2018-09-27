@@ -208,3 +208,7 @@ footer {
 .logout:hover {
     color: #A0D468;
 }
+
+.driver-ui-main-button {
+    margin-top: 50px;
+}

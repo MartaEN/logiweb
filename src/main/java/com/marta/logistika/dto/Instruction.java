@@ -1,5 +1,7 @@
 package com.marta.logistika.dto;
 
+import com.marta.logistika.entity.CityEntity;
+
 import java.util.List;
 
 public class Instruction {
@@ -9,7 +11,8 @@ public class Instruction {
     private Command command;
     private String directiveMessage;
     private String requestedActionMessage;
-    private List<OrderRecordFull> orders;
+    private CityEntity currentStop;
+    private List<OrderRecordDriverInstruction> orders;
 
     public enum Command {
         GOTO ("goto"),
@@ -62,11 +65,19 @@ public class Instruction {
         this.requestedActionMessage = requestedActionMessage;
     }
 
-    public List<OrderRecordFull> getOrders() {
+    public CityEntity getCurrentStop() {
+        return currentStop;
+    }
+
+    public void setCurrentStop(CityEntity currentStop) {
+        this.currentStop = currentStop;
+    }
+
+    public List<OrderRecordDriverInstruction> getOrders() {
         return orders;
     }
 
-    public void setOrders(List<OrderRecordFull> orders) {
+    public void setOrders(List<OrderRecordDriverInstruction> orders) {
         this.orders = orders;
     }
 }

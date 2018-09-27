@@ -2,6 +2,7 @@ package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.*;
 import com.marta.logistika.dto.Instruction;
+import com.marta.logistika.dto.OrderRecordDriverInstruction;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
@@ -297,11 +298,21 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) {
                 instruction.setCommand(UNLOAD);
                 instruction.setStep(step);
+                instruction.setCurrentStop(currentStopover.getCity());
+                instruction.setOrders(currentStopover.getUnloads().stream()
+                        .map(TransactionEntity::getOrder)
+                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
+                        .collect(Collectors.toList()));
                 instruction.setDirectiveMessage("Произведите выгрузку");
                 instruction.setRequestedActionMessage("Подтвердить отгрузку");
             } else if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) {
                 instruction.setCommand(LOAD);
                 instruction.setStep(step);
+                instruction.setCurrentStop(currentStopover.getCity());
+                instruction.setOrders(currentStopover.getLoads().stream()
+                        .map(TransactionEntity::getOrder)
+                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
+                        .collect(Collectors.toList()));
                 instruction.setDirectiveMessage("Получите груз:");
                 instruction.setRequestedActionMessage("Подтвердить погрузку");
             } else {
