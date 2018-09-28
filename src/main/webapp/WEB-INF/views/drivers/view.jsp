@@ -40,9 +40,25 @@
         <c:if test="${not empty instruction.requestedActionMessage}">
             <form:form modelAttribute="instructionDetails" action="${pageContext.request.contextPath}/logiweb/${instruction.command.path}" method="POST">
                 <button class="btn btn-success">${instruction.requestedActionMessage}</button>
-                <form:input path="ticketId" type="hidden" value="${instruction.ticketId}"/>
-                <form:input path="step" type="hidden" value="${instruction.step}"/>
+                <form:input path="ticketId" type="hidden" value="${instruction.ticket.id}"/>
+                <form:input path="targetStep" type="hidden" value="${instruction.targetStep}"/>
             </form:form>
+        </c:if>
+    </div>
+    <br><br>
+    <div>
+        <c:if test="${not empty instruction.ticket}">
+            <h5>Маршрутный лист №${instruction.ticket.id}</h5>
+            <p><i class="far fa-calendar-alt"></i> ${instruction.ticket.departureDateTime.substring(0, 10)} <i class="far fa-clock"></i> ${instruction.ticket.departureDateTime.substring(11, 16)} <i class="fas fa-map-marker-alt"></i> ${instruction.ticket.stopovers.get(0).city.name}</p>
+            <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> ${instruction.ticket.truck.regNumber} ${instruction.ticket.truck.capacity}кг</p>
+            <p>
+                <c:forEach items="${instruction.ticket.drivers}" var="driver">
+                    <p><i class="fas fa-user"></i> ${driver.firstName} ${driver.lastName}</p>
+                </c:forEach>
+            </p>
+            <c:forEach items="${instruction.ticket.stopovers}" var="stopover">
+                <p><i class="fas fa-parking"></i> ${stopover.city.name}</p>
+            </c:forEach>
         </c:if>
     </div>
 

@@ -10,6 +10,7 @@ public class TripTicketRecord implements Serializable {
     private long id;
     private TruckShortRecord truck;
     private List<StopoverShortRecord> stopovers;
+    private int currentStep;
     private List<DriverRecord> drivers;
     private String departureDateTime;
     private TripTicketStatus status;
@@ -37,6 +38,14 @@ public class TripTicketRecord implements Serializable {
 
     public void setStopovers(List<StopoverShortRecord> stopovers) {
         this.stopovers = stopovers;
+    }
+
+    public int getCurrentStep() {
+        return currentStep;
+    }
+
+    public void setCurrentStep(int currentStep) {
+        this.currentStep = currentStep;
     }
 
     public List<DriverRecord> getDrivers() {

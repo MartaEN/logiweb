@@ -36,19 +36,19 @@ public class OnTheRoadController {
 
     @PostMapping(value = "/goto")
     public String goTo(@ModelAttribute InstructionDetails instruction) {
-        ticketService.moveToStopover(instruction.getTicketId(), instruction.getStep());
+        ticketService.moveToStopover(instruction.getTicketId(), instruction.getTargetStep());
         return "redirect:/logiweb";
     }
 
     @PostMapping(value = "/load")
     public String load(@ModelAttribute InstructionDetails instruction) {
-        ticketService.loadAtStopover(instruction.getTicketId(), instruction.getStep());
+        ticketService.loadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
         return "redirect:/logiweb";
     }
 
     @PostMapping(value = "/unload")
     public String unload(@ModelAttribute InstructionDetails instruction) {
-        ticketService.unloadAtStopover(instruction.getTicketId(), instruction.getStep());
+        ticketService.unloadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
         return "redirect:/logiweb";
     }
 

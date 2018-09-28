@@ -6,8 +6,8 @@ import java.util.List;
 
 public class Instruction {
 
-    private long ticketId;
-    private int step;
+    private TripTicketRecord ticket;
+    private int targetStep;
     private Command command;
     private String directiveMessage;
     private String requestedActionMessage;
@@ -25,20 +25,20 @@ public class Instruction {
         public String getPath() { return path; }
     }
 
-    public long getTicketId() {
-        return ticketId;
+    public TripTicketRecord getTicket() {
+        return ticket;
     }
 
-    public void setTicketId(long ticketId) {
-        this.ticketId = ticketId;
+    public void setTicket(TripTicketRecord ticket) {
+        this.ticket = ticket;
     }
 
-    public int getStep() {
-        return step;
+    public int getTargetStep() {
+        return targetStep;
     }
 
-    public void setStep(int step) {
-        this.step = step;
+    public void setTargetStep(int targetStep) {
+        this.targetStep = targetStep;
     }
 
     public Command getCommand() {

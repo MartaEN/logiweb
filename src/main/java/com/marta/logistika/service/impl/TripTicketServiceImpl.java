@@ -295,13 +295,12 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             instruction.setDirectiveMessage("Маршрутных заданий нет. Отдыхайте!");
             return instruction;
         }
+        instruction.setTicket(mapper.map(currentTicket, TripTicketRecord.class));
 
-        instruction.setTicketId(currentTicket.getId());
         int step = currentTicket.getCurrentStep();
-
         if(step == -1) {
             instruction.setCommand(GOTO);
-            instruction.setStep(0);
+            instruction.setTargetStep(0);
             instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
                     currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
                     currentTicket.getDepartureDateTime().toString().substring(0, 10),
@@ -311,7 +310,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             StopoverEntity currentStopover = currentTicket.getStopoverWithSequenceNo(step);
             if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) {
                 instruction.setCommand(UNLOAD);
-                instruction.setStep(step);
+                instruction.setTargetStep(step);
                 instruction.setCurrentStop(currentStopover.getCity());
                 instruction.setOrders(currentStopover.getUnloads().stream()
                         .map(TransactionEntity::getOrder)
@@ -321,7 +320,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 instruction.setRequestedActionMessage("Подтвердить отгрузку");
             } else if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) {
                 instruction.setCommand(LOAD);
-                instruction.setStep(step);
+                instruction.setTargetStep(step);
                 instruction.setCurrentStop(currentStopover.getCity());
                 instruction.setOrders(currentStopover.getLoads().stream()
                         .map(TransactionEntity::getOrder)
@@ -332,13 +331,13 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             } else {
                 if(currentTicket.getStopovers().size() > step + 1) {
                     instruction.setCommand(GOTO);
-                    instruction.setStep(step + 1);
+                    instruction.setTargetStep(step + 1);
                     instruction.setDirectiveMessage(String.format("Следуйте в город %s",
                             currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
                     instruction.setRequestedActionMessage("Подтвердить прибытие");
                 } else {
                     instruction.setCommand(FINISH);
-                    instruction.setStep(step + 1);
+                    instruction.setTargetStep(step + 1);
                     instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
                     instruction.setRequestedActionMessage("Закрыть");
                 }

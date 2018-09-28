@@ -2,7 +2,7 @@ package com.marta.logistika.dto;
 
 public class InstructionDetails {
     private long ticketId;
-    private int step;
+    private int targetStep;
 
     public long getTicketId() {
         return ticketId;
@@ -12,11 +12,11 @@ public class InstructionDetails {
         this.ticketId = ticketId;
     }
 
-    public int getStep() {
-        return step;
+    public int getTargetStep() {
+        return targetStep;
     }
 
-    public void setStep(int step) {
-        this.step = step;
+    public void setTargetStep(int targetStep) {
+        this.targetStep = targetStep;
     }
 }
