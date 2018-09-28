@@ -20,6 +20,14 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
     }
 
     @Override
+    public boolean usernameExists(String username) {
+        Long count = em.createQuery("SELECT COUNT (d) FROM DriverEntity d WHERE d.username=:username", Long.class)
+                .setParameter("username", username)
+                .getSingleResult();
+        return count > 0;
+    }
+
+    @Override
     public DriverEntity findByPersonalId(String personalId) {
         if(personalId == null) return null;
         return em.createQuery(

@@ -18,6 +18,11 @@ public class DriverRecord implements Serializable {
     private String personalId;
 
     @NotNull
+    @Size(min = 3, max = 50)
+    @Pattern(regexp = "^[a-z]+$")
+    private String username;
+
+    @NotNull
     @Size(min = 1, max = 65)
     @Pattern(regexp = "^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")
     private String firstName;
@@ -36,6 +41,14 @@ public class DriverRecord implements Serializable {
 
     public void setPersonalId(String personalId) {
         this.personalId = personalId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirstName() {

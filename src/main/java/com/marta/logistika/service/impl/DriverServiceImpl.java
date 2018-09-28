@@ -79,6 +79,11 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     }
 
     @Override
+    public boolean usernameExists(String username) {
+        return driverDao.usernameExists(username);
+    }
+
+    @Override
     public DriverRecord findDriverByPersonalId(String personalId) {
         return mapper.map(driverDao.findByPersonalId(personalId), DriverRecord.class);
     }

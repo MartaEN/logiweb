@@ -14,6 +14,11 @@
             <form:errors path="personalId" cssClass="error-message"/>
         </div>
         <div class="form-group">
+            <form:label path="username" cssClass="col-form-label">Логин: </form:label>
+            <form:input path="username" cssClass="form-control" type="text" pattern="^[a-z]+$" minlength="3" maxlength="50" required="true"/>
+            <form:errors path="username" cssClass="error-message"/>
+        </div>
+        <div class="form-group">
             <form:label path="lastName" cssClass="col-form-label">Фамилия: </form:label>
             <form:input path="lastName" cssClass="form-control" type="text" pattern="^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$" required="true"/>
             <form:errors path="lastName" cssClass="error-message"/>
