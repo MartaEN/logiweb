@@ -44,7 +44,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     @Override
     public List<OrderRecordShort> getOrdersPage(int page) {
-        int index = (page - 1) * ROWS_PER_PAGE + 1;
+        int index = (page - 1) * ROWS_PER_PAGE;
         return orderDao.getOrdersPage(index, ROWS_PER_PAGE).stream()
                 .map(o -> mapper.map(o, OrderRecordShort.class))
                 .collect(Collectors.toList());
