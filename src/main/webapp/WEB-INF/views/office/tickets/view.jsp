@@ -63,7 +63,7 @@
 
 
     <div class="modal-footer">
-        <a class="btn btn-secondary" href="${contextPath}/orders" role="button">Закрыть</a>
+        <a class="btn btn-secondary" href="${contextPath}/${returnTo}" role="button">Закрыть</a>
     </div>
 
 </div>

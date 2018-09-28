@@ -31,8 +31,8 @@ public interface TripTicketService {
 
     // other very useful operations
     TripTicketRecord findById(long ticketId);
+    List<TripTicketRecord> listAll();
     List<TripTicketRecord> listAllUnapproved();
     List<OrderEntity> listAllOrderInTicket(long id);
     Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket);
-
 }

@@ -255,6 +255,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     @Override
     @Transactional
+    public List<TripTicketRecord> listAll() {
+        return ticketDao.listAll()
+                .stream()
+                .map(t -> mapper.map(t, TripTicketRecord.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public List<TripTicketRecord> listAllUnapproved() {
         return ticketDao.listAllUnapproved()
                 .stream()

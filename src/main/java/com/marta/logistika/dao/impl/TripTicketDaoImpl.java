@@ -23,6 +23,14 @@ public  class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements
     }
 
     @Override
+    public List<TripTicketEntity> listAll() {
+        return em.createQuery(
+                "SELECT t FROM TripTicketEntity t",
+                TripTicketEntity.class)
+                .getResultList();
+    }
+
+    @Override
     public List<TripTicketEntity> listAllUnapproved() {
         return em.createQuery(
                 "SELECT t FROM TripTicketEntity t  WHERE t.status='CREATED'",

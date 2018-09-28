@@ -8,7 +8,6 @@ import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.TimeTrackerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;

@@ -32,6 +32,16 @@ public class TripTicketController {
 
         uiModel.addAttribute("ticket", ticketService.findById(id));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
+        uiModel.addAttribute("returnTo", "tickets/view");
+
+        return "office/tickets/view";
+    }
+
+    @GetMapping(value = "/approve/{id}")
+    public String viewAndApproveTicket(@PathVariable("id") Long id, Model uiModel) {
+
+        uiModel.addAttribute("ticket", ticketService.findById(id));
+        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
         uiModel.addAttribute("ticketAndOrder", new TicketAndOrder());
 
         return "office/tickets/approve";
@@ -70,8 +80,17 @@ public class TripTicketController {
 
         uiModel.addAttribute("ticket", ticketService.findById(ticketId));
         uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
+        uiModel.addAttribute("returnTo", "orders");
 
         return "office/tickets/view";
+    }
+
+    @GetMapping (value = "/view")
+    public String viewAllTickets (Model uiModel) {
+
+        uiModel.addAttribute("tickets", ticketService.listAll());
+
+        return "office/tickets/list";
     }
 
 
