@@ -50,7 +50,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .permitAll()
                 .and()
                 .exceptionHandling()
-                    .accessDeniedPage("/access-denied");
+                    .accessDeniedPage("/access-denied")
+                .and()
+                .csrf().disable();
 
     }
 }
