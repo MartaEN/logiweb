@@ -49,7 +49,7 @@
 <jsp:include page="modal-add.jsp"/>
 
 <%-- Scripts specific for the page --%>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+<script src="${contextPath}/resources/third-party/handelbars/handlebars.js"></script>
 <script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
 <script src="${contextPath}/resources/js/monitor-update.js"></script>
 <script src="${contextPath}/resources/js/save-new-order.js"></script>
