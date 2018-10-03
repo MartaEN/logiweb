@@ -6,6 +6,7 @@ $(document).ready(function(){
         cache: false,
         success: function (data) {
             console.log(data);
+            handlebarsHelpers();
             fillOrdersSection(data.orders);
             fillTripTicketsSection(data.tickets);
             addDragAndDropListening();
@@ -17,7 +18,6 @@ $(document).ready(function(){
 });
 
 function fillOrdersSection(orders) {
-    handlebarsHelpers();
     let source   = document.getElementById("order-list-template").innerHTML;
     let template = Handlebars.compile(source);
     $('#order-list').html(template(orders));
@@ -25,10 +25,14 @@ function fillOrdersSection(orders) {
 }
 
 function fillTripTicketsSection(tickets) {
-    handlebarsHelpers();
     let source   = document.getElementById("ticket-list-template").innerHTML;
     let template = Handlebars.compile(source);
     $('#ticket-list').html(template(tickets));
+}
+
+function showErrorMessage(error) {
+    $('#errorMsgModal .modal-body').text(error);
+    $('#errorMsgModal').modal();
 }
 
 function addDragAndDropListening() {
@@ -65,6 +69,7 @@ function addDragAndDropListening() {
                         console.log(data);
                         fillOrdersSection(data.orders);
                         fillTripTicketsSection(data.tickets);
+                        if(data.error !== null) showErrorMessage(data.error);
                         addDragAndDropListening();
                     },
                     error: function (err) {

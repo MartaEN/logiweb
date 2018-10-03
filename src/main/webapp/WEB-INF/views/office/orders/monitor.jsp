@@ -47,6 +47,8 @@
 
 <%-- Modal window for new order entry form --%>
 <jsp:include page="modal-add.jsp"/>
+<%-- Modal window for error message --%>
+<jsp:include page="modal-error.jsp"/>
 
 <%-- Scripts specific for the page --%>
 <script src="${contextPath}/resources/third-party/handelbars/handlebars.js"></script>

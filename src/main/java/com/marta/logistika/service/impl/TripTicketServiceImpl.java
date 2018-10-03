@@ -7,6 +7,7 @@ import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
+import com.marta.logistika.exception.OrderDoesNotFitToTicketException;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TimeTrackerService;
@@ -135,7 +136,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         try {
             helper.checkWeightLimit(ticket);
         } catch (ServiceException e) {
-            throw new ServiceException(String.format("### Order id %d does not fit into trip ticket %d: %s", order.getId(), ticket.getId(), e.getMessage()));
+//            throw new ServiceException(String.format("### Order id %d does not fit into trip ticket %d: %s", order.getId(), ticket.getId(), e.getMessage()));
+            throw new OrderDoesNotFitToTicketException(e, order.getId());
         }
         ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
 

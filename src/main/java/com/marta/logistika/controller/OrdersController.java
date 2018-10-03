@@ -1,6 +1,7 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.*;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 
 @Controller
@@ -40,9 +43,9 @@ public class OrdersController {
 
     @GetMapping(value = "/monitor", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public MonitorDataDTO provideDataForMonitor () {
+    public MonitorDataResponse provideDataForMonitor () {
 
-        MonitorDataDTO response = new MonitorDataDTO();
+        MonitorDataResponse response = new MonitorDataResponse();
         response.setOrders(orderService.listAllUnassigned());
         response.setTickets(tripTicketService.listAllUnapproved());
 
@@ -51,13 +54,19 @@ public class OrdersController {
 
     @GetMapping(value = "/add-order-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public MonitorDataDTO addOrderToTicket(
+    public MonitorDataResponse addOrderToTicket(
+            Locale locale,
             @RequestParam long orderId,
             @RequestParam long ticketId) {
 
-        tripTicketService.addOrderToTicket(ticketId, orderId);
+        MonitorDataResponse response = new MonitorDataResponse();
 
-        MonitorDataDTO response = new MonitorDataDTO();
+        try {
+            tripTicketService.addOrderToTicket(ticketId, orderId);
+        } catch (ServiceException e) {
+            response.setError(e.getLocalizedMessage(locale));
+        }
+
         response.setOrders(orderService.listAllUnassigned());
         response.setTickets(tripTicketService.listAllUnapproved());
 
