@@ -7,6 +7,7 @@ import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
+import com.marta.logistika.exception.EntityNotFoundException;
 import com.marta.logistika.exception.OrderDoesNotFitToTicketException;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
@@ -252,7 +253,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public TripTicketRecord findById(long ticketId) {
-        return mapper.map(ticketDao.findById(ticketId), TripTicketRecord.class);
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        if (ticket == null) throw new EntityNotFoundException(ticketId, TripTicketEntity.class);
+        return mapper.map(ticket, TripTicketRecord.class);
     }
 
     @Override
