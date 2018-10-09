@@ -1,4 +1,4 @@
-package com.marta.logistika.controller;
+package com.marta.logistika.controllerAdvice;
 
 import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.entity.CityEntity;
