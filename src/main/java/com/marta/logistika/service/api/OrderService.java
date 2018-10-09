@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    void add (OrderEntryForm order);
+    long add (OrderEntryForm order);
     OrderRecordFull findById(long id);
     List<OrderRecordShort> listAllUnassigned();
     List<OrderRecordShort> getOrdersPage(int page);

@@ -26,8 +26,8 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     @Override
     @Transactional
-    public void add(OrderEntryForm order) {
-        orderDao.add(mapper.map(order, OrderEntity.class));
+    public long add(OrderEntryForm order) {
+        return orderDao.add(mapper.map(order, OrderEntity.class));
     }
 
     @Override

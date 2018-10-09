@@ -4,7 +4,7 @@ import com.marta.logistika.entity.AbstractEntity;
 
 public interface GenericDao<T extends AbstractEntity> {
 
-    void add(T entity);
+    long add(T entity);
     void merge(T entity);
     void remove(T entity);
 

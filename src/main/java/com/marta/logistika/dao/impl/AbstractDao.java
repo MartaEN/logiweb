@@ -11,9 +11,15 @@ abstract class AbstractDao<T extends AbstractEntity> implements GenericDao<T> {
     @PersistenceContext
     EntityManager em;
 
+    /**
+     * Persists new entity and returns its id
+     * @param entity entity to be persisted
+     * @return id
+     */
     @Override
-    public void add(T entity) {
+    public long add(T entity) {
         em.persist(entity);
+        return entity.getId();
     }
 
     @Override
