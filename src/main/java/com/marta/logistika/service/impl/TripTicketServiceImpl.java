@@ -7,9 +7,7 @@ import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
-import com.marta.logistika.exception.EntityNotFoundException;
-import com.marta.logistika.exception.OrderDoesNotFitToTicketException;
-import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.*;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,7 +59,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) throws ServiceException {
+    public long createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) throws ServiceException {
 
         //create new ticket entity
         TripTicketEntity ticket = new TripTicketEntity();
@@ -91,7 +90,27 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         truck.setParked(false);
         ticket.setCurrentStep(-1);
 
-        ticketDao.add(ticket);
+        return ticketDao.add(ticket);
+    }
+
+    /**
+     * Updates departure date and time in the trip ticket
+     * @param ticketId ticket id
+     * @param departureDateTime new departure date and time
+     */
+    @Override
+    @Transactional
+    public void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime) throws ServiceException {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        if(ticket.getStatus() != TripTicketStatus.CREATED) throw new ServiceException(
+                String.format("Can't update ticket if %d as it has status %s",
+                        ticketId,
+                        ticket.getStatus()));
+        if(departureDateTime.isBefore(getMinNewDateTime(ticketId))) throw new ServiceException(
+                String.format("Cant' update departure date for ticket id %d: " +
+                        "new departure time should be in the future and not earlier then the current departure time",
+                        ticketId));
+        ticket.setDepartureDateTime(departureDateTime);
     }
 
     /**
@@ -187,21 +206,20 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void approveTicket(long ticketId) throws ServiceException {
+    public void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
 
         if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
 
             // correct the date to the future if necessary
-            if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now())) {
-                ticket.setDepartureDateTime(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
-            }
+            if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now()))
+                throw new PastDepartureDateException(ticketId);
 
             // assign drivers
             CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
             int shiftSize = ticket.getTruck().getShiftSize();
             List<DriverEntity> availableDrivers = driverDao.listAllAvailable(fromCity, ticket.getDepartureDateTime());
-            if (availableDrivers.size() < shiftSize) throw new ServiceException("No drivers available for the ticket");
+            if (availableDrivers.size() < shiftSize) throw new NoDriversAvailableException(ticketId);
             ticket.setDrivers(availableDrivers.subList(0, shiftSize));
 
             // calculate estimated arrival time and record it for truck and drivers
@@ -410,6 +428,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
         helper.updateDriversTimeRecords(ticket);
         helper.checkTicketCompletion(ticket);
+    }
+
+
+    @Override
+    @Transactional
+    public LocalDateTime getMinNewDateTime(long ticketId) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        return LocalDateTime.now().isAfter(ticket.getDepartureDateTime()) ?
+                LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES) :
+                ticket.getDepartureDateTime().truncatedTo(ChronoUnit.MINUTES);
     }
 
 }

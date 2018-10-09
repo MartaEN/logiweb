@@ -1,16 +1,24 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.*;
+import com.marta.logistika.exception.NoDriversAvailableException;
+import com.marta.logistika.exception.PastDepartureDateException;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.CityService;
-import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TripTicketService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Past;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/tickets")
@@ -18,15 +26,20 @@ public class TripTicketController {
 
     private final TripTicketService ticketService;
     private final CityService cityService;
-    private final DriverService driverService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrdersController.class);
 
     @Autowired
-    public TripTicketController(TripTicketService ticketService, CityService cityService, DriverService driverService) {
+    public TripTicketController(TripTicketService ticketService, CityService cityService) {
         this.ticketService = ticketService;
         this.cityService = cityService;
-        this.driverService = driverService;
     }
 
+    /**
+     * Shows page with trip ticket information
+     * @param id trip ticket id
+     * @param uiModel data to build page
+     * @return path to jsp
+     */
     @GetMapping(value = "/{id}")
     public String viewTicket(@PathVariable("id") Long id, Model uiModel) {
 
@@ -37,16 +50,100 @@ public class TripTicketController {
         return "office/tickets/view";
     }
 
-    @GetMapping(value = "/approve/{id}")
-    public String viewAndApproveTicket(@PathVariable("id") Long id, Model uiModel) {
-
-        uiModel.addAttribute("ticket", ticketService.findById(id));
-        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
-        uiModel.addAttribute("ticketAndOrder", new TicketAndOrder());
-
+    /**
+     * Shows page where user can view, edit and approve the selected trip ticket
+     * @param ticketId ticket id
+     * @param uiModel contains data to build the page
+     * @return path to jsp
+     */
+    @GetMapping(value = "/{ticketId}/approve")
+    public String viewAndApproveTicket(@PathVariable("ticketId") Long ticketId, Model uiModel) {
+        prepareTicketApproveForm(ticketId, uiModel);
         return "office/tickets/approve";
     }
 
+    /**
+     * Tries to assign drivers and approve the ticket
+     * @param ticketId ticket id
+     * @param uiModel data to build the page
+     * @param locale user locale
+     * @return path to jsp
+     */
+    @PostMapping(value = "/{ticketId}/approve")
+    public String signTicket (@PathVariable("ticketId") long ticketId, Model uiModel, Locale locale) {
+
+        prepareTicketApproveForm(ticketId, uiModel);
+
+        try {
+            ticketService.approveTicket(ticketId);
+            LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - successful",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    ticketId));
+            return "office/tickets/view";
+        } catch (PastDepartureDateException | NoDriversAvailableException e) {
+            uiModel.addAttribute("error", e.getLocalizedMessage(locale));
+            LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - failed (%s)",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    ticketId,
+                    e.getLocalizedMessage(Locale.ENGLISH)));
+            return "office/tickets/approve";
+        }
+    }
+
+    /**
+     * Updates departure date and time in the trip ticket edit and approval page
+     * @param ticketId ticket id
+     * @param futureDateTimeRecord data transfer object to request new input from user
+     * @param bindingResult validation result
+     * @param uiModel data to build the page
+     * @return path to jsp
+     */
+    @PostMapping (value = "/{ticketId}/update-departure")
+    public String updateDepartureDateTime (@PathVariable("ticketId") long ticketId,
+                                           @Valid @ModelAttribute FutureDateTimeRecord futureDateTimeRecord,
+                                           BindingResult bindingResult,
+                                           Model uiModel,
+                                           Locale locale) {
+
+        if (bindingResult.hasErrors()) {
+            prepareTicketApproveForm(ticketId, uiModel);
+            return "office/tickets/approve";
+        }
+
+        try {
+            ticketService.updateDepartureDateTime(ticketId, futureDateTimeRecord.getDepartureDateTime());
+            LOGGER.info(String.format("###LOGIWEB### User %s: Departure date time for ticket %d updated",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    ticketId));
+            return String.format("redirect: /tickets/%d/approve", ticketId);
+        } catch (ServiceException e) {
+            uiModel.addAttribute("error", e.getLocalizedMessage(locale));
+            LOGGER.info(String.format("###LOGIWEB### User %s: Updating Departure Date and Time for Ticket id %d FAILED (%s)",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    ticketId,
+                    e.getLocalizedMessage(Locale.ENGLISH)));
+            return "office/tickets/approve";
+        }
+    }
+
+    /**
+     * Populates model with data
+     * @param ticketId ticket id
+     * @param uiModel ui model
+     */
+    private void prepareTicketApproveForm(long ticketId, Model uiModel) {
+        uiModel.addAttribute("ticket", ticketService.findById(ticketId));
+        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
+        uiModel.addAttribute("ticketAndOrder", new TicketAndOrder());
+        uiModel.addAttribute("departureDateTime", new FutureDateTimeRecord());
+        uiModel.addAttribute("minNewDateTime", ticketService.getMinNewDateTime(ticketId));
+    }
+
+    /**
+     * Produces trip ticket creation page
+     * @param uiModel data to build the page
+     * @return path to jsp
+     */
     @GetMapping(value = "/create")
     public String newTicketForm(Model uiModel) {
 
@@ -56,77 +153,55 @@ public class TripTicketController {
         return "office/tickets/create";
     }
 
+    /**
+     * Persists the ticket as submitted by user and redirects to core "/orders" page
+     * @param ticketCreateForm new trip ticket data submitted by user
+     * @return redirect to core "/orders" page
+     */
     @PostMapping(value = "/create")
     public String newTicketCreate(@ModelAttribute TripTicketCreateForm ticketCreateForm) {
 
-        ticketService.createTicket(
+        long newTicketId = ticketService.createTicket(
                 ticketCreateForm.getTruckRegNumber(),
                 LocalDateTime.parse(ticketCreateForm.getDepartureDateTime()),
                 ticketCreateForm.getToCity() == null ? null : cityService.findById(ticketCreateForm.getToCity()));
 
+        LOGGER.info(String.format("###LOGIWEB### User %s: Created new trip ticket id %d",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                newTicketId));
+
         return "redirect:/orders";
     }
 
+    /**
+     * Removes order from a trip ticket in the ticket edit and approval page
+     * @param ticketAndOrder data transfer object for ticket and order id
+     * @return redirect to ticket edit and approval page
+     */
     @PostMapping(value = "/remove-order")
     public String removeOrderFromTicket(@ModelAttribute TicketAndOrder ticketAndOrder) {
+
         ticketService.removeOrderFromTicket(ticketAndOrder.getTicketId(), ticketAndOrder.getOrderId());
-        return "redirect:/tickets/" + ticketAndOrder.getTicketId();
+
+        LOGGER.info(String.format("###LOGIWEB### User %s: Removed order id %d from trip ticket id %d",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                ticketAndOrder.getOrderId(),
+                ticketAndOrder.getTicketId()));
+
+        return String.format("redirect:/tickets/%d/approve", ticketAndOrder.getTicketId());
     }
 
-    @PostMapping(value = "/{ticketId}/sign")
-    public String signTicket (@PathVariable("ticketId") long ticketId, Model uiModel) {
-
-        ticketService.approveTicket(ticketId);
-
-        uiModel.addAttribute("ticket", ticketService.findById(ticketId));
-        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
-        uiModel.addAttribute("returnTo", "orders");
-
-        return "office/tickets/view";
-    }
-
+    /**
+     * Produces trip ticket view page
+     * @param uiModel data to build the page
+     * @return path to jsp
+     */
     @GetMapping (value = "/view")
     public String viewAllTickets (Model uiModel) {
 
         uiModel.addAttribute("tickets", ticketService.listAll());
 
         return "office/tickets/list";
-    }
-
-
-    //        <%--Неудавшийся multiple select через post spring формы--%>
-    @GetMapping(value = "/{ticketId}/select-drivers")
-    public String selectDrivers (
-            @PathVariable("ticketId") long ticketId,
-            Model uiModel) {
-
-        uiModel.addAttribute("ticketId", ticketId);
-        uiModel.addAttribute("shiftSize", ticketService.findById(ticketId).getTruck().getShiftSize());
-        uiModel.addAttribute("driverList", driverService.findDrivers(ticketId));
-        uiModel.addAttribute("driverSelectForm", new DriverSelectForm());
-
-        return "office/drivers/select";
-
-    }
-
-    //        <%--Неудавшийся multiple select через post spring формы--%>
-    @PostMapping(value = "/{ticketId}/finalize")
-    public String finalizeTicket (
-            @ModelAttribute DriverSelectForm drivers,
-            @PathVariable("ticketId") long ticketId) {
-
-        System.out.println("=== I'm inside ====");
-        return "redirect:/orders";
-    }
-
-    //            <%--Неудавшийся multiple select через ajax и обычную форму--%>
-    @PostMapping(value = "/{ticketId}/approve", consumes = {"application/x-www-form-urlencoded"})
-    public String approveTicket (
-            @PathVariable("ticketId") long ticketId,
-            ArrayList<DriverIdRecord> drivers) {
-        //принимает список нулевой длины - как правильно принять данные?
-        System.out.println(ticketId);
-        return "redirect:/orders";
     }
 
 

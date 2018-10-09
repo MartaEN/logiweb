@@ -1,6 +1,7 @@
 package com.marta.logistika.controllerAdvice;
 
 import com.marta.logistika.dto.DriverRecord;
+import com.marta.logistika.dto.FutureDateTimeRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.DriverService;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.InitBinder;
 
 import java.beans.PropertyEditorSupport;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @ControllerAdvice
 public class DataBindingControllerAdvice {
@@ -96,5 +99,24 @@ public class DataBindingControllerAdvice {
                 return null;
             }
         });
+
+        binder.registerCustomEditor(LocalDateTime.class, "departureDateTime", new PropertyEditorSupport() {
+
+            public void setAsText(String text) {
+                LocalDateTime departureDateTime = LocalDateTime.parse(
+                        text, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                setValue(departureDateTime);
+            }
+
+            public String getAsText() {
+                Object value = getValue();
+                if (value != null) {
+                    LocalDateTime departureDateTime = (LocalDateTime) value;
+                    return departureDateTime.toString();
+                }
+                return null;
+            }
+        });
+
     }
 }

@@ -10,7 +10,7 @@
 
     {{#each this}}
 
-    <a href="/tickets/approve/{{id}}" class="ticket open-ticket target row-wrapper" property="{{id}}">
+    <a href="/tickets/{{id}}/approve" class="ticket open-ticket target row-wrapper" property="{{id}}">
         <div class="ticket-truck-info">
             <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> {{truck.regNumber}}</p>
             <p><i class="fas fa-truck-loading"></i> {{truck.capacity}} кг</p>

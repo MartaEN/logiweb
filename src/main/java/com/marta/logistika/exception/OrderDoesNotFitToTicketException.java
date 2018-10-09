@@ -7,7 +7,7 @@ public class OrderDoesNotFitToTicketException extends ServiceException {
     private long orderId;
 
     public OrderDoesNotFitToTicketException(Throwable e, long orderId){
-        super("com.marta.logistika.exceptions.orderDoesNotFitToTicket", e);
+        super("com.marta.logistika.error.orderDoesNotFitToTicket", e);
         this.orderId = orderId;
     }
 
