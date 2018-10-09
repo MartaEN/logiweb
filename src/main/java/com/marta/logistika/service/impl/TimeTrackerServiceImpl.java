@@ -25,7 +25,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     }
 
     /**
-     * Method creates new time record entry for the driver
+     * Method creates new time record entry for the driver with his current status
      * @param driver driver
      * @throws ServiceException in case previous time record was not closed
      */
@@ -35,47 +35,52 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
         if (timeTrackerDao.hasOpenTimeRecord(driver)) throw new ServiceException(String.format("Previous time record for driver %s is not closed", driver.toString()));
         TimeTrackerEntity timeRecord = new TimeTrackerEntity();
         timeRecord.setDriver(driver);
-        timeRecord.setStart(LocalDateTime.now());
-        timeTrackerDao.add(timeRecord);
-    }
-
-    @Override
-    @Transactional
-    public void closeReopenTimeRecord(DriverEntity driver, DriverStatus status) {
-        closeTimeRecord(driver, status);
-        TimeTrackerEntity timeRecord = new TimeTrackerEntity();
-        timeRecord.setDriver(driver);
+        timeRecord.setStatus(driver.getStatus());
         timeRecord.setStart(LocalDateTime.now());
         timeTrackerDao.add(timeRecord);
     }
 
     /**
-     * Method closes driver's time entry with a given status.
-     * In case time record crosses midnight(s), is it split into separate records for each calendar day.
+     * Closes a currently open time record and opens a new one
      * @param driver driver
-     * @param status status to be used for closing the time record
      */
     @Override
     @Transactional
-    public void closeTimeRecord(DriverEntity driver, DriverStatus status) {
+    public void closeReopenTimeRecord(DriverEntity driver) {
+        closeTimeRecord(driver);
+        TimeTrackerEntity timeRecord = new TimeTrackerEntity();
+        timeRecord.setDriver(driver);
+        timeRecord.setStatus(driver.getStatus());
+        timeRecord.setStart(LocalDateTime.now());
+        timeTrackerDao.add(timeRecord);
+    }
+
+    /**
+     * Method closes driver's time entry.
+     * In case time record crosses midnight(s), is it split into separate records for each calendar day.
+     * @param driver driver
+     */
+    @Override
+    @Transactional
+    public void closeTimeRecord(DriverEntity driver) {
 
         LocalDateTime timestamp = LocalDateTime.now();
         TimeTrackerEntity openRecord = timeTrackerDao.getOpenTimeRecord(driver);
+        DriverStatus recordStatus = openRecord.getStatus();
 
         while (openRecord.getStart().isBefore(timestamp.toLocalDate().atStartOfDay())) {
             LocalDateTime divider = openRecord.getStart().plusDays(1).toLocalDate().atStartOfDay();
-            openRecord.setStatus(status);
             openRecord.setFinish(divider.minusSeconds(1));
             openRecord.setMinutes(Duration.between(openRecord.getStart(), openRecord.getFinish()).toMinutes());
             timeTrackerDao.merge(openRecord);
 
             openRecord = new TimeTrackerEntity();
             openRecord.setDriver(driver);
+            openRecord.setStatus(recordStatus);
             openRecord.setStart(divider);
             timeTrackerDao.add(openRecord);
         }
 
-        openRecord.setStatus(status);
         openRecord.setFinish(timestamp);
         openRecord.setMinutes(Duration.between(openRecord.getStart(), openRecord.getFinish()).toMinutes());
         timeTrackerDao.merge(openRecord);

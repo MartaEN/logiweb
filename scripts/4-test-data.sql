@@ -73,9 +73,9 @@ UNLOCK TABLES;
 
 LOCK TABLES `drivers` WRITE;
 /*!40000 ALTER TABLE `drivers` DISABLE KEYS */;
-INSERT INTO `drivers` VALUES (1,'2018-09-01 00:00:00.000000','Адам','Козлевич','000123','akozlevich',1),
-							(2,'2018-09-26 20:00:00.000000','Александр','Балаганов','000345','abalaganov',1),
-                            (3,'2018-09-01 00:00:00.000000','Михаил','Паниковский','000013','mpanikovski',5);
+INSERT INTO `drivers` VALUES (1,'2018-09-01 00:00:00.000000','Адам','Козлевич','000123','akozlevich',1,'OFFLINE'),
+							(2,'2018-09-26 20:00:00.000000','Александр','Балаганов','000345','abalaganov',1,'OFFLINE'),
+                            (3,'2018-09-01 00:00:00.000000','Михаил','Паниковский','000013','mpanikovski',5,'OFFLINE');
 /*!40000 ALTER TABLE `drivers` ENABLE KEYS */;
 UNLOCK TABLES;
 

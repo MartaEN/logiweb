@@ -24,10 +24,9 @@ public interface TripTicketService {
 
     // processing ticket on the road (driver operations)
     Instruction getInstructionForDriver(String personalId);
-    void moveToStopover(long ticketId, int step);
+    void reachStopover(long ticketId, int step);
     void loadAtStopover(long ticketId, int step);
     void unloadAtStopover(long ticketId, int step);
-    void closeTicket(long ticketId);
 
     // other very useful operations
     TripTicketRecord findById(long ticketId);

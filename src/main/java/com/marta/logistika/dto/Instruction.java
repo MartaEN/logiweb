@@ -1,6 +1,7 @@
 package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.enums.DriverStatus;
 
 import java.util.List;
 
@@ -8,20 +9,23 @@ public class Instruction {
 
     private TripTicketRecord ticket;
     private int targetStep;
-    private Command command;
+    private Task task;
     private String directiveMessage;
     private String requestedActionMessage;
     private CityEntity currentStop;
     private List<OrderRecordDriverInstruction> orders;
+    private DriverStatus driverStatus;
 
-    public enum Command {
+    public enum Task {
+        START ("start"),
         GOTO ("goto"),
         LOAD ("load"),
         UNLOAD ("unload"),
-        FINISH ("finish");
+        FINISH ("finish"),
+        NONE ("none");
 
         private String path;
-        Command(String path) { this.path = path; }
+        Task(String path) { this.path = path; }
         public String getPath() { return path; }
     }
 
@@ -41,12 +45,12 @@ public class Instruction {
         this.targetStep = targetStep;
     }
 
-    public Command getCommand() {
-        return command;
+    public Task getTask() {
+        return task;
     }
 
-    public void setCommand(Command command) {
-        this.command = command;
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     public String getDirectiveMessage() {
@@ -79,5 +83,13 @@ public class Instruction {
 
     public void setOrders(List<OrderRecordDriverInstruction> orders) {
         this.orders = orders;
+    }
+
+    public DriverStatus getDriverStatus() {
+        return driverStatus;
+    }
+
+    public void setDriverStatus(DriverStatus driverStatus) {
+        this.driverStatus = driverStatus;
     }
 }

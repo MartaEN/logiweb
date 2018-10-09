@@ -1,5 +1,7 @@
 package com.marta.logistika.entity;
 
+import com.marta.logistika.enums.DriverStatus;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -20,6 +22,9 @@ public class DriverEntity extends AbstractEntity {
     @Column (nullable = false, length = 65)
     private String lastName;
 
+    @Enumerated(EnumType.STRING)
+    private DriverStatus status;
+
     @Column (nullable = false)
     private LocalDateTime bookedUntil;
 
@@ -30,6 +35,7 @@ public class DriverEntity extends AbstractEntity {
     @PrePersist
     public void setDefaults() {
         bookedUntil = LocalDateTime.now();
+        status = DriverStatus.OFFLINE;
     }
 
     public String getPersonalId() {
@@ -58,6 +64,14 @@ public class DriverEntity extends AbstractEntity {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public DriverStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DriverStatus status) {
+        this.status = status;
     }
 
     public void setLastName(String lastName) {

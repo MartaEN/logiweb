@@ -36,7 +36,7 @@ public class OnTheRoadController {
 
     @PostMapping(value = "/goto")
     public String goTo(@ModelAttribute InstructionDetails instruction) {
-        ticketService.moveToStopover(instruction.getTicketId(), instruction.getTargetStep());
+        ticketService.reachStopover(instruction.getTicketId(), instruction.getTargetStep());
         return "redirect:/logiweb";
     }
 
@@ -54,7 +54,6 @@ public class OnTheRoadController {
 
     @PostMapping(value = "/finish")
     public String finish(@ModelAttribute InstructionDetails instruction) {
-        ticketService.closeTicket(instruction.getTicketId());
         return "redirect:/logiweb";
     }
 }

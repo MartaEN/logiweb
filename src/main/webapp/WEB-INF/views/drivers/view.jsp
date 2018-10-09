@@ -6,6 +6,7 @@
 <jsp:include page="../_fragments/page-template-before-main.jsp"/>
 
 <div class="table col-sm-4">
+    <p>${instruction.driverStatus}</p>
     <div>
         <c:if test="${not empty instruction.currentStop}">
             <h3>${instruction.currentStop.name}</h3>
@@ -38,7 +39,7 @@
     </div>
     <div class="driver-ui-main-button">
         <c:if test="${not empty instruction.requestedActionMessage}">
-            <form:form modelAttribute="instructionDetails" action="${pageContext.request.contextPath}/logiweb/${instruction.command.path}" method="POST">
+            <form:form modelAttribute="instructionDetails" action="${pageContext.request.contextPath}/logiweb/${instruction.task.path}" method="POST">
                 <button class="btn btn-success">${instruction.requestedActionMessage}</button>
                 <form:input path="ticketId" type="hidden" value="${instruction.ticket.id}"/>
                 <form:input path="targetStep" type="hidden" value="${instruction.targetStep}"/>

@@ -10,12 +10,10 @@ import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.exception.EntityNotFoundException;
 import com.marta.logistika.exception.OrderDoesNotFitToTicketException;
 import com.marta.logistika.exception.ServiceException;
-import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,8 +26,8 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.marta.logistika.dto.Instruction.Command.*;
-import static com.marta.logistika.enums.DriverStatus.*;
+import static com.marta.logistika.dto.Instruction.*;
+import static com.marta.logistika.dto.Instruction.Task.*;
 
 @Service("tripTicketService")
 public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
@@ -39,18 +37,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final DriverDao driverDao;
     private final TimeTrackerService timeService;
     private final OrderDao orderDao;
-    private final RoadService roadService;
     private final TripTicketServiceHelper helper;
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, RoadService roadService) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, TripTicketServiceHelper helper) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
         this.timeService = timeService;
         this.orderDao = orderDao;
-        this.roadService = roadService;
-        this.helper = new TripTicketServiceHelper(roadService);
+        this.helper = helper;
     }
 
     /**
@@ -294,6 +290,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         Instruction instruction = new Instruction();
 
+        DriverEntity driver = driverDao.findByPersonalId(personalId);
+        instruction.setDriverStatus(driver.getStatus());
+
         TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.RUNNING);
         if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.APPROVED);
         if (currentTicket == null) {
@@ -303,28 +302,28 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         instruction.setTicket(mapper.map(currentTicket, TripTicketRecord.class));
 
         int step = currentTicket.getCurrentStep();
-        if(step == -1) {
-            instruction.setCommand(GOTO);
-            instruction.setTargetStep(0);
-            instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
-                    currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
-                    currentTicket.getDepartureDateTime().toString().substring(0, 10),
-                    currentTicket.getDepartureDateTime().toString().substring(11, 16)));
-            instruction.setRequestedActionMessage("Подтвердить прибытие");
-        } else {
-            StopoverEntity currentStopover = currentTicket.getStopoverWithSequenceNo(step);
-            if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) {
-                instruction.setCommand(UNLOAD);
-                instruction.setTargetStep(step);
-                instruction.setCurrentStop(currentStopover.getCity());
-                instruction.setOrders(currentStopover.getUnloads().stream()
-                        .map(TransactionEntity::getOrder)
-                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
-                        .collect(Collectors.toList()));
-                instruction.setDirectiveMessage("Произведите выгрузку");
-                instruction.setRequestedActionMessage("Подтвердить отгрузку");
-            } else if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) {
-                instruction.setCommand(LOAD);
+        StopoverEntity currentStopover;
+        Task task = helper.getCurrentTask(currentTicket);
+        switch (task) {
+            case START:
+                instruction.setTask(GOTO);
+                instruction.setTargetStep(0);
+                instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
+                        currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
+                        currentTicket.getDepartureDateTime().toString().substring(0, 10),
+                        currentTicket.getDepartureDateTime().toString().substring(11, 16)));
+                instruction.setRequestedActionMessage("Открыть смену");
+                break;
+            case GOTO:
+                instruction.setTask(GOTO);
+                instruction.setTargetStep(step + 1);
+                instruction.setDirectiveMessage(String.format("Следуйте в город %s",
+                        currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
+                instruction.setRequestedActionMessage("Подтвердить прибытие");
+                break;
+            case LOAD:
+                currentStopover = currentTicket.getStopoverWithSequenceNo(step);
+                instruction.setTask(LOAD);
                 instruction.setTargetStep(step);
                 instruction.setCurrentStop(currentStopover.getCity());
                 instruction.setOrders(currentStopover.getLoads().stream()
@@ -333,46 +332,49 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                         .collect(Collectors.toList()));
                 instruction.setDirectiveMessage("Получите груз:");
                 instruction.setRequestedActionMessage("Подтвердить погрузку");
-            } else {
-                if(currentTicket.getStopovers().size() > step + 1) {
-                    instruction.setCommand(GOTO);
-                    instruction.setTargetStep(step + 1);
-                    instruction.setDirectiveMessage(String.format("Следуйте в город %s",
-                            currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
-                    instruction.setRequestedActionMessage("Подтвердить прибытие");
-                } else {
-                    instruction.setCommand(FINISH);
-                    instruction.setTargetStep(step + 1);
-                    instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
-                    instruction.setRequestedActionMessage("Закрыть");
-                }
-            }
+                break;
+            case UNLOAD:
+                currentStopover = currentTicket.getStopoverWithSequenceNo(step);
+                instruction.setTask(UNLOAD);
+                instruction.setTargetStep(currentTicket.getCurrentStep());
+                instruction.setCurrentStop(currentStopover.getCity());
+                instruction.setOrders(currentStopover.getUnloads().stream()
+                        .map(TransactionEntity::getOrder)
+                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
+                        .collect(Collectors.toList()));
+                instruction.setDirectiveMessage("Произведите выгрузку");
+                instruction.setRequestedActionMessage("Подтвердить отгрузку");
+                break;
+            case FINISH:
+                instruction.setTask(FINISH);
+                instruction.setTargetStep(step + 1);
+                instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
+                instruction.setRequestedActionMessage("Закрыть");
+                break;
+            case NONE:
+            default:
+                throw new ServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
+
         }
         return instruction;
     }
 
     /**
-     * Method records a move to the new stopover and updates time tracking for the driver
+     * Method records finished move to the new stopover and updates time tracking for all the drivers
      * @param ticketId ticket id
      * @param step sequence number of the stopover to move to
      */
     @Override
     @Transactional
-    public void moveToStopover(long ticketId, int step) {
+    public void reachStopover(long ticketId, int step) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
-        if(ticket.getCurrentStep() + 1 == step)
+        if(ticket.getCurrentStep() + 1 == step) {
             ticket.setCurrentStep(step);
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        DriverEntity driver = driverDao.findByUsername(username);
-
-        if (step == 0) {
-            timeService.openNewTimeRecord(driver);
-        } else {
-            timeService.closeReopenTimeRecord(driver, DRIVING);
-        }
-
+            helper.updateDriversTimeRecords(ticket);
+            helper.checkTicketCompletion(ticket);
+        } else throw new ServiceException(String.format("Wrong step sequence for ticket id %d", ticketId));
     }
+
 
     /**
      * Method marks all load operations at the given stopover as completed
@@ -388,10 +390,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getLoads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToLoad.forEach(o -> o.setStatus(OrderStatus.SHIPPED));
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        DriverEntity driver = driverDao.findByUsername(username);
-        timeService.closeReopenTimeRecord(driver, HANDLING);
+        helper.updateDriversTimeRecords(ticket);
+        helper.checkTicketCompletion(ticket);
     }
 
     /**
@@ -408,40 +408,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getUnloads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        DriverEntity driver = driverDao.findByUsername(username);
-        timeService.closeReopenTimeRecord(driver, HANDLING);
+        helper.updateDriversTimeRecords(ticket);
+        helper.checkTicketCompletion(ticket);
     }
-
-    /**
-     * Method closes the trip ticket and updates booking for the truck and the drivers
-     * @param ticketId id of the ticket to be closed
-     */
-    @Override
-    @Transactional
-    public void closeTicket(long ticketId) {
-        TripTicketEntity ticket = ticketDao.findById(ticketId);
-        ticket.setStatus(TripTicketStatus.CLOSED);
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        DriverEntity driver = driverDao.findByUsername(username);
-        timeService.closeTimeRecord(driver, HANDLING);
-
-
-        TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), TripTicketStatus.APPROVED);
-        if(nextTripForThisTruck == null) {
-            ticket.getTruck().setBookedUntil(LocalDateTime.now());
-            ticket.getTruck().setParked(true);
-        }
-
-        ticket.getDrivers().forEach(d -> {
-            TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(d.getPersonalId(), TripTicketStatus.APPROVED);
-            if(nextTripForThisDriver == null) {
-                d.setBookedUntil(LocalDateTime.now());
-            }
-        });
-    }
-
 
 }

@@ -48,6 +48,7 @@ CREATE TABLE `drivers` (
   `personalId` varchar(12) NOT NULL,
   `username` varchar(50) NOT NULL,
   `location` bigint(20) NOT NULL,
+  `status` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_gq374lh46a7wq07rhyiuwt27m` (`personalId`),
   UNIQUE KEY `UK_hfm3gk84eakexruf4mnv2tdpm` (`username`),
