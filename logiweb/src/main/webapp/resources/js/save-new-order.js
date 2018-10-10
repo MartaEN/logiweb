@@ -1,0 +1,17 @@
+$(document).ready(function () {
+
+    $('#saveNewOrderBtn').on('click', (event) => {
+
+        $.ajax({
+            url: "/orders/add",
+            type: "POST",
+            data : $('form[name=orderEntryForm]').serialize(),
+            success: function (data) {
+                alert("saved");
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    })
+});
