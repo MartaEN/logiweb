@@ -16,7 +16,6 @@
 
     <properties>
         <javaee.version>7.0</javaee.version>
-        <jstl.version>1.2</jstl.version>
         <jsf.version>RELEASE</jsf.version>
         <primefaces.version>RELEASE</primefaces.version>
     </properties>
@@ -26,12 +25,6 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>${javaee.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>${jstl.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -49,7 +42,7 @@
     </dependencies>
 
     <build>
-        <finalName>logiweb-tableau</finalName>
+        <finalName>logiweb</finalName>
         <plugins>
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
