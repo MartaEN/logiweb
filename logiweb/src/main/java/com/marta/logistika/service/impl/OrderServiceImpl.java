@@ -3,6 +3,7 @@ package com.marta.logistika.service.impl;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dto.OrderRecordFull;
 import com.marta.logistika.entity.OrderEntity;
+import com.marta.logistika.messaging.MessageSender;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.dto.OrderEntryForm;
 import com.marta.logistika.dto.OrderRecordShort;
@@ -17,17 +18,21 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
+    private final MessageSender messageSender;
     private final static int ROWS_PER_PAGE = 6;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao) {
+    public OrderServiceImpl(OrderDao orderDao, MessageSender messageSender) {
         this.orderDao = orderDao;
+        this.messageSender = messageSender;
     }
 
     @Override
     @Transactional
     public long add(OrderEntryForm order) {
-        return orderDao.add(mapper.map(order, OrderEntity.class));
+        long newOrderId = orderDao.add(mapper.map(order, OrderEntity.class));
+        messageSender.sendMessage(String.format("Order id %d created", newOrderId));
+        return newOrderId;
     }
 
     @Override

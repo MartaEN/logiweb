@@ -23,6 +23,7 @@
         <javax.validation>2.0.1.Final</javax.validation>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version>
         <jackson.version>2.9.6</jackson.version>
+        <activemq.version>5.13.3</activemq.version>
         <dozer.version>5.4.0</dozer.version>
         <dozer.jdk8.version>1.0.4</dozer.jdk8.version>
     </properties>
@@ -116,6 +117,18 @@
             <version>${dozer.jdk8.version}</version>
         </dependency>
 
+        <!-- Messaging -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-spring</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+
         <!-- Spring security and some explicit dependencies to prevent dependency resolution conflicts  -->
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -171,6 +184,16 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <url>http://localhost:8088/manager/text</url>
+                    <server>TomcatServer</server>
+                    <path>/</path>
                 </configuration>
             </plugin>
         </plugins>
