@@ -8,16 +8,15 @@
     <title>LogiWeb</title>
 
     <%--Bootstrap--%>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/third-party/bootstrap/bootstrap.min.css">
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+
     <%--fontawesome--%>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/third-party/fontawesome/css/all.min.css">
+    <link href="/webjars/font-awesome/css/all.min.css" rel="stylesheet">
+
     <%--own stylesheet--%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
-
-    <%--Bootstrap--%>
-    <script src="${pageContext.request.contextPath}/resources/third-party/bootstrap/jquery-3.3.1.min.js"></script>
-    <script src="${pageContext.request.contextPath}/resources/third-party/bootstrap/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="${pageContext.request.contextPath}/resources/third-party/bootstrap/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
     <%--csrf token for ajax--%>
     <%--<sec:csrfMetaTags />--%>
