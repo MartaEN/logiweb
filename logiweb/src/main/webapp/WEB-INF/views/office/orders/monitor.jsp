@@ -3,7 +3,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<c:set value="${contextPath}/resources" var="resourcesPath" />
 <jsp:include page="../../_fragments/page-template-before-main.jsp"/>
 
 
@@ -42,17 +41,17 @@
 
 
 <%-- Handelbars templates for order list and ticket list--%>
+<script src="/webjars/handlebars/handlebars.min.js"></script>
+<script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
 <jsp:include page="template-orders.jsp"/>
 <jsp:include page="template-tickets.jsp"/>
 
 <%-- Modal window for new order entry form --%>
-<jsp:include page="modal-add.jsp"/>
+<%--<jsp:include page="modal-add.jsp"/>--%>
 <%-- Modal window for error message --%>
 <jsp:include page="modal-error.jsp"/>
 
 <%-- Scripts specific for the page --%>
-<script src="${contextPath}/resources/third-party/handelbars/handlebars.js"></script>
-<script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
 <script src="${contextPath}/resources/js/monitor-update.js"></script>
 <script src="${contextPath}/resources/js/save-new-order.js"></script>
 <script src="${contextPath}/resources/js/tooltips.js"></script>

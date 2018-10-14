@@ -86,8 +86,9 @@
             </div>
         </div>
 
+        <%--Handlebars template for order view form--%>
         <jsp:include page="template-order.jsp"/>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+        <script src="/webjars/handlebars/handlebars.min.js"></script>
         <script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
         <script src="${contextPath}/resources/js/show-order.js"></script>
 
