@@ -14,25 +14,30 @@ import com.marta.logistika.exception.*;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.marta.logistika.dto.Instruction.*;
 import static com.marta.logistika.dto.Instruction.Task.*;
 
 @Service("tripTicketService")
-public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
+public class TripTicketServiceImpl extends AbstractService implements TripTicketService, ApplicationListener<BrokerAvailabilityEvent> {
 
     private final TripTicketDao ticketDao;
     private final TruckDao truckDao;
@@ -40,15 +45,23 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final TimeTrackerService timeService;
     private final OrderDao orderDao;
     private final TripTicketServiceHelper helper;
+    private final SimpMessageSendingOperations messagingTemplate;
+    private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, TripTicketServiceHelper helper) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, TripTicketServiceHelper helper, SimpMessageSendingOperations messagingTemplate) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
         this.timeService = timeService;
         this.orderDao = orderDao;
         this.helper = helper;
+        this.messagingTemplate = messagingTemplate;
+    }
+
+    @Override
+    public void onApplicationEvent(BrokerAvailabilityEvent event) {
+        this.brokerAvailable.set(event.isBrokerAvailable());
     }
 
     /**
@@ -302,20 +315,22 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Method looks up for a current trip ticket assigned to the driver
      * and compiles the instruction to the driver based on current ticket step and its loads / unloads list
-     * @param personalId driver's personal Id
+     * @param principal driver initiating the request
      * @return instruction to the driver usable in OnTheRoadController
      */
     @Override
     @Transactional
-    public Instruction getInstructionForDriver(String personalId) {
+    public Instruction getInstructionForDriver(Principal principal) {
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        return getInstructionForDriver(driver);
+    }
 
+    private Instruction getInstructionForDriver(DriverEntity driver) {
         Instruction instruction = new Instruction();
-
-        DriverEntity driver = driverDao.findByPersonalId(personalId);
         instruction.setDriverStatus(driver.getStatus());
 
-        TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.RUNNING);
-        if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(personalId, TripTicketStatus.APPROVED);
+        TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.RUNNING);
+        if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.APPROVED);
         if (currentTicket == null) {
             instruction.setDirectiveMessage("Маршрутных заданий нет. Отдыхайте!");
             return instruction;
@@ -388,12 +403,13 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void reachStopover(long ticketId, int step) {
+    public void reachStopover(Principal principal, long ticketId, int step) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step) {
             ticket.setCurrentStep(step);
             helper.updateDriversTimeRecords(ticket);
             helper.checkTicketCompletion(ticket);
+            sendUpdateToOtherDrivers(ticket, principal);
         } else throw new ServiceException(String.format("Wrong step sequence for ticket id %d", ticketId));
     }
 
@@ -406,7 +422,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void loadAtStopover(long ticketId, int step) {
+    public void loadAtStopover(Principal principal, long ticketId, int step) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> ordersToLoad = ticket.getStopoverWithSequenceNo(step)
                 .getLoads().stream()
@@ -414,6 +430,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ordersToLoad.forEach(o -> o.setStatus(OrderStatus.SHIPPED));
         helper.updateDriversTimeRecords(ticket);
         helper.checkTicketCompletion(ticket);
+        sendUpdateToOtherDrivers(ticket, principal);
     }
 
     /**
@@ -424,7 +441,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     @Transactional
-    public void unloadAtStopover(long ticketId, int step) {
+    public void unloadAtStopover(Principal principal, long ticketId, int step) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> ordersToUnload = ticket.getStopoverWithSequenceNo(step)
                 .getUnloads().stream()
@@ -432,6 +449,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
         helper.updateDriversTimeRecords(ticket);
         helper.checkTicketCompletion(ticket);
+        sendUpdateToOtherDrivers(ticket, principal);
     }
 
 
@@ -442,6 +460,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         return LocalDateTime.now().isAfter(ticket.getDepartureDateTime()) ?
                 LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES) :
                 ticket.getDepartureDateTime().truncatedTo(ChronoUnit.MINUTES);
+    }
+
+    private void sendUpdateToOtherDrivers(TripTicketEntity ticket, Principal principal) {
+        if(this.brokerAvailable.get() && ticket.getDrivers().size() > 1) {
+            DriverEntity initiatingDriver = driverDao.findByUsername(principal.getName());
+            ticket.getDrivers().stream().filter(driver -> !driver.equals(initiatingDriver)).forEach(driver -> {
+                this.messagingTemplate.convertAndSendToUser(driver.getUsername(), "/logiweb/updates",
+                        getInstructionForDriver(driver));
+            });
+        }
     }
 
 }

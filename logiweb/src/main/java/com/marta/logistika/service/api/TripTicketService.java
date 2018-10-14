@@ -10,6 +10,7 @@ import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.dto.Instruction;
 import org.springframework.lang.Nullable;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -26,10 +27,10 @@ public interface TripTicketService {
     void deleteTicket(long ticketId);
 
     // processing ticket on the road (driver operations)
-    Instruction getInstructionForDriver(String personalId);
-    void reachStopover(long ticketId, int step);
-    void loadAtStopover(long ticketId, int step);
-    void unloadAtStopover(long ticketId, int step);
+    Instruction getInstructionForDriver(Principal principal);
+    void reachStopover(Principal principal, long ticketId, int step);
+    void loadAtStopover(Principal principal, long ticketId, int step);
+    void unloadAtStopover(Principal principal, long ticketId, int step);
 
     // other very useful operations
     TripTicketRecord findById(long ticketId);

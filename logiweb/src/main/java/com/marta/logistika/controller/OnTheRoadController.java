@@ -1,26 +1,24 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.Instruction;
-import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dto.InstructionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/logiweb")
 public class OnTheRoadController {
 
     private final TripTicketService ticketService;
-    private final DriverService driverService;
 
     @Autowired
-    public OnTheRoadController(TripTicketService ticketService, DriverService driverService) {
+    public OnTheRoadController(TripTicketService ticketService) {
         this.ticketService = ticketService;
-        this.driverService = driverService;
     }
 
     /**
@@ -37,10 +35,8 @@ public class OnTheRoadController {
      */
     @GetMapping(value = "/instruction", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public Instruction getInstruction() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String personalId = driverService.findPersonalIdByUsername(username);
-        return ticketService.getInstructionForDriver(personalId);
+    public Instruction getInstruction(Principal principal) {
+        return ticketService.getInstructionForDriver(principal);
     }
 
     /**
@@ -50,9 +46,9 @@ public class OnTheRoadController {
      */
     @PostMapping(value = "/goto", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public Instruction goTo(@ModelAttribute InstructionDetails instruction) {
-        ticketService.reachStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return getInstruction();
+    public Instruction goTo(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.reachStopover(principal, instruction.getTicketId(), instruction.getTargetStep());
+        return getInstruction(principal);
     }
 
     /**
@@ -62,9 +58,9 @@ public class OnTheRoadController {
      */
     @PostMapping(value = "/load", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public Instruction load(@ModelAttribute InstructionDetails instruction) {
-        ticketService.loadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return getInstruction();
+    public Instruction load(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.loadAtStopover(principal, instruction.getTicketId(), instruction.getTargetStep());
+        return getInstruction(principal);
     }
 
     /**
@@ -74,9 +70,9 @@ public class OnTheRoadController {
      */
     @PostMapping(value = "/unload", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public Instruction unload(@ModelAttribute InstructionDetails instruction) {
-        ticketService.unloadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return getInstruction();
+    public Instruction unload(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.unloadAtStopover(principal, instruction.getTicketId(), instruction.getTargetStep());
+        return getInstruction(principal);
     }
 
     /**
@@ -86,7 +82,7 @@ public class OnTheRoadController {
      */
     @PostMapping(value = "/finish", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public Instruction finish(@ModelAttribute InstructionDetails instruction) {
-        return getInstruction();
+    public Instruction finish(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        return getInstruction(principal);
     }
 }

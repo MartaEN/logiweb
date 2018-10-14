@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <spring.version>5.0.6.RELEASE</spring.version>
+        <spring.version>5.1.0.RELEASE</spring.version>
         <spring-security.version>5.1.0.RELEASE</spring-security.version>
         <hibernate.version>5.3.0.Final</hibernate.version>
         <mysql-connector.version>5.1.46</mysql-connector.version>
@@ -135,6 +135,11 @@
             <artifactId>spring-websocket</artifactId>
             <version>${spring.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
 
         <!-- Spring security and some explicit dependencies to prevent dependency resolution conflicts  -->
         <dependency>
@@ -215,6 +220,7 @@
             <artifactId>stomp-websocket</artifactId>
             <version>2.3.3</version>
         </dependency>
+
     </dependencies>
 
     <build>
