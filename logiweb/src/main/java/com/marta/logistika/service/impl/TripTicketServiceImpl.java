@@ -377,6 +377,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 throw new ServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
 
         }
+        instruction.setUrl(instruction.getTask().getUrl());
         return instruction;
     }
 

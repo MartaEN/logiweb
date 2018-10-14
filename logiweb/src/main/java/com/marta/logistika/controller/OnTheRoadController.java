@@ -1,12 +1,13 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dto.InstructionDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -22,38 +23,70 @@ public class OnTheRoadController {
         this.driverService = driverService;
     }
 
+    /**
+     * Renders core drivers' page
+     * @return path to jsp
+     */
     @GetMapping
-    public String home(Model uiModel){
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String personalId = driverService.findPersonalIdByUsername(username);
-
-        uiModel.addAttribute("instruction", ticketService.getInstructionForDriver(personalId));
-        uiModel.addAttribute("instructionDetails", new InstructionDetails());
-
+    public String home(){
         return "drivers/view";
     }
 
-    @PostMapping(value = "/goto")
-    public String goTo(@ModelAttribute InstructionDetails instruction) {
+    /**
+     * @return JSON current instruction to the requesting driver
+     */
+    @GetMapping(value = "/instruction", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction getInstruction() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String personalId = driverService.findPersonalIdByUsername(username);
+        return ticketService.getInstructionForDriver(personalId);
+    }
+
+    /**
+     * Record the message from the driver that the truck has reached the next stopover
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/goto", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction goTo(@ModelAttribute InstructionDetails instruction) {
         ticketService.reachStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return "redirect:/logiweb";
+        return getInstruction();
     }
 
-    @PostMapping(value = "/load")
-    public String load(@ModelAttribute InstructionDetails instruction) {
+    /**
+     * Record the message from the driver that the load has been completed
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/load", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction load(@ModelAttribute InstructionDetails instruction) {
         ticketService.loadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return "redirect:/logiweb";
+        return getInstruction();
     }
 
-    @PostMapping(value = "/unload")
-    public String unload(@ModelAttribute InstructionDetails instruction) {
+    /**
+     * Record the message from the driver that the unload has been completed
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/unload", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction unload(@ModelAttribute InstructionDetails instruction) {
         ticketService.unloadAtStopover(instruction.getTicketId(), instruction.getTargetStep());
-        return "redirect:/logiweb";
+        return getInstruction();
     }
 
-    @PostMapping(value = "/finish")
-    public String finish(@ModelAttribute InstructionDetails instruction) {
-        return "redirect:/logiweb";
+    /**
+     * Record the message from the driver that his shift is over
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/finish", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction finish(@ModelAttribute InstructionDetails instruction) {
+        return getInstruction();
     }
 }

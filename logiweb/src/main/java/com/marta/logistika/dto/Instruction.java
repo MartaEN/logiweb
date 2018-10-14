@@ -10,6 +10,7 @@ public class Instruction {
     private TripTicketRecord ticket;
     private int targetStep;
     private Task task;
+    private String url;
     private String directiveMessage;
     private String requestedActionMessage;
     private CityEntity currentStop;
@@ -24,9 +25,9 @@ public class Instruction {
         FINISH ("finish"),
         NONE ("none");
 
-        private String path;
-        Task(String path) { this.path = path; }
-        public String getPath() { return path; }
+        private String url;
+        Task(String url) { this.url = url; }
+        public String getUrl() { return url; }
     }
 
     public TripTicketRecord getTicket() {
@@ -51,6 +52,14 @@ public class Instruction {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getDirectiveMessage() {

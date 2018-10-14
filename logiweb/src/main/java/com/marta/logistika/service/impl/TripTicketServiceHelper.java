@@ -234,7 +234,6 @@ class TripTicketServiceHelper {
 
             // update driver status
             switch (currentTask) {
-//                case START:
                 case GOTO:
                     if(isFirstDriverSet) {
                         driver.setStatus(DriverStatus.SECONDING);
@@ -250,6 +249,7 @@ class TripTicketServiceHelper {
                 case FINISH:
                     driver.setStatus(DriverStatus.OFFLINE);
                     break;
+                case START:
                 default:
                     throw new RuntimeException(String.format("Invalid task %s for ticket id %d", currentTask, ticket.getId()));
             }
