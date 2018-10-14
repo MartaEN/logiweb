@@ -12,7 +12,7 @@ public class MessagingConfiguration {
 
 	private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
 	
-	private static final String ORDER_QUEUE = "order-queue";
+	private static final String TOPIC = "logiweb.update";
 
 	@Bean
 	public ActiveMQConnectionFactory connectionFactory(){
@@ -26,7 +26,8 @@ public class MessagingConfiguration {
 	public JmsTemplate jmsTemplate(){
 		JmsTemplate template = new JmsTemplate();
 		template.setConnectionFactory(connectionFactory());
-		template.setDefaultDestinationName(ORDER_QUEUE);
+		template.setPubSubDomain(true);
+		template.setDefaultDestinationName(TOPIC);
 		return template;
 	}
 	
