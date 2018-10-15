@@ -9,4 +9,7 @@
         <a href="/drivers"><i class="fas fa-users"></i></a>
         <a href="/destinations"><i class="fas fa-map-marked-alt"></i></a>
     </security:authorize>
+    <security:authorize access="hasRole('DRIVER')">
+        <a href="/logiweb"><i class="fas fa-map-marked-alt"></i></a>
+    </security:authorize>
 </nav>

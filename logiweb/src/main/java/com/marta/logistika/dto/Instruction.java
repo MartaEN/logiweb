@@ -22,7 +22,9 @@ public class Instruction {
         GOTO ("goto"),
         LOAD ("load"),
         UNLOAD ("unload"),
-        FINISH ("finish"),
+        FINISH_STOPOVER_BREAK ("stopover-break-over"),
+        FINISH_ROAD_BREAK("road-break-over"),
+        CLOSE_TICKET("finish"),
         NONE ("none");
 
         private String url;

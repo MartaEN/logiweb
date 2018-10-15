@@ -1,8 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<c:set value="${contextPath}/resources" var="resourcesPath" />
-<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-fixed-before-main.jsp"/>
 
 
 <div class="col-sm-6">

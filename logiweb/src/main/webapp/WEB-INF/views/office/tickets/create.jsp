@@ -2,9 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<c:set value="${contextPath}/resources" var="resourcesPath" />
-
-<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-fixed-before-main.jsp"/>
 
 
 <div class="col-sm-6">
@@ -58,6 +56,7 @@
 
 </div>
 
+<%--Scripts specific for the page--%>
+<script src="${contextPath}/resources/js/find-trucks.js"></script>
 
-<script src="${resourcesPath}/js/find-trucks.js"></script>
 <jsp:include page="../../_fragments/page-template-after-main.jsp"/>

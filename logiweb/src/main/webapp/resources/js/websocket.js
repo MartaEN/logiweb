@@ -36,9 +36,12 @@ function connect() {
 
 function render(instruction) {
     console.log("Rendering instruction");
-    let source   = document.getElementById("template-drivers-view").innerHTML;
+    let source   = document.getElementById("template-drivers-nav").innerHTML;
     let template = Handlebars.compile(source);
-    $('#core-screen').html(template(instruction));
+    $('#mainNav').html(template(instruction));
+    source   = document.getElementById("template-drivers-view").innerHTML;
+    template = Handlebars.compile(source);
+    $('#driversView').html(template(instruction));
     addActionFormListener();
 }
 
@@ -46,8 +49,28 @@ function addActionFormListener() {
     $('form[name=actionForm]').on('submit', function (e) {
         e.preventDefault();
     });
-    $( "#actionBtn" ).click(function() {
+    $('form[name=changeStatusForm]').on('submit', function (e) {
+        e.preventDefault();
+    });
+    $( ".action-button" ).click(function() {
         let actionForm = $('form[name=actionForm]');
+        $.ajax({
+            url: actionForm[0].action,
+            type: actionForm[0].method,
+            data : actionForm.serialize(),
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                console.log(data);
+                render(data);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+    $( ".change-status-button" ).click(function() {
+        let actionForm = $('form[name=changeStatusForm]');
         $.ajax({
             url: actionForm[0].action,
             type: actionForm[0].method,

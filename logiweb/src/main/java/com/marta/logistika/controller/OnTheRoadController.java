@@ -64,7 +64,7 @@ public class OnTheRoadController {
     }
 
     /**
-     * Record the message from the driver that the unload has been completed
+     * Records the message from the driver that the unload has been completed
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -72,6 +72,64 @@ public class OnTheRoadController {
     @ResponseBody
     public Instruction unload(Principal principal, @ModelAttribute InstructionDetails instruction) {
         ticketService.unloadAtStopover(principal, instruction.getTicketId(), instruction.getTargetStep());
+        return getInstruction(principal);
+    }
+
+    /**
+     * Sets the requesting driver as the driving one
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/first-driver", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction setFirstDriver(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.setFirstDriver(principal, instruction.getTicketId());
+        return getInstruction(principal);
+    }
+
+    /**
+     * Records the message from the driver that a road break is being made
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/road-break", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction startRoadBreak(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.startRoadBreak(principal, instruction.getTicketId());
+        return getInstruction(principal);
+    }
+
+    /**
+     * Records the message from the driver that a road break is over
+     * @param instruction InstructionDetails
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/road-break-over", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction finishRoadBreak(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.finishRoadBreak(principal, instruction.getTicketId());
+        return getInstruction(principal);
+    }
+
+    /**
+     * Records the message from the driver he is making a stopover break
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/stopover-break", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction makeStopoverBreak(Principal principal) {
+        ticketService.startStopoverBreak(principal);
+        return getInstruction(principal);
+    }
+
+    /**
+     * Records the message from the driver that his stopover break is over
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/stopover-break-over", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction finishBreak(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.finishStopoverBreak(principal, instruction.getTicketId());
         return getInstruction(principal);
     }
 

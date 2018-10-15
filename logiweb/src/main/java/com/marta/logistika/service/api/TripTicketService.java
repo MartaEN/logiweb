@@ -31,6 +31,11 @@ public interface TripTicketService {
     void reachStopover(Principal principal, long ticketId, int step);
     void loadAtStopover(Principal principal, long ticketId, int step);
     void unloadAtStopover(Principal principal, long ticketId, int step);
+    void setFirstDriver(Principal principal, long ticketId);
+    void startRoadBreak(Principal principal, long ticketId);
+    void finishRoadBreak(Principal principal, long ticketId);
+    void startStopoverBreak(Principal principal);
+    void finishStopoverBreak(Principal principal, long ticketId);
 
     // other very useful operations
     TripTicketRecord findById(long ticketId);

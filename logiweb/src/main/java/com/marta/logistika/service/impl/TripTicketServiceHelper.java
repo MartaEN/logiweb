@@ -222,7 +222,7 @@ class TripTicketServiceHelper {
      * @param ticket to be updated
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    void updateDriversTimeRecords(TripTicketEntity ticket) {
+    void updateDriversTimeRecordsForNewStage(TripTicketEntity ticket) {
         // get actual task for the ticket
         Instruction.Task currentTask = getCurrentTask(ticket);
 
@@ -244,9 +244,9 @@ class TripTicketServiceHelper {
                     break;
                 case LOAD:
                 case UNLOAD:
-                    if(driver.getStatus() != DriverStatus.RESTING) driver.setStatus(DriverStatus.HANDLING);
+                    if(driver.getStatus() != DriverStatus.STOPOVER_BREAK) driver.setStatus(DriverStatus.HANDLING);
                     break;
-                case FINISH:
+                case CLOSE_TICKET:
                     driver.setStatus(DriverStatus.OFFLINE);
                     break;
                 case START:
@@ -255,14 +255,114 @@ class TripTicketServiceHelper {
             }
 
             //update driver time records
-            if(driver.getStatus() != DriverStatus.RESTING) {
+            if( ! driver.getStatus().equals(previousDriverStatus)) {
                 if (previousDriverStatus == DriverStatus.OFFLINE) timeService.openNewTimeRecord(driver);
-                else if (currentTask == FINISH) timeService.closeTimeRecord(driver);
+                else if (currentTask == CLOSE_TICKET) timeService.closeTimeRecord(driver);
                 else timeService.closeReopenTimeRecord(driver);
             }
         }
     }
 
+
+    /**
+     * Method registers the reporting driver as the first (driving) one, and changes all the rest to seconding status.
+     * @param ticket trip ticket
+     * @param initiatingDriver reporting driver
+     */
+    void setFirstDriver(TripTicketEntity ticket, DriverEntity initiatingDriver) {
+        if(getCurrentTask(ticket).equals(GOTO)) {
+            if(initiatingDriver.getStatus().equals(DriverStatus.SECONDING)) {
+                ticket.getDrivers().forEach(driver -> {
+                    if(driver.equals(initiatingDriver)) driver.setStatus(DriverStatus.DRIVING);
+                    else driver.setStatus(DriverStatus.SECONDING);
+                    timeService.closeReopenTimeRecord(driver);
+                });
+            } else {
+                throw new ServiceException(String.format("Driver role changes can be only made when ticket current task is 'goto'. Ticket id %d has %s task",
+                    ticket.getId(), getCurrentTask(ticket)));
+            }
+        } else {
+            throw new ServiceException(String.format("Changing to first driver can only be made from seconding status. Driver %s has %s status",
+                    initiatingDriver, initiatingDriver.getStatus()));
+        }
+    }
+
+    /**
+     * Method registers the road break for the ticket
+     * @param ticket to be updated
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void startRoadBreak(TripTicketEntity ticket) {
+        ticket.getDrivers().forEach(driver -> {
+            switch (driver.getStatus()) {
+                case DRIVING:
+                case SECONDING:
+                    driver.setStatus(DriverStatus.ROAD_BREAK);
+                    timeService.closeReopenTimeRecord(driver);
+                    break;
+                case HANDLING:
+                case ROAD_BREAK:
+                case STOPOVER_BREAK:
+                case OFFLINE:
+                    throw new ServiceException(String.format("Road break can be only taken from driving or seconding status. Driver %s has %s status",
+                            driver, driver.getStatus()));
+            }
+        });
+    }
+
+    /**
+     * Method registers the road break is over (statuses are updated for all truck drivers)
+     * @param ticket to be updated
+     * @param initiatingDriver initiating driver will be set as the driving one after break
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    void finishRoadBreak(TripTicketEntity ticket, DriverEntity initiatingDriver) {
+        if (getCurrentTask(ticket).equals(GOTO)) {
+            for (int i = 0; i < ticket.getDrivers().size(); i++) {
+                DriverEntity driver = ticket.getDrivers().get(i);
+                if(driver.equals(initiatingDriver)) {
+                    driver.setStatus(DriverStatus.DRIVING);
+                } else {
+                    driver.setStatus(DriverStatus.SECONDING);
+                }
+                timeService.closeReopenTimeRecord(driver);
+            }
+        } else {
+            throw new ServiceException(String.format(
+                "Road break can only be taken while ticket task is 'GOTO';  ticket id %d current task is %s",
+                ticket.getId(), getCurrentTask(ticket)));
+        }
+    }
+
+    /**
+     * Method registers the start of stopover break for the driver
+     * @param driver reporting driver
+     */
+     void startStopoverBreak(DriverEntity driver) {
+         if(driver.getStatus().equals(DriverStatus.HANDLING)) {
+             driver.setStatus(DriverStatus.STOPOVER_BREAK);
+             timeService.closeReopenTimeRecord(driver);
+         } else {
+             throw new ServiceException(String.format("Stopover break can be only taken from handling status. Driver %s has %s status",
+                     driver, driver.getStatus()));
+         }
+     }
+
+    /**
+     * Method registers the end of stopover break for the driver
+     * @param driver reporting driver
+     * @param ticket trip ticket
+     */
+    void finishStopoverBreak(DriverEntity driver, TripTicketEntity ticket) {
+        if(getCurrentTask(ticket).equals(LOAD) || getCurrentTask(ticket).equals(UNLOAD)) {
+            driver.setStatus(DriverStatus.HANDLING);
+            timeService.closeReopenTimeRecord(driver);
+        } else {
+            throw new ServiceException(String.format(
+                    "Stopover break can only be taken while ticket task is 'LOAD' or 'UNLOAD';  ticket id %d current task is %s",
+                    ticket.getId(), getCurrentTask(ticket)));
+        }
+    }
 
     /**
      * Checks if all ticket tasks have been completed, and if yes - closes the ticket
@@ -271,7 +371,7 @@ class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     void checkTicketCompletion(TripTicketEntity ticket) {
-        if(getCurrentTask(ticket) == FINISH) {
+        if(getCurrentTask(ticket) == CLOSE_TICKET) {
             ticket.setStatus(TripTicketStatus.CLOSED);
 
             TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), TripTicketStatus.APPROVED);
@@ -302,7 +402,8 @@ class TripTicketServiceHelper {
         StopoverEntity currentStopover = ticket.getStopoverWithSequenceNo(ticket.getCurrentStep());
         if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) return UNLOAD;
         if(currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) return LOAD;
-        if(currentStep == ticket.getStopovers().size() - 1) return FINISH;
+        if(currentStep == ticket.getStopovers().size() - 1) return CLOSE_TICKET;
         return GOTO;
     }
+
 }

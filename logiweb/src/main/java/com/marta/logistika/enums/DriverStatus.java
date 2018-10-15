@@ -5,5 +5,6 @@ public enum DriverStatus {
     DRIVING,
     SECONDING,
     HANDLING,
-    RESTING
+    ROAD_BREAK,
+    STOPOVER_BREAK
 }

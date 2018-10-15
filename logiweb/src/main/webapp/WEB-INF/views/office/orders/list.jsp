@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
-<jsp:include page="../../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../../_fragments/page-template-fixed-before-main.jsp"/>
 
 
 <div class="col-md-8">

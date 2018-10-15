@@ -1,7 +1,7 @@
 package com.marta.logistika.service.impl;
 
+import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
-import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dao.api.TripTicketDao;
@@ -42,18 +42,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final TripTicketDao ticketDao;
     private final TruckDao truckDao;
     private final DriverDao driverDao;
-    private final TimeTrackerService timeService;
     private final OrderDao orderDao;
     private final TripTicketServiceHelper helper;
     private final SimpMessageSendingOperations messagingTemplate;
     private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, TimeTrackerService timeService, OrderDao orderDao, TripTicketServiceHelper helper, SimpMessageSendingOperations messagingTemplate) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, SimpMessageSendingOperations messagingTemplate) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
-        this.timeService = timeService;
         this.orderDao = orderDao;
         this.helper = helper;
         this.messagingTemplate = messagingTemplate;
@@ -327,7 +325,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     private Instruction getInstructionForDriver(DriverEntity driver) {
         Instruction instruction = new Instruction();
-        instruction.setDriverStatus(driver.getStatus());
 
         TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.RUNNING);
         if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.APPROVED);
@@ -337,61 +334,78 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
         instruction.setTicket(mapper.map(currentTicket, TripTicketRecord.class));
 
-        int step = currentTicket.getCurrentStep();
-        StopoverEntity currentStopover;
-        Task task = helper.getCurrentTask(currentTicket);
-        switch (task) {
-            case START:
-                instruction.setTask(GOTO);
-                instruction.setTargetStep(0);
-                instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
-                        currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
-                        currentTicket.getDepartureDateTime().toString().substring(0, 10),
-                        currentTicket.getDepartureDateTime().toString().substring(11, 16)));
-                instruction.setRequestedActionMessage("Открыть смену");
-                break;
-            case GOTO:
-                instruction.setTask(GOTO);
-                instruction.setTargetStep(step + 1);
-                instruction.setDirectiveMessage(String.format("Следуйте в город %s",
-                        currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
-                instruction.setRequestedActionMessage("Подтвердить прибытие");
-                break;
-            case LOAD:
-                currentStopover = currentTicket.getStopoverWithSequenceNo(step);
-                instruction.setTask(LOAD);
-                instruction.setTargetStep(step);
-                instruction.setCurrentStop(currentStopover.getCity());
-                instruction.setOrders(currentStopover.getLoads().stream()
-                        .map(TransactionEntity::getOrder)
-                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
-                        .collect(Collectors.toList()));
-                instruction.setDirectiveMessage("Получите груз:");
-                instruction.setRequestedActionMessage("Подтвердить погрузку");
-                break;
-            case UNLOAD:
-                currentStopover = currentTicket.getStopoverWithSequenceNo(step);
-                instruction.setTask(UNLOAD);
-                instruction.setTargetStep(currentTicket.getCurrentStep());
-                instruction.setCurrentStop(currentStopover.getCity());
-                instruction.setOrders(currentStopover.getUnloads().stream()
-                        .map(TransactionEntity::getOrder)
-                        .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
-                        .collect(Collectors.toList()));
-                instruction.setDirectiveMessage("Произведите выгрузку");
-                instruction.setRequestedActionMessage("Подтвердить отгрузку");
-                break;
-            case FINISH:
-                instruction.setTask(FINISH);
-                instruction.setTargetStep(step + 1);
-                instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
-                instruction.setRequestedActionMessage("Закрыть");
-                break;
-            case NONE:
-            default:
-                throw new ServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
 
+        DriverStatus driverStatus = driver.getStatus();
+        instruction.setDriverStatus(driverStatus);
+        switch (driverStatus) {
+            case ROAD_BREAK:
+                instruction.setTask(FINISH_ROAD_BREAK);
+                instruction.setDirectiveMessage("Ваш статус: стоянка для отдыха");
+                instruction.setRequestedActionMessage("Завершить стоянку");
+                break;
+            case STOPOVER_BREAK:
+                instruction.setTask(FINISH_STOPOVER_BREAK);
+                instruction.setDirectiveMessage("Ваш статус: перерыв");
+                instruction.setRequestedActionMessage("Завершить перерыв");
+                break;
+            default:
+                int step = currentTicket.getCurrentStep();
+                StopoverEntity currentStopover;
+                Task task = helper.getCurrentTask(currentTicket);
+                switch (task) {
+                    case START:
+                        instruction.setTask(GOTO);
+                        instruction.setTargetStep(0);
+                        instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
+                                currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
+                                currentTicket.getDepartureDateTime().toString().substring(0, 10),
+                                currentTicket.getDepartureDateTime().toString().substring(11, 16)));
+                        instruction.setRequestedActionMessage("Открыть смену");
+                        break;
+                    case GOTO:
+                        instruction.setTask(GOTO);
+                        instruction.setTargetStep(step + 1);
+                        instruction.setDirectiveMessage(String.format("Следуйте в город %s",
+                                currentTicket.getStopoverWithSequenceNo(step + 1).getCity().getName()));
+                        instruction.setRequestedActionMessage("Подтвердить прибытие");
+                        break;
+                    case LOAD:
+                        currentStopover = currentTicket.getStopoverWithSequenceNo(step);
+                        instruction.setTask(LOAD);
+                        instruction.setTargetStep(step);
+                        instruction.setCurrentStop(currentStopover.getCity());
+                        instruction.setOrders(currentStopover.getLoads().stream()
+                                .map(TransactionEntity::getOrder)
+                                .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
+                                .collect(Collectors.toList()));
+                        instruction.setDirectiveMessage("Получите груз:");
+                        instruction.setRequestedActionMessage("Подтвердить погрузку");
+                        break;
+                    case UNLOAD:
+                        currentStopover = currentTicket.getStopoverWithSequenceNo(step);
+                        instruction.setTask(UNLOAD);
+                        instruction.setTargetStep(currentTicket.getCurrentStep());
+                        instruction.setCurrentStop(currentStopover.getCity());
+                        instruction.setOrders(currentStopover.getUnloads().stream()
+                                .map(TransactionEntity::getOrder)
+                                .map(o -> mapper.map(o, OrderRecordDriverInstruction.class))
+                                .collect(Collectors.toList()));
+                        instruction.setDirectiveMessage("Произведите выгрузку");
+                        instruction.setRequestedActionMessage("Подтвердить отгрузку");
+                        break;
+                    case CLOSE_TICKET:
+                        instruction.setTask(CLOSE_TICKET);
+                        instruction.setTargetStep(step + 1);
+                        instruction.setDirectiveMessage("Маршрут завершён. Спасибо за работу!");
+                        instruction.setRequestedActionMessage("Закрыть");
+                        break;
+                    case NONE:
+                    default:
+                        throw new ServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
+
+                }
         }
+
         instruction.setUrl(instruction.getTask().getUrl());
         return instruction;
     }
@@ -407,7 +421,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step) {
             ticket.setCurrentStep(step);
-            helper.updateDriversTimeRecords(ticket);
+            helper.updateDriversTimeRecordsForNewStage(ticket);
             helper.checkTicketCompletion(ticket);
             sendUpdateToOtherDrivers(ticket, principal);
         } else throw new ServiceException(String.format("Wrong step sequence for ticket id %d", ticketId));
@@ -428,7 +442,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getLoads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToLoad.forEach(o -> o.setStatus(OrderStatus.SHIPPED));
-        helper.updateDriversTimeRecords(ticket);
+        helper.updateDriversTimeRecordsForNewStage(ticket);
         helper.checkTicketCompletion(ticket);
         sendUpdateToOtherDrivers(ticket, principal);
     }
@@ -447,12 +461,79 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .getUnloads().stream()
                 .map(TransactionEntity::getOrder).collect(Collectors.toList());
         ordersToUnload.forEach(o -> o.setStatus(OrderStatus.DELIVERED));
-        helper.updateDriversTimeRecords(ticket);
+        helper.updateDriversTimeRecordsForNewStage(ticket);
         helper.checkTicketCompletion(ticket);
         sendUpdateToOtherDrivers(ticket, principal);
     }
 
+    /**
+     * Method registers the reporting driver as the first (driving) one, and changes all the rest to seconding status.
+     * @param principal reporting driver
+     * @param ticketId ticket id
+     */
+    @Override
+    @Transactional
+    public void setFirstDriver(Principal principal, long ticketId) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        helper.setFirstDriver(ticket, driver);
+        sendUpdateToOtherDrivers(ticket, principal);
+    }
 
+    /**
+     * Method registers drivers taking a road break (status ROAD_BREAK is assigned to all truck drivers).
+     * @param principal reporting driver
+     * @param ticketId ticket id
+     */
+    @Override
+    @Transactional
+    public void startRoadBreak(Principal principal, long ticketId) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        helper.startRoadBreak(ticket);
+        sendUpdateToOtherDrivers(ticket, principal);
+    }
+
+    /**
+     * Method registers drivers finishing a road break (status RESTING is assigned to all truck drivers).
+     * @param principal reporting driver
+     * @param ticketId ticket id
+     */
+    @Override
+    @Transactional
+    public void finishRoadBreak(Principal principal, long ticketId) {
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        helper.finishRoadBreak(ticket, driver);
+        sendUpdateToOtherDrivers(ticket, principal);
+    }
+
+    /**
+     * Method registers drivers taking a stopover break (break status is assigned to him but not to other truck drivers).
+     * @param principal reporting driver
+     */
+    @Override
+    @Transactional
+    public void startStopoverBreak(Principal principal) {
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        helper.startStopoverBreak(driver);
+    }
+
+    /**
+     * Method registers driver's stopover break is over
+     * @param principal reporting driver
+     */
+    @Override
+    @Transactional
+    public void finishStopoverBreak(Principal principal, long ticketId) {
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        helper.finishStopoverBreak(driver, ticket);
+    }
+
+    /**
+     * @param ticketId trip ticket
+     * @return minimum date / time that the ticket's departure datetime can be changed to
+     */
     @Override
     @Transactional
     public LocalDateTime getMinNewDateTime(long ticketId) {

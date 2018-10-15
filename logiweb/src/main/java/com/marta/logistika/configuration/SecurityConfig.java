@@ -1,12 +1,15 @@
 package com.marta.logistika.configuration;
 
+import com.marta.logistika.security.UrlAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
@@ -37,12 +40,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(filter,CsrfFilter.class);
 
         http.authorizeRequests()
-                .antMatchers("/orders/**", "/tickets/**", "/trucks/**", "/drivers/**").hasRole("LOGIST")
+                .antMatchers("/orders/**", "/tickets/**", "/trucks/**", "/drivers/**", "/destinations/**").hasRole("LOGIST")
                 .antMatchers("/logiweb/**").hasRole("DRIVER")
                 .and()
                 .formLogin()
                     .loginPage("/login")
                     .loginProcessingUrl("/authenticate")
+                    .successHandler(myAuthenticationSuccessHandler())
                     .permitAll()
                 .and()
                 .logout()
@@ -54,5 +58,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable();
 
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler myAuthenticationSuccessHandler(){
+        return new UrlAuthenticationSuccessHandler();
     }
 }

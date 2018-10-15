@@ -2,7 +2,10 @@
 
 <html>
 
-<jsp:include page="../_fragments/head.jsp"/>
+<head>
+    <jsp:include page="../_fragments/head-common.jsp"/>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style-fixed.css">
+</head>
 
 <body>
 

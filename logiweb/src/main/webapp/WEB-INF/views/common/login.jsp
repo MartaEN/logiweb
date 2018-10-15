@@ -4,9 +4,9 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@page session="true"%>
-<jsp:include page="../_fragments/page-template-before-main.jsp"/>
+<jsp:include page="../_fragments/page-template-flex-before-main.jsp"/>
 
-<div class="col-sm-4">
+<div class="col-12 col-sm-9 col-md-7 col-lg-5">
 
     <h3 class="modal-header"><spring:message code="security.pleaseLogIn"/></h3>
 
