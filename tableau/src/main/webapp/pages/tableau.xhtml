@@ -13,5 +13,16 @@
 
     <h:outputLabel value="${tableauView.testMessage}"/>
 
+    <f:websocket channel="websocket" onmessage="socketListener" />
+
+    <div id="logwebInfo"></div>
+
+
+    <script type="text/javascript">
+        function socketListener(message, channel, event) {
+            document.getElementById("logwebInfo").innerHTML += message + "<br/>";
+        }
+    </script>
+
 </h:body>
 </html>
