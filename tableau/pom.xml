@@ -17,26 +17,21 @@
 
     <properties>
         <javaee.version>8.0</javaee.version>
-        <version.jboss.bom>8.1.0.Final</version.jboss.bom>
+        <version.jboss.bom>14.0.1.Final</version.jboss.bom>
         <jsf.version>RELEASE</jsf.version>
         <primefaces.version>RELEASE</primefaces.version>
+        <hibernate.version>1.0.2.Final</hibernate.version>
         <version.compiler.plugin>3.1</version.compiler.plugin>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
+        <wildfly.plugin.version>1.2.1.Final</wildfly.plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.wildfly.bom</groupId>
-                <artifactId>jboss-javaee-7.0-with-tools</artifactId>
-                <version>${version.jboss.bom}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wildfly.bom</groupId>
-                <artifactId>jboss-javaee-7.0-with-hibernate</artifactId>
+                <artifactId>wildfly-javaee8-with-tools</artifactId>
                 <version>${version.jboss.bom}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -48,7 +43,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
+            <version>${javaee.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>
@@ -57,17 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>jaxrs-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -76,19 +61,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.spec.javax.faces</groupId>
-            <artifactId>jboss-jsf-api_2.2_spec</artifactId>
+            <artifactId>jboss-jsf-api_2.3_spec</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -96,6 +70,11 @@
             <artifactId>primefaces</artifactId>
             <version>${primefaces.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
     </dependencies>
 
@@ -113,7 +92,7 @@
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.2.1.Final</version>
+                <version>${wildfly.plugin.version}</version>
             </plugin>
         </plugins>
     </build>
