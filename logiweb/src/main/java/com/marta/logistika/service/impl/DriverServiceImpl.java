@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
+import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.dto.DriverRecord;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,11 +92,6 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     }
 
     @Override
-    public String findPersonalIdByUsername(String username) {
-        return driverDao.findByUsername(username).getPersonalId();
-    }
-
-    @Override
     public List<DriverRecord> listAll() {
         return driverDao.listAll().stream()
                 .map(d -> mapper.map(d, DriverRecord.class))
@@ -120,6 +118,22 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
         return driversList.stream()
                 .map(d -> mapper.map(d, DriverRecord.class))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Prepares summary statistics on total number of online / offline drivers
+     * @return map with resulting statistics
+     */
+    @Override
+    public LinkedHashMap<String, Integer> getDriverStatistics() {
+        Map<DriverStatus, Integer> fullDriverStats = driverDao.getDriverStatistics();
+        LinkedHashMap<String, Integer> briefDriverStats = new LinkedHashMap<>();
+        briefDriverStats.put("ONLINE", 0);
+        briefDriverStats.put("OFFLINE", 0);
+        fullDriverStats.forEach((status, count) -> {
+            briefDriverStats.put(status.getBriefStatValue(), count + briefDriverStats.getOrDefault(status.getBriefStatValue(), 0));
+        });
+        return briefDriverStats;
     }
 
 

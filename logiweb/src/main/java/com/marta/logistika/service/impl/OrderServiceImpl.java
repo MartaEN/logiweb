@@ -3,10 +3,10 @@ package com.marta.logistika.service.impl;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dto.OrderRecordFull;
 import com.marta.logistika.entity.OrderEntity;
-import com.marta.logistika.messaging.MessageSender;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.dto.OrderEntryForm;
 import com.marta.logistika.dto.OrderRecordShort;
+import com.marta.logistika.service.api.TableauService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,20 +18,20 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
-    private final MessageSender messageSender;
+    private final TableauService tableauService;
     private final static int ROWS_PER_PAGE = 6;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, MessageSender messageSender) {
+    public OrderServiceImpl(OrderDao orderDao, TableauService tableauService) {
         this.orderDao = orderDao;
-        this.messageSender = messageSender;
+        this.tableauService = tableauService;
     }
 
     @Override
     @Transactional
     public long add(OrderEntryForm order) {
         long newOrderId = orderDao.add(mapper.map(order, OrderEntity.class));
-        messageSender.sendMessage(String.format("Order id %d created", newOrderId));
+        tableauService.updateTableau();
         return newOrderId;
     }
 

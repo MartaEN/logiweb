@@ -3,10 +3,13 @@ package com.marta.logistika.dao.impl;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
+import com.marta.logistika.enums.DriverStatus;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository("driverRepository")
 public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDao {
@@ -65,5 +68,17 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
                 .setParameter("fromCity", fromCity)
                 .setParameter("time", time)
                 .getResultList();
+    }
+
+    @Override
+    public Map<DriverStatus, Integer> getDriverStatistics() {
+        Map<DriverStatus, Integer> driverStats = new HashMap<>();
+        List<Object[]> results = em.createQuery(
+                "SELECT d.status AS status, COUNT(d) AS total FROM DriverEntity d GROUP BY d.status")
+        .getResultList();
+        for (Object[] result : results) {
+            driverStats.put((DriverStatus) result[0], ((Number) result[1]).intValue());
+        }
+        return driverStats;
     }
 }

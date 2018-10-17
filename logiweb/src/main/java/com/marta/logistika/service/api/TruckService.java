@@ -3,7 +3,9 @@ package com.marta.logistika.service.api;
 import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface TruckService {
 
@@ -13,4 +15,5 @@ public interface TruckService {
     List<TruckRecord> listAll();
     List<TruckRecord> listAllFilteredBy (TruckFilterForm filter);
     TruckRecord findTruckByRegNum(String regNum);
+    LinkedHashMap<String,Long> getTruckStatistics();
 }

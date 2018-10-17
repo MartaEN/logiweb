@@ -21,4 +21,8 @@ public class WebsocketPushBean implements Serializable {
     public void pushUpdate(String input) {
         push.send(input);
     }
+
+    public void pushUpdate(Object input) {
+        push.send(input);
+    }
 }

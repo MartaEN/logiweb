@@ -11,5 +11,8 @@ public interface TruckDao extends GenericDao<TruckEntity> {
     TruckEntity findByRegNumber (String regNumber);
     List<TruckEntity> listAll();
     List<TruckEntity> listAllFilteredBy(TruckFilterForm filter);
+    long countOnline();
+    long countOffline();
+    long countUnserviceable();
 
 }

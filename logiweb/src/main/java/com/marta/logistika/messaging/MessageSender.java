@@ -6,6 +6,7 @@ import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
 import javax.jms.*;
+import java.io.Serializable;
 
 @Component
 public class MessageSender {
@@ -26,6 +27,17 @@ public class MessageSender {
 					return textMessage;
 				}
 			});
+	}
+
+	public void sendMessage(final Serializable message) {
+
+		jmsTemplate.send(new MessageCreator(){
+			@Override
+			public Message createMessage(Session session) throws JMSException{
+				ObjectMessage objectMessage = session.createObjectMessage(message);
+				return objectMessage;
+			}
+		});
 	}
 
 }

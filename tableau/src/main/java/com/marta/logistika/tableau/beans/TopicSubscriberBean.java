@@ -28,6 +28,7 @@ public class TopicSubscriberBean implements MessageListener {
                 pushBean.pushUpdate(input);
             } else if (message instanceof ObjectMessage) {
                 System.out.println("ObjectMessage received.");
+                pushBean.pushUpdate(message.getBody(Object.class));
             } else {
                 System.out.println("Unknown message type:" + message.getClass());
             }

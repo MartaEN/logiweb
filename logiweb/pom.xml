@@ -22,7 +22,6 @@
         <jstl.version>1.2</jstl.version>
         <javax.validation>2.0.1.Final</javax.validation>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version>
-        <jackson.version>2.9.6</jackson.version>
         <activemq.version>5.13.3</activemq.version>
         <dozer.version>5.4.0</dozer.version>
         <dozer.jdk8.version>1.0.4</dozer.jdk8.version>
@@ -100,12 +99,7 @@
             <version>${hibernate.validator.version}</version>
         </dependency>
 
-        <!-- JSON and Bean mapping support -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
+        <!-- Bean mapping support -->
         <dependency>
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>

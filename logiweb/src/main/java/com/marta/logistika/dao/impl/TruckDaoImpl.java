@@ -53,4 +53,22 @@ public class TruckDaoImpl extends AbstractDao<TruckEntity> implements TruckDao {
                 .getResultList();
 
     }
+
+    @Override
+    public long countOnline() {
+        return em.createQuery("SELECT COUNT (t) FROM TruckEntity t WHERE t.isServiceable=true AND t.isParked=false", Long.class)
+                .getSingleResult();
+    }
+
+    @Override
+    public long countOffline() {
+        return em.createQuery("SELECT COUNT (t) FROM TruckEntity t WHERE t.isServiceable=true AND t.isParked=true", Long.class)
+                .getSingleResult();
+    }
+
+    @Override
+    public long countUnserviceable() {
+        return em.createQuery("SELECT COUNT (t) FROM TruckEntity t WHERE t.isServiceable=false", Long.class)
+                .getSingleResult();
+    }
 }

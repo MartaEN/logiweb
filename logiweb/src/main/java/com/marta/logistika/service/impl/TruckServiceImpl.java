@@ -4,6 +4,7 @@ import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.entity.TruckEntity;
 import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.dto.TruckRecord;
+import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("truckService")
@@ -79,6 +83,19 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     public TruckRecord findTruckByRegNum(String regNum) {
         return mapper.map(truckDao.findByRegNumber(regNum), TruckRecord.class);
+    }
+
+    /**
+     * Prepares summary statistics on total number of online / offline / unserviceable trucks
+     * @return map with resulting statistics
+     */
+    @Override
+    public LinkedHashMap<String, Long> getTruckStatistics() {
+        LinkedHashMap<String, Long> briefTruckStats = new LinkedHashMap<>();
+        briefTruckStats.put("ONLINE", truckDao.countOnline());
+        briefTruckStats.put("OFFLINE", truckDao.countOffline());
+        briefTruckStats.put("UNSERVICEABLE", truckDao.countUnserviceable());
+        return briefTruckStats;
     }
 
     private boolean isTruckRecordValid (TruckRecord truckRecord) {

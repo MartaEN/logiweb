@@ -11,18 +11,54 @@
 </h:head>
 <h:body>
 
-    <h:outputLabel value="${tableauView.testMessage}"/>
+    <h:form>
+
+    <div class="ui-g">
+        <div class="ui-g-12">
+            Header
+        </div>
+        <div class="ui-g-12 ui-md-8">
+            <p:dataTable var="order" value="#{tableauView.latestOrders}">
+                <p:column headerText="Id">
+                    <h:outputText value="#{order.id}" />
+                </p:column>
+                <p:column headerText="From">
+                    <h:outputText value="#{order.fromCity.name}" />
+                </p:column>
+                <p:column headerText="To">
+                    <h:outputText value="#{order.toCity.name}" />
+                </p:column>
+            </p:dataTable>
+        </div>
+        <div class="ui-g-12 ui-md-4">
+            <div class="ui-g-6 ui-md-12">
+                <p:chart type="pie" model="#{tableauView.driverStatistics}" style="width:400px;height:300px" />
+            </div>
+            <div class="ui-g-6 ui-md-12">
+                <p:chart type="pie" model="#{tableauView.truckStatistics}"  style="width:400px;height:300px" />
+            </div>
+        </div>
+        <div class="ui-g-12">
+            Footer
+        </div>
+    </div>
+
+
+
+
+
 
     <f:websocket channel="websocket" onmessage="socketListener" />
 
     <div id="logwebInfo"></div>
-
 
     <script type="text/javascript">
         function socketListener(message, channel, event) {
             document.getElementById("logwebInfo").innerHTML += message + "<br/>";
         }
     </script>
+
+    </h:form>
 
 </h:body>
 </html>
