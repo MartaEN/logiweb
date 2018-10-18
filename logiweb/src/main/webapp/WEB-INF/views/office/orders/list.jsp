@@ -26,7 +26,7 @@
 
     <c:if test="${not empty orders}">
 
-        <table class="table table-hover">
+        <table class="table table-sm table-hover">
 
             <thead>
             <tr>

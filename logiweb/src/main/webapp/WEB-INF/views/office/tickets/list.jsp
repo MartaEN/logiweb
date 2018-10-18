@@ -17,7 +17,7 @@
 
     <c:if test="${not empty tickets}">
 
-        <table id="filter-table" class="table table-hover">
+        <table id="filter-table" class="table table-sm table-hover">
             <thead>
             <tr>
                 <th>№</th>
