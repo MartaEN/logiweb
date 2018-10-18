@@ -1,8 +1,17 @@
+html, body {
+    height: 100%;
+}
+
 body {
+    margin: 0 auto;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    display: grid;
+    grid-template-rows: 80px 1fr 24px;
+    grid-template-areas:    "header" "main" "footer";
 }
 
 #header {
+    grid-area: header;
     background-color: #8CC152;
     color: white;
     padding: 12px;
@@ -11,13 +20,20 @@ body {
     user-select: none;
 }
 
+#main {
+    grid-area: main;
+}
+
 #footer {
+    grid-area: footer;
     background-color: #E6E9ED;
     text-align: center;
     font-size: 12px;
+    line-height: 12px;
 }
 
 .side-chart {
     height: 250px;
+    width: 100%;
 }
 

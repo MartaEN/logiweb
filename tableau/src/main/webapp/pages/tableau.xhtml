@@ -10,20 +10,19 @@
     <title>Logiweb Tableau</title>
     <h:outputStylesheet library="css" name="tableau.css" />
     <h:outputScript>
-        function onMessage(message, channel, event) {
-            // console.log('websocket push message::' + message + ' channel::' + channel + ' event::' + event);
-            // document.getElementById("logwebInfo").innerHTML = message;
+        function onMessage(message) {
+            // console.log('websocket push message::' + message);
             location.reload();
         }
     </h:outputScript>
 </h:head>
 <h:body>
 
-    <div class="ui-g">
-        <div id="header" class="ui-g-12">
-            LogiWeb Tableau
-        </div>
-        <div id="table" class="ui-g-12 ui-md-8">
+    <div id="header" class="ui-g-12">
+        LogiWeb Tableau
+    </div>
+    <div id="main" class="ui-g-12">
+        <div id="orders-table" class="ui-g-12 ui-md-12 ui-lg-8">
             <h3>Latest orders</h3>
             <p:dataTable var="order" reflow="true" value="#{tableauView.latestOrders}">
                 <p:column headerText="Id">
@@ -46,17 +45,17 @@
                 </p:column>
             </p:dataTable>
         </div>
-        <div class="ui-g-12 ui-md-4">
-            <div class="ui-g-12">
+        <div class="ui-g-12 ui-md-12 ui-lg-4">
+            <div class="ui-g-12 ui-md-6 ui-lg-12">
                 <p:chart type="pie" styleClass="side-chart" model="#{tableauView.driverStatistics}"/>
             </div>
-            <div class="ui-g-12">
+            <div class="ui-g-12 ui-md-6 ui-lg-12">
                 <p:chart type="pie" styleClass="side-chart" model="#{tableauView.truckStatistics}"  />
             </div>
         </div>
-        <div id="footer" class="ui-g-12">
-            <h:outputText value="LogiWeb &copy; 2018" />
-        </div>
+    </div>
+    <div id="footer" class="ui-g-12">
+        <h:outputText value="LogiWeb &copy; 2018" />
     </div>
 
     <f:websocket channel="websocket" onmessage="onMessage" />
