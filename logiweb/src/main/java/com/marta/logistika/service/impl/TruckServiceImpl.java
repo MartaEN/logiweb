@@ -4,28 +4,29 @@ import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.entity.TruckEntity;
 import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.dto.TruckRecord;
-import com.marta.logistika.enums.DriverStatus;
+import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.TruckService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("truckService")
 public class TruckServiceImpl extends AbstractService implements TruckService {
 
     private final TruckDao truckDao;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public TruckServiceImpl(TruckDao truckDao) {
+    public TruckServiceImpl(TruckDao truckDao, ApplicationEventPublisher applicationEventPublisher) {
         this.truckDao = truckDao;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -36,6 +37,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
         } else if(isTruckRecordValid(truck)) {
             truck.setParked(true);
             truckDao.add(mapper.map(truck, TruckEntity.class));
+            applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         } else {
             throw new ServiceException("Truck data invalid");
         }
@@ -50,6 +52,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
                 truckEntity.setCapacity(truckEditFormInput.getCapacity());
                 truckEntity.setShiftSize(truckEditFormInput.getShiftSize());
                 truckEntity.setServiceable(truckEditFormInput.isServiceable());
+                applicationEventPublisher.publishEvent(new EntityUpdateEvent());
             } else {
                 throw new ServiceException("Truck data invalid");
             }
@@ -62,6 +65,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Transactional
     public void remove(TruckRecord truck) {
         truckDao.remove(truckDao.findByRegNumber(truck.getRegNumber()));
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
     @Override

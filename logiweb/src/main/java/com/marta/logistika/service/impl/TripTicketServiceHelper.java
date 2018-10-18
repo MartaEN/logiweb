@@ -4,12 +4,14 @@ import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
+import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,12 +34,14 @@ class TripTicketServiceHelper {
     private final TripTicketDao ticketDao;
     private final RoadService roadService;
     private final TimeTrackerService timeService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public TripTicketServiceHelper(TripTicketDao ticketDao, RoadService roadService, TimeTrackerService timeService) {
+    public TripTicketServiceHelper(TripTicketDao ticketDao, RoadService roadService, TimeTrackerService timeService, ApplicationEventPublisher applicationEventPublisher) {
         this.ticketDao = ticketDao;
         this.roadService = roadService;
         this.timeService = timeService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -256,9 +260,13 @@ class TripTicketServiceHelper {
 
             //update driver time records
             if( ! driver.getStatus().equals(previousDriverStatus)) {
-                if (previousDriverStatus == DriverStatus.OFFLINE) timeService.openNewTimeRecord(driver);
-                else if (currentTask == CLOSE_TICKET) timeService.closeTimeRecord(driver);
-                else timeService.closeReopenTimeRecord(driver);
+                if (previousDriverStatus == DriverStatus.OFFLINE) {
+                    timeService.openNewTimeRecord(driver);
+                    applicationEventPublisher.publishEvent(new EntityUpdateEvent());
+                } else if (currentTask == CLOSE_TICKET) {
+                    timeService.closeTimeRecord(driver);
+                    applicationEventPublisher.publishEvent(new EntityUpdateEvent());
+                } else timeService.closeReopenTimeRecord(driver);
             }
         }
     }
@@ -386,6 +394,9 @@ class TripTicketServiceHelper {
                     d.setBookedUntil(LocalDateTime.now());
                 }
             });
+
+            //publish update event
+            applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         }
     }
 

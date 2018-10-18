@@ -2,6 +2,7 @@ package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.enums.DriverStatus;
+import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.dto.DriverRecord;
@@ -12,13 +13,13 @@ import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +35,15 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     private final TripTicketDao ticketDao;
     private final TripTicketService ticketService;
     private final TimeTrackerService timeService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public DriverServiceImpl(DriverDao driverDao, TripTicketDao ticketDao, TripTicketService ticketService, TimeTrackerService timeService) {
+    public DriverServiceImpl(DriverDao driverDao, TripTicketDao ticketDao, TripTicketService ticketService, TimeTrackerService timeService, ApplicationEventPublisher applicationEventPublisher) {
         this.driverDao = driverDao;
         this.ticketDao = ticketDao;
         this.ticketService = ticketService;
         this.timeService = timeService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
         }
         System.out.println(mapper.map(driver, DriverEntity.class));
         driverDao.add(mapper.map(driver, DriverEntity.class));
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
     @Override
@@ -62,6 +66,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
                 driverEntity.setFirstName(driverEditFormInput.getFirstName());
                 driverEntity.setLastName(driverEditFormInput.getLastName());
                 driverEntity.setLocation(driverEditFormInput.getLocation());
+                applicationEventPublisher.publishEvent(new EntityUpdateEvent());
             } else {
                 throw new ServiceException("Driver data invalid");
             }
@@ -74,6 +79,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     @Transactional
     public void remove(String personalId) {
         driverDao.remove(driverDao.findByPersonalId(personalId));
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
     @Override

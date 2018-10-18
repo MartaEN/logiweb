@@ -2,6 +2,7 @@ package com.marta.logistika.service.impl;
 
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
+import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dao.api.TripTicketDao;
@@ -14,6 +15,7 @@ import com.marta.logistika.exception.*;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -44,16 +46,18 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final DriverDao driverDao;
     private final OrderDao orderDao;
     private final TripTicketServiceHelper helper;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final SimpMessageSendingOperations messagingTemplate;
     private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, SimpMessageSendingOperations messagingTemplate) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, ApplicationEventPublisher applicationEventPublisher, SimpMessageSendingOperations messagingTemplate) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
         this.orderDao = orderDao;
         this.helper = helper;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -103,6 +107,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
         truck.setParked(false);
         ticket.setCurrentStep(-1);
+
+        //publish update event
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
 
         return ticketDao.add(ticket);
     }
@@ -173,6 +180,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         // update order status in case of successful weight check
         order.setStatus(OrderStatus.ASSIGNED);
+
+        //publish update event
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
 
@@ -208,6 +218,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
 
         order.setStatus(OrderStatus.NEW);
+
+        //publish update event
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
 
@@ -245,6 +258,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             // update ticket and its orders statuses
             ticket.setStatus(TripTicketStatus.APPROVED);
             ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
+
+            //publish update event
+            applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         }
     }
 

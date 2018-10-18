@@ -3,11 +3,13 @@ package com.marta.logistika.service.impl;
 import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dto.OrderRecordFull;
 import com.marta.logistika.entity.OrderEntity;
+import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.dto.OrderEntryForm;
 import com.marta.logistika.dto.OrderRecordShort;
 import com.marta.logistika.service.api.TableauService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +21,14 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
     private final TableauService tableauService;
-    private final static int ROWS_PER_PAGE = 6;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final static int ROWS_PER_PAGE = 10;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, TableauService tableauService) {
+    public OrderServiceImpl(OrderDao orderDao, TableauService tableauService, ApplicationEventPublisher applicationEventPublisher) {
         this.orderDao = orderDao;
         this.tableauService = tableauService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     public long add(OrderEntryForm order) {
         long newOrderId = orderDao.add(mapper.map(order, OrderEntity.class));
         tableauService.updateTableau();
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         return newOrderId;
     }
 
