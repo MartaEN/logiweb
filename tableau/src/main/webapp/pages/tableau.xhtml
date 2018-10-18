@@ -7,20 +7,30 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 <h:head>
-
+    <title>Logiweb Tableau</title>
+    <h:outputStylesheet library="css" name="tableau.css" />
+    <h:outputScript>
+        function onMessage(message, channel, event) {
+            // console.log('websocket push message::' + message + ' channel::' + channel + ' event::' + event);
+            // document.getElementById("logwebInfo").innerHTML = message;
+            location.reload();
+        }
+    </h:outputScript>
 </h:head>
 <h:body>
 
-    <h:form>
-
     <div class="ui-g">
-        <div class="ui-g-12">
-            Header
+        <div id="header" class="ui-g-12">
+            LogiWeb Tableau
         </div>
-        <div class="ui-g-12 ui-md-8">
-            <p:dataTable var="order" value="#{tableauView.latestOrders}">
+        <div id="table" class="ui-g-12 ui-md-8">
+            <h3>Latest orders</h3>
+            <p:dataTable var="order" reflow="true" value="#{tableauView.latestOrders}">
                 <p:column headerText="Id">
                     <h:outputText value="#{order.id}" />
+                </p:column>
+                <p:column headerText="Date">
+                    <h:outputText value="#{order.creationDate}" />
                 </p:column>
                 <p:column headerText="From">
                     <h:outputText value="#{order.fromCity.name}" />
@@ -28,37 +38,28 @@
                 <p:column headerText="To">
                     <h:outputText value="#{order.toCity.name}" />
                 </p:column>
+                <p:column headerText="Weight, kg">
+                    <h:outputText value="#{order.weight}" />
+                </p:column>
+                <p:column headerText="Status">
+                    <h:outputText value="#{order.status}" />
+                </p:column>
             </p:dataTable>
         </div>
         <div class="ui-g-12 ui-md-4">
-            <div class="ui-g-6 ui-md-12">
-                <p:chart type="pie" model="#{tableauView.driverStatistics}" style="width:400px;height:300px" />
+            <div class="ui-g-12">
+                <p:chart type="pie" styleClass="side-chart" model="#{tableauView.driverStatistics}"/>
             </div>
-            <div class="ui-g-6 ui-md-12">
-                <p:chart type="pie" model="#{tableauView.truckStatistics}"  style="width:400px;height:300px" />
+            <div class="ui-g-12">
+                <p:chart type="pie" styleClass="side-chart" model="#{tableauView.truckStatistics}"  />
             </div>
         </div>
-        <div class="ui-g-12">
-            Footer
+        <div id="footer" class="ui-g-12">
+            <h:outputText value="LogiWeb &copy; 2018" />
         </div>
     </div>
 
-
-
-
-
-
-    <f:websocket channel="websocket" onmessage="socketListener" />
-
-    <div id="logwebInfo"></div>
-
-    <script type="text/javascript">
-        function socketListener(message, channel, event) {
-            document.getElementById("logwebInfo").innerHTML += message + "<br/>";
-        }
-    </script>
-
-    </h:form>
+    <f:websocket channel="websocket" onmessage="onMessage" />
 
 </h:body>
 </html>
