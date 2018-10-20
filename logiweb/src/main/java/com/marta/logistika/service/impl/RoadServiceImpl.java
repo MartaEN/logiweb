@@ -1,5 +1,7 @@
 package com.marta.logistika.service.impl;
 
+import com.marta.logistika.exception.DuplicateRoadException;
+import com.marta.logistika.exception.NoRouteFoundException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.dao.api.RoadDao;
 import com.marta.logistika.dto.RoadRecord;
@@ -28,11 +30,11 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
     public void add(RoadEntity road) {
 
         //check road parameters validity
-        if(road == null) return;
-        if(road.getFromCity() == null || road.getToCity() == null) throw new IllegalArgumentException("Road id" + road.getId() + " invalid: null end points");
-        if(road.getFromCity().equals(road.getToCity())) throw new IllegalArgumentException("Road id" + road.getId() + " invalid: coinciding end points");
-//        if(roadDao.getDirectRoadFromTo(road.getFromCity(), road.getToCity()) != null) throw new SuchEntityAlreadyExistsException(road.getId(), RoadEntity.class);
-        if(road.getDistance() < 0.1f) throw new IllegalArgumentException("Road id" + road.getId() + ": distance " + road.getDistance() + " invalid; should be positive");
+        if(road == null) throw new IllegalArgumentException("Invalid input: null road");
+        if(road.getFromCity() == null || road.getToCity() == null) throw new IllegalArgumentException("Invalid input: null road end point(s)");
+        if(road.getFromCity().equals(road.getToCity())) throw new IllegalArgumentException("Invalid input: coinciding road end points");
+        if(roadDao.getDirectRoadFromTo(road.getFromCity(), road.getToCity()) != null) throw new DuplicateRoadException(road.getFromCity(), road.getToCity());
+        if(road.getDistance() < 1) throw new IllegalArgumentException(String.format("Road id %d distance (%d) is invalid - should be positive", road.getId(), road.getDistance()));
 
         //create return road
         RoadEntity returnRoad = new RoadEntity();
@@ -125,7 +127,7 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
             });
         }
 
-        if(!routesFound.containsKey(fromCity)) throw new RuntimeException("No route available from " + fromCity.getName() + " to " + toCity.getName());
+        if(!routesFound.containsKey(fromCity)) throw new NoRouteFoundException(fromCity, toCity);
 
 
         return routesFound.get(fromCity).roadList
