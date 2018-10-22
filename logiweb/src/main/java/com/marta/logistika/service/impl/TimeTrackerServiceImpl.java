@@ -20,7 +20,7 @@ import java.time.YearMonth;
 public class TimeTrackerServiceImpl extends AbstractService implements TimeTrackerService {
 
     private final TimeTrackerDao timeTrackerDao;
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoadServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeTrackerServiceImpl.class);
 
     @Autowired
     public TimeTrackerServiceImpl(TimeTrackerDao timeTrackerDao) {
