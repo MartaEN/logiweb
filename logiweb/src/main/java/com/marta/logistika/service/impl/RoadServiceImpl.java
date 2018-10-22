@@ -1,6 +1,5 @@
 package com.marta.logistika.service.impl;
 
-import com.marta.logistika.controller.TripTicketController;
 import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.dao.api.RoadDao;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 public class RoadServiceImpl extends AbstractService implements RoadService {
 
     private final RoadDao roadDao;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoadServiceImpl.class);
 
     @Autowired
     public RoadServiceImpl(RoadDao roadDao) {

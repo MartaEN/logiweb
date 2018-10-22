@@ -1,10 +1,12 @@
 package com.marta.logistika.service.impl;
 
-import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.dao.api.TimeTrackerDao;
 import com.marta.logistika.entity.DriverEntity;
 import com.marta.logistika.entity.TimeTrackerEntity;
 import com.marta.logistika.enums.DriverStatus;
+import com.marta.logistika.exception.unchecked.UncheckedServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.marta.logistika.service.api.TimeTrackerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.time.YearMonth;
 public class TimeTrackerServiceImpl extends AbstractService implements TimeTrackerService {
 
     private final TimeTrackerDao timeTrackerDao;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoadServiceImpl.class);
 
     @Autowired
     public TimeTrackerServiceImpl(TimeTrackerDao timeTrackerDao) {
@@ -27,12 +30,12 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     /**
      * Method creates new time record entry for the driver with his current status
      * @param driver driver
-     * @throws ServiceException in case previous time record was not closed
      */
     @Override
     @Transactional
-    public void openNewTimeRecord(DriverEntity driver) throws ServiceException {
-        if (timeTrackerDao.hasOpenTimeRecord(driver)) throw new ServiceException(String.format("Previous time record for driver %s is not closed", driver.toString()));
+    public void openNewTimeRecord(DriverEntity driver) {
+        LOGGER.debug(String.format("###LOGIWEB### TimeTrackerServiceImpl::openNewTimeRecord(driver::%s)", driver));
+        if (timeTrackerDao.hasOpenTimeRecord(driver)) throw new UncheckedServiceException(String.format("Previous time record for driver %s is not closed", driver.toString()));
         TimeTrackerEntity timeRecord = new TimeTrackerEntity();
         timeRecord.setDriver(driver);
         timeRecord.setStatus(driver.getStatus());
@@ -47,6 +50,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     @Override
     @Transactional
     public void closeReopenTimeRecord(DriverEntity driver) {
+        LOGGER.debug(String.format("###LOGIWEB### TimeTrackerServiceImpl::closeReopenTimeRecord(driver::%s)", driver));
         closeTimeRecord(driver);
         TimeTrackerEntity timeRecord = new TimeTrackerEntity();
         timeRecord.setDriver(driver);
@@ -63,7 +67,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     @Override
     @Transactional
     public void closeTimeRecord(DriverEntity driver) {
-
+        LOGGER.debug(String.format("###LOGIWEB### TimeTrackerServiceImpl::closeTimeRecord(driver::%s)", driver));
         LocalDateTime timestamp = LocalDateTime.now();
         TimeTrackerEntity openRecord = timeTrackerDao.getOpenTimeRecord(driver);
         DriverStatus recordStatus = openRecord.getStatus();
@@ -96,6 +100,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
      */
     @Override
     public long calculateMonthlyMinutes(DriverEntity driver, YearMonth month) {
+        LOGGER.debug(String.format("###LOGIWEB### TimeTrackerServiceImpl::calculateMonthlyMinutes(driver::%s,period::%s)", driver, month));
         return timeTrackerDao.calculateMonthlyMinutes(driver, month);
     }
 }
