@@ -10,7 +10,7 @@ public class DuplicateRoadException extends ServiceException {
     private CityEntity toCity;
 
     public DuplicateRoadException(CityEntity fromCity, CityEntity toCity) {
-        super("com.marta.logistika.error.noRouteFound");
+        super("com.marta.logistika.error.duplicateRoad");
         this.fromCity = fromCity;
         this.toCity = toCity;
     }

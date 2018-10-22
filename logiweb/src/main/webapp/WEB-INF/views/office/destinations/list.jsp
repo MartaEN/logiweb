@@ -18,7 +18,12 @@
                     </tr>
                     <tr class='table-filters'>
                         <td>
-                            <input type="text"/>
+                            <div class="input-group input-group-sm mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="<spring:message code="buttons.search"/>">
+                            </div>
                         </td>
                     </tr>
                     <c:forEach items="${cities}" var="city">

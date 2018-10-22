@@ -8,4 +8,5 @@ public interface CityDao extends GenericDao<CityEntity> {
 
     CityEntity findById (long id);
     List<CityEntity> listAll();
+    boolean cityNameExists (String cityName);
 }

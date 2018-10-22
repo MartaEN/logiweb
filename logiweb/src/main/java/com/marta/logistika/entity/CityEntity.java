@@ -1,6 +1,8 @@
 package com.marta.logistika.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.Objects;
 
 @Entity
@@ -8,6 +10,8 @@ import java.util.Objects;
 public class CityEntity extends AbstractEntity {
 
     @Column(unique = true, nullable = false)
+    @NotNull
+    @Pattern(regexp = "(^[А-ЯЁ][А-Яа-яЁё0-9\\-\\s]+$)|(^[A-Z][A-Za-z0-9\\-\\s]+$)")
     private String name;
 
     public String getName() {

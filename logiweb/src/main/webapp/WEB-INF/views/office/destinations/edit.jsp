@@ -7,7 +7,7 @@
 <div class="col-sm-6">
     <h3 class="modal-header"><spring:message code="destinations.cities.edit.pageTitle"/></h3>
     <h4>${city.name}</h4>
-    <table class="table">
+    <table class="table table-sm">
         <thead><spring:message code="destinations.cities.edit.isLinkedWith"/></thead>
         <tr>
             <th><spring:message code="destinations.cities.city"/></th>

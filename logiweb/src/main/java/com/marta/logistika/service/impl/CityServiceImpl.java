@@ -1,5 +1,6 @@
 package com.marta.logistika.service.impl;
 
+import com.marta.logistika.exception.DuplicateCityException;
 import com.marta.logistika.exception.EntityNotFoundException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.dao.api.CityDao;
@@ -22,14 +23,9 @@ public class CityServiceImpl extends AbstractService implements CityService {
 
     @Override
     @Transactional
-    public void add(CityEntity city) {
+    public void add(CityEntity city) throws DuplicateCityException {
+        if(cityDao.cityNameExists(city.getName())) throw new DuplicateCityException(city.getName());
         cityDao.add(city);
-    }
-
-    @Override
-    @Transactional
-    public void update(CityEntity city) {
-        cityDao.merge(city);
     }
 
     @Override
@@ -46,8 +42,10 @@ public class CityServiceImpl extends AbstractService implements CityService {
     }
 
     @Override
-    public CityEntity findById(long id) {
-        return cityDao.findById(id);
+    public CityEntity findById(long id) throws EntityNotFoundException {
+        CityEntity city = cityDao.findById(id);
+        if (city == null) throw new EntityNotFoundException(id, CityEntity.class);
+        return city;
     }
 
 }

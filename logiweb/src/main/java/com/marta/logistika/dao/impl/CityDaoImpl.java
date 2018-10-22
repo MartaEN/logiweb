@@ -21,4 +21,12 @@ public class CityDaoImpl extends AbstractDao<CityEntity> implements CityDao {
                 CityEntity.class)
                 .getResultList();
     }
+
+    @Override
+    public boolean cityNameExists(String cityName) {
+        Long count = em.createQuery("SELECT COUNT (c) FROM CityEntity c WHERE c.name=:cityName", Long.class)
+                .setParameter("cityName", cityName)
+                .getSingleResult();
+        return count > 0;
+    }
 }

@@ -21,14 +21,14 @@
 <jsp:include page="../_fragments/footer.jsp"/>
 
 <%-- Handelbars template for order list and ticket list--%>
-<script src="/webjars/handlebars/handlebars.min.js"></script>
+<script src="${contextPath}/webjars/handlebars/handlebars.min.js"></script>
 <script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
 <jsp:include page="template-drivers-nav.jsp"/>
 <jsp:include page="template-drivers-view.jsp"/>
 
 <%-- Scripts specific for the page --%>
-<script src="/webjars/sockjs-client/sockjs.min.js"></script>
-<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+<script src="${contextPath}/webjars/sockjs-client/sockjs.min.js"></script>
+<script src="${contextPath}/webjars/stomp-websocket/stomp.min.js"></script>
 <script src="${contextPath}/resources/js/websocket.js"></script>
 
 </body>
