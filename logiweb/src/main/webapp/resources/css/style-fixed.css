@@ -43,7 +43,7 @@ header a:hover {
     width: 60px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: space-between;
 }
 
 .sideNav a {
@@ -211,4 +211,26 @@ footer {
 
 .action-button {
     margin-top: 50px;
+}
+
+#orders thead {
+    display: block;
+    height: 100px;
+}
+
+#orders tbody {
+    display: block;
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+td {
+    box-sizing: content-box;
+}
+
+#ticket-list {
+    height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }

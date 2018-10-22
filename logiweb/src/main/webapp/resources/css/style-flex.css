@@ -40,6 +40,9 @@ header a:hover {
     background-color: #A0D468;
     color: white;
     width: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .sideNav a {
