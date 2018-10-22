@@ -2,7 +2,6 @@ package com.marta.logistika.controller;
 
 import com.marta.logistika.exception.checked.NoDriversAvailableException;
 import com.marta.logistika.exception.checked.PastDepartureDateException;
-import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dto.FutureDateTimeRecord;
@@ -19,7 +18,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Controller
@@ -112,20 +110,11 @@ public class TripTicketController {
             return "office/tickets/approve";
         }
 
-        try {
-            ticketService.updateDepartureDateTime(ticketId, futureDateTimeRecord.getDepartureDateTime());
-            LOGGER.info(String.format("###LOGIWEB### User %s: Departure date time for ticket %d updated",
-                    SecurityContextHolder.getContext().getAuthentication().getName(),
-                    ticketId));
-            return String.format("redirect: /tickets/%d/approve", ticketId);
-        } catch (ServiceException e) {
-            uiModel.addAttribute("error", e.getLocalizedMessage(locale));
-            LOGGER.info(String.format("###LOGIWEB### User %s: Updating Departure Date and Time for Ticket id %d FAILED (%s)",
-                    SecurityContextHolder.getContext().getAuthentication().getName(),
-                    ticketId,
-                    e.getLocalizedMessage(Locale.ENGLISH)));
-            return "office/tickets/approve";
-        }
+        ticketService.updateDepartureDateTime(ticketId, futureDateTimeRecord.getDepartureDateTime());
+        LOGGER.info(String.format("###LOGIWEB### User %s: Departure date time for ticket %d updated",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                ticketId));
+        return String.format("redirect: /tickets/%d/approve", ticketId);
     }
 
     /**
@@ -161,11 +150,17 @@ public class TripTicketController {
      * @return redirect to core "/orders" page
      */
     @PostMapping(value = "/create")
-    public String newTicketCreate(@ModelAttribute TripTicketCreateForm ticketCreateForm) {
+    public String newTicketCreate(@Valid @ModelAttribute TripTicketCreateForm ticketCreateForm,
+                                  BindingResult bindingResult,
+                                  Locale locale) {
+
+        if(bindingResult.hasErrors()) {
+            return "office/tickets/create";
+        }
 
         long newTicketId = ticketService.createTicket(
                 ticketCreateForm.getTruckRegNumber(),
-                LocalDateTime.parse(ticketCreateForm.getDepartureDateTime()),
+                ticketCreateForm.getDepartureDateTime(),
                 ticketCreateForm.getToCity() == null ? null : cityService.findById(ticketCreateForm.getToCity()));
 
         LOGGER.info(String.format("###LOGIWEB### User %s: Created new trip ticket id %d",

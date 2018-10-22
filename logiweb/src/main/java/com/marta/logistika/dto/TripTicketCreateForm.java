@@ -1,16 +1,19 @@
 package com.marta.logistika.dto;
 
+import javax.validation.constraints.Future;
+import java.time.LocalDateTime;
+
 public class TripTicketCreateForm {
 
-    private String departureDateTime;
+    @Future private LocalDateTime departureDateTime;
     private Long toCity;
     private String truckRegNumber;
 
-    public String getDepartureDateTime() {
+    public LocalDateTime getDepartureDateTime() {
         return departureDateTime;
     }
 
-    public void setDepartureDateTime(String departureDateTime) {
+    public void setDepartureDateTime(LocalDateTime departureDateTime) {
         this.departureDateTime = departureDateTime;
     }
 

@@ -12,7 +12,7 @@
         <div class="form-group row">
             <label for="departureDateTime" class="col-sm-4 col-form-label">Дата и время отправления: </label>
             <div class="col-sm-8">
-                <input type="datetime-local" id="departureDateTime" name="departureDateTime" class="form-control" >
+                <input type="datetime-local" id="departureDateTime" name="departureDateTime" class="form-control" min="<%= java.time.LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MINUTES)%>" required>
             </div>
         </div>
         <div class="form-group row">

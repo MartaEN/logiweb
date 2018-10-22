@@ -1,6 +1,5 @@
 package com.marta.logistika.service.impl;
 
-import com.marta.logistika.controller.TripTicketController;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
@@ -18,7 +17,6 @@ import com.marta.logistika.dto.OrderRecordDriverInstruction;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.TripTicketStatus;
-import com.marta.logistika.exception.*;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
 import org.slf4j.Logger;
@@ -58,7 +56,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final ApplicationEventPublisher applicationEventPublisher;
     private final SimpMessageSendingOperations messagingTemplate;
     private AtomicBoolean brokerAvailable = new AtomicBoolean();
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketServiceImpl.class);
 
     @Autowired
     public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, ApplicationEventPublisher applicationEventPublisher, SimpMessageSendingOperations messagingTemplate) {
@@ -88,11 +86,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * @param truckRegNum truck to be booked
      * @param departureDateTime departure date and time
      * @param toCity destination city (may be omitted)
-     * @throws ServiceException in case truck is not available or departure time is in the past
      */
     @Override
     @Transactional
-    public long createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) throws ServiceException {
+    public long createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::createTicket(truckRegNum::%s,departureDateTime::%s,toCity::%s)", truckRegNum, departureDateTime, toCity));
 
         //create new ticket entity
@@ -100,14 +97,14 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setStatus(TripTicketStatus.CREATED);
 
         //validate and assign trip departure date
-        if(departureDateTime.isBefore(LocalDateTime.now())) throw new ServiceException("Trip starting date should be in the future");
+        if(departureDateTime.isBefore(LocalDateTime.now())) throw new UncheckedServiceException("Trip starting date should be in the future");
         ticket.setDepartureDateTime(departureDateTime);
 
         //validate and assign truck and mark it as booked
         TruckEntity truck = truckDao.findByRegNumber(truckRegNum);
-        if(!truck.isServiceable()) throw new ServiceException(String.format(
+        if(!truck.isServiceable()) throw new UncheckedServiceException(String.format(
                 "Can't book truck %s - it is out of service", truck.getRegNumber()));
-        if(truck.getBookedUntil().isAfter(departureDateTime)) throw new ServiceException(String.format(
+        if(truck.getBookedUntil().isAfter(departureDateTime)) throw new UncheckedServiceException(String.format(
                 "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truck.getRegNumber(), departureDateTime, truck.getBookedUntil()));
         truck.setBookedUntil(MAX_FUTURE_DATE);
         ticket.setTruck(truck);
@@ -192,8 +189,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         helper.updateWeights(ticket);
         try {
             helper.checkWeightLimit(ticket);
-        } catch (ServiceException e) {
-//            throw new ServiceException(String.format("### Order id %d does not fit into trip ticket %d: %s", order.getId(), ticket.getId(), e.getMessage()));
+        } catch (OrderDoesNotFitToTicketException e) {
             throw new OrderDoesNotFitToTicketException(e, order.getId());
         }
         ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
@@ -492,7 +488,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                         break;
                     case NONE:
                     default:
-                        throw new ServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
+                        throw new UncheckedServiceException(String.format("Invalid instruction for ticket id %d", currentTicket.getId()));
 
                 }
         }
@@ -516,7 +512,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             helper.updateDriversTimeRecordsForNewStage(ticket);
             helper.checkTicketCompletion(ticket);
             sendUpdateToOtherDrivers(ticket, principal);
-        } else throw new ServiceException(String.format("Wrong step sequence for ticket id %d", ticketId));
+        } else throw new UncheckedServiceException(String.format("Wrong step sequence for ticket id %d", ticketId));
     }
 
 
