@@ -1,8 +1,8 @@
-package com.marta.logistika.exception;
+package com.marta.logistika.exception.checked;
 
 import java.util.Locale;
 
-public class NoDriversAvailableException extends ServiceException {
+public class NoDriversAvailableException extends CheckedServiceException {
 
     private long ticketId;
 

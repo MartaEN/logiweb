@@ -2,8 +2,8 @@ package com.marta.logistika.service;
 
 import com.marta.logistika.dao.api.CityDao;
 import com.marta.logistika.entity.CityEntity;
-import com.marta.logistika.exception.DuplicateCityException;
-import com.marta.logistika.exception.EntityNotFoundException;
+import com.marta.logistika.exception.checked.DuplicateCityException;
+import com.marta.logistika.exception.unchecked.EntityNotFoundException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.impl.CityServiceImpl;
 import org.junit.Assert;
@@ -35,7 +35,7 @@ public class CityServiceTest {
     }
 
     @Test
-    public void addCity() {
+    public void addCity() throws DuplicateCityException {
         CityEntity newCity = new CityEntity();
         newCity.setName("Санкт-Петербург");
         cityService.add(newCity);
@@ -43,7 +43,7 @@ public class CityServiceTest {
     }
 
     @Test(expected = DuplicateCityException.class)
-    public void addDuplicateCity() {
+    public void addDuplicateCity() throws DuplicateCityException {
         CityEntity newCity = new CityEntity();
         newCity.setName("Москва");
         cityService.add(newCity);

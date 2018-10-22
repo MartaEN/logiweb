@@ -1,8 +1,8 @@
-package com.marta.logistika.exception;
+package com.marta.logistika.exception.checked;
 
 import java.util.Locale;
 
-public class OrderDoesNotFitToTicketException extends ServiceException {
+public class OrderDoesNotFitToTicketException extends CheckedServiceException {
 
     private long orderId;
 

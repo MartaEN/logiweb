@@ -4,7 +4,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <jsp:include page="../../_fragments/page-template-fixed-before-main.jsp"/>
-<script src="${contextPath}/resources/js/find-route.js"></script>
 
 <div class="col-sm-6">
 
@@ -30,5 +29,8 @@
     <div id="searchResult" style="display: none;"></div>
 
 </div>
+
+<%--scripts specific for the page--%>
+<script src="${contextPath}/resources/js/find-route.js"></script>
 
 <jsp:include page="../../_fragments/page-template-after-main.jsp"/>

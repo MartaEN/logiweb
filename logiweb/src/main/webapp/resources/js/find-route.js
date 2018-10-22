@@ -25,6 +25,9 @@ $(document).ready(function () {
             },
             error: function (err) {
                 console.log(err);
+                let $searchResult = $('#searchResult');
+                $searchResult.html("");
+                $searchResult.append('<p><b>Невозможно проложить маршрут</b></p>');
             }
         });
     })

@@ -54,4 +54,15 @@ public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
                 .getSingleResult();
     }
 
+    @Override
+    public List<CityEntity> listAllUnlinkedCities(CityEntity fromCity) {
+        return em.createQuery(
+                "SELECT c FROM CityEntity c WHERE c NOT IN " +
+                        "(SELECT r.toCity FROM RoadEntity r WHERE r.fromCity=:fromCity) " +
+                        "AND c NOT IN (:fromCity) ",
+                CityEntity.class)
+                .setParameter("fromCity", fromCity)
+                .getResultList();
+    }
+
 }

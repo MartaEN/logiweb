@@ -58,8 +58,8 @@ public class RoadEntity extends AbstractEntity {
     @Override
     public String toString() {
         return "RoadEntity{" +
-                "fromCity=" + fromCity.getName() +
-                ", toCity=" + toCity.getName() +
+                "fromCity=" + fromCity +
+                ", toCity=" + toCity +
                 ", distance=" + distance +
                 '}';
     }

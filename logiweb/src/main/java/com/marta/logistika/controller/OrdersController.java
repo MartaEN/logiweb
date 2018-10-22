@@ -1,6 +1,6 @@
 package com.marta.logistika.controller;
 
-import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.checked.CheckedServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dto.OrderEntryForm;
@@ -89,7 +89,7 @@ public class OrdersController {
                     SecurityContextHolder.getContext().getAuthentication().getName(),
                     orderId,
                     ticketId));
-        } catch (ServiceException e) {
+        } catch (CheckedServiceException e) {
             LOGGER.error(String.format("###LOGIWEB### User %s: Adding Order %d to Ticket %d - operation failed (%s)",
                     SecurityContextHolder.getContext().getAuthentication().getName(),
                     orderId,

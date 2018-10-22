@@ -3,11 +3,12 @@ package com.marta.logistika.service.api;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
-import com.marta.logistika.exception.NoDriversAvailableException;
-import com.marta.logistika.exception.PastDepartureDateException;
-import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.checked.NoDriversAvailableException;
+import com.marta.logistika.exception.checked.PastDepartureDateException;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.dto.Instruction;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
+import com.marta.logistika.exception.checked.OrderDoesNotFitToTicketException;
 import org.springframework.lang.Nullable;
 
 import java.security.Principal;
@@ -20,8 +21,8 @@ public interface TripTicketService {
 
     // creating, filling and approving the ticket (office operations)
     long createTicket(String truckRegNum, LocalDateTime date, @Nullable CityEntity toCity);
-    void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime) throws ServiceException;
-    void addOrderToTicket(long ticketId, long orderId) throws ServiceException;
+    void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime);
+    void addOrderToTicket(long ticketId, long orderId) throws NoRouteFoundException, OrderDoesNotFitToTicketException;
     void removeOrderFromTicket(long ticketId, long orderId);
     void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException;
     void deleteTicket(long ticketId);

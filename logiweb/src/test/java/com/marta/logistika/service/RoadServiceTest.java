@@ -4,8 +4,7 @@ import com.marta.logistika.dao.api.RoadDao;
 import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
-import com.marta.logistika.exception.DuplicateRoadException;
-import com.marta.logistika.exception.NoRouteFoundException;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.impl.RoadServiceImpl;
 import org.dozer.DozerBeanMapper;
@@ -20,6 +19,7 @@ import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,48 +52,29 @@ public class RoadServiceTest {
     @Before
     public void setup() {
         roadService = new RoadServiceImpl(roadDao);
-
         prefillTestData();
-
-        Mockito.when(roadDao.findById(1L)).thenReturn(roadMoscowTver);
-        Mockito.when(roadDao.findById(2L)).thenReturn(roadTverMoscow);
-        Mockito.when(roadDao.findById(3L)).thenReturn(roadTverSpb);
-        Mockito.when(roadDao.findById(4L)).thenReturn(roadSpbTver);
-        Mockito.when(roadDao.findById(5L)).thenReturn(roadMoscowPskov);
-        Mockito.when(roadDao.findById(6L)).thenReturn(roadPskovMoscow);
-        Mockito.when(roadDao.findById(7L)).thenReturn(roadPskovSpb);
-        Mockito.when(roadDao.findById(8L)).thenReturn(roadSpbPskov);
-
-        Mockito.when(roadDao.listAllRoadsTo(spb)).thenReturn(roadsToSpb);
-        Mockito.when(roadDao.listAllRoadsTo(tver)).thenReturn(roadsToTver);
-        Mockito.when(roadDao.listAllRoadsTo(moscow)).thenReturn(roadsToMoscow);
-        Mockito.when(roadDao.listAllRoadsTo(pskov)).thenReturn(roadsToPskov);
-
-        Mockito.when(roadDao.getDirectRoadFromTo(tver, moscow)).thenReturn(roadTverMoscow);
-        Mockito.when(roadDao.getDirectRoadFromTo(moscow, tver)).thenReturn(roadMoscowTver);
-
+        defineMocks();
     }
 
-
     @Test
-    public void distanceFinding() {
+    public void distanceFinding() throws NoRouteFoundException {
         int distance = roadService.getDistanceFromTo(moscow, spb);
         Assert.assertEquals(700, distance);
     }
 
     @Test
-    public void zeroDistanceFinding() {
+    public void zeroDistanceFinding() throws NoRouteFoundException {
         int distance = roadService.getDistanceFromTo(moscow, moscow);
         Assert.assertEquals(0, distance);
     }
 
     @Test(expected = NoRouteFoundException.class)
-    public void missingRoadDistanceFinding() {
+    public void missingRoadDistanceFinding() throws NoRouteFoundException {
         roadService.getDistanceFromTo(moscow, yaroslavl);
     }
 
     @Test
-    public void routeSearch() {
+    public void routeSearch() throws NoRouteFoundException {
         List<RoadRecord> route = roadService.findRouteFromTo(moscow, spb);
         List<RoadRecord> routeExpected = new ArrayList<>();
         routeExpected.add(mapper.map(roadMoscowTver, RoadRecord.class));
@@ -102,12 +83,12 @@ public class RoadServiceTest {
     }
 
     @Test(expected = NoRouteFoundException.class)
-    public void missingRouteSearch() {
+    public void missingRouteSearch() throws NoRouteFoundException {
         roadService.findRouteFromTo(moscow, yaroslavl);
     }
 
     @Test
-    public void routeDistanceFinding() {
+    public void routeDistanceFinding() throws NoRouteFoundException {
         List<CityEntity> testRoute = new ArrayList<>();
         testRoute.add(moscow);
         testRoute.add(spb);
@@ -116,7 +97,7 @@ public class RoadServiceTest {
     }
 
     @Test(expected = NoRouteFoundException.class)
-    public void missingRouteDistanceFinding() {
+    public void missingRouteDistanceFinding() throws NoRouteFoundException {
         List<CityEntity> testRoute = new ArrayList<>();
         testRoute.add(moscow);
         testRoute.add(spb);
@@ -157,7 +138,7 @@ public class RoadServiceTest {
         roadService.add(null);
     }
 
-    @Test(expected = DuplicateRoadException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void duplicatedRoadCreation () {
         RoadEntity road = new RoadEntity();
         road.setFromCity(moscow);
@@ -183,6 +164,12 @@ public class RoadServiceTest {
     public void listAllRoadsFrom () {
         roadService.listAllRoadsFrom(moscow);
         Mockito.verify(roadDao, VerificationModeFactory.times(1)).listAllRoadsFrom(moscow);
+    }
+
+    @Test
+    public void listAllUnlinkedCities() {
+        roadService.listAllUnlinkedCities(moscow);
+        Mockito.verify(roadDao, VerificationModeFactory.times(1)).listAllUnlinkedCities(moscow);
     }
 
     private void prefillTestData() {
@@ -268,6 +255,27 @@ public class RoadServiceTest {
         roadsToPskov.add(roadSpbPskov);
         roadsToPskov.add(roadMoscowPskov);
 
+    }
+
+    private void defineMocks() {
+        Mockito.when(roadDao.findById(1L)).thenReturn(roadMoscowTver);
+        Mockito.when(roadDao.findById(2L)).thenReturn(roadTverMoscow);
+        Mockito.when(roadDao.findById(3L)).thenReturn(roadTverSpb);
+        Mockito.when(roadDao.findById(4L)).thenReturn(roadSpbTver);
+        Mockito.when(roadDao.findById(5L)).thenReturn(roadMoscowPskov);
+        Mockito.when(roadDao.findById(6L)).thenReturn(roadPskovMoscow);
+        Mockito.when(roadDao.findById(7L)).thenReturn(roadPskovSpb);
+        Mockito.when(roadDao.findById(8L)).thenReturn(roadSpbPskov);
+
+        Mockito.when(roadDao.listAllRoadsTo(spb)).thenReturn(roadsToSpb);
+        Mockito.when(roadDao.listAllRoadsTo(tver)).thenReturn(roadsToTver);
+        Mockito.when(roadDao.listAllRoadsTo(moscow)).thenReturn(roadsToMoscow);
+        Mockito.when(roadDao.listAllRoadsTo(pskov)).thenReturn(roadsToPskov);
+
+        Mockito.when(roadDao.getDirectRoadFromTo(tver, moscow)).thenReturn(roadTverMoscow);
+        Mockito.when(roadDao.getDirectRoadFromTo(moscow, tver)).thenReturn(roadMoscowTver);
+
+        Mockito.when(roadDao.listAllUnlinkedCities(moscow)).thenReturn(Arrays.asList(spb, yaroslavl, vologda));
     }
 
 }

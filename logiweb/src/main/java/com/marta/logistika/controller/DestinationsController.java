@@ -4,7 +4,8 @@ import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.dto.RouteJsonResponse;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
-import com.marta.logistika.exception.DuplicateCityException;
+import com.marta.logistika.exception.checked.DuplicateCityException;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.RoadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +89,7 @@ public class DestinationsController {
 
         uiModel.addAttribute("fromCity", fromCity);
         uiModel.addAttribute("road", road);
-        uiModel.addAttribute("cities", cityService.listAll());
+        uiModel.addAttribute("cities", roadService.listAllUnlinkedCities(fromCity));
 
         return "office/destinations/add-road";
     }
@@ -129,7 +130,7 @@ public class DestinationsController {
     @ResponseBody
     public RouteJsonResponse findRouteResult(
             @RequestParam long fromCity,
-            @RequestParam long toCity) {
+            @RequestParam long toCity) throws NoRouteFoundException {
         RouteJsonResponse response = new RouteJsonResponse();
         response.setRoute(roadService.findRouteFromTo(cityService.findById(fromCity), cityService.findById(toCity)));
         return response;

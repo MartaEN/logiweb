@@ -1,7 +1,7 @@
 package com.marta.logistika.controller;
 
-import com.marta.logistika.exception.NoDriversAvailableException;
-import com.marta.logistika.exception.PastDepartureDateException;
+import com.marta.logistika.exception.checked.NoDriversAvailableException;
+import com.marta.logistika.exception.checked.PastDepartureDateException;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -28,7 +28,7 @@ public class TripTicketController {
 
     private final TripTicketService ticketService;
     private final CityService cityService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrdersController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketController.class);
 
     @Autowired
     public TripTicketController(TripTicketService ticketService, CityService cityService) {

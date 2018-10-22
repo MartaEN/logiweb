@@ -6,6 +6,7 @@ import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.dto.Instruction;
@@ -53,7 +54,7 @@ class TripTicketServiceHelper {
      *             load on or immediately after current route element number "load"
      *             unload on or immediately before current route element number "unload"
      */
-    int[] suggestLoadUnloadPoints (TripTicketEntity ticketEntity, OrderEntity order) {
+    int[] suggestLoadUnloadPoints (TripTicketEntity ticketEntity, OrderEntity order) throws NoRouteFoundException {
 
         List<CityEntity> currentRoute = ticketEntity.getCities();
         List<Integer> weights = ticketEntity.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
@@ -109,13 +110,13 @@ class TripTicketServiceHelper {
 
     }
 
-    float getAvgLoad (TripTicketEntity ticket) {
+    float getAvgLoad (TripTicketEntity ticket) throws NoRouteFoundException {
         List<CityEntity> route = ticket.getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
         List<Integer> weights = ticket.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         return getAvgLoad(route, weights);
     }
 
-    private float getAvgLoad (List<CityEntity> route, List<Integer> weights) {
+    private float getAvgLoad (List<CityEntity> route, List<Integer> weights) throws NoRouteFoundException {
         int totalDistance = 0;
         float totalLoad = 0;
         for (int i = 0; i < route.size() - 1; i++) {
@@ -181,7 +182,7 @@ class TripTicketServiceHelper {
      * @param ticket trip ticket to be processed
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    LocalDateTime calculateDurationAndArrivalDateTime(TripTicketEntity ticket) {
+    LocalDateTime calculateDurationAndArrivalDateTime(TripTicketEntity ticket) throws NoRouteFoundException {
 
         List<StopoverEntity> stopovers = ticket.getStopovers();
         stopovers.sort(StopoverEntity::compareTo);

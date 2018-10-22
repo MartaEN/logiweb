@@ -1,8 +1,8 @@
-package com.marta.logistika.exception;
+package com.marta.logistika.exception.checked;
 
 import java.util.Locale;
 
-public class PastDepartureDateException extends ServiceException {
+public class PastDepartureDateException extends CheckedServiceException {
 
     private long ticketId;
 

@@ -1,16 +1,16 @@
-package com.marta.logistika.exception;
+package com.marta.logistika.exception.checked;
 
 import com.marta.logistika.entity.CityEntity;
 
 import java.util.Locale;
 
-public class DuplicateRoadException extends ServiceException {
+public class NoRouteFoundException extends CheckedServiceException {
 
     private CityEntity fromCity;
     private CityEntity toCity;
 
-    public DuplicateRoadException(CityEntity fromCity, CityEntity toCity) {
-        super("com.marta.logistika.error.duplicateRoad");
+    public NoRouteFoundException(CityEntity fromCity, CityEntity toCity) {
+        super("com.marta.logistika.error.noRouteFound");
         this.fromCity = fromCity;
         this.toCity = toCity;
     }

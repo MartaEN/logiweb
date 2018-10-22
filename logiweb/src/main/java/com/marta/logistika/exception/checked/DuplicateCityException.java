@@ -1,8 +1,8 @@
-package com.marta.logistika.exception;
+package com.marta.logistika.exception.checked;
 
 import java.util.Locale;
 
-public class DuplicateCityException extends ServiceException {
+public class DuplicateCityException extends CheckedServiceException {
 
     private String cityName;
 

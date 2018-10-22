@@ -1,8 +1,8 @@
 package com.marta.logistika.controllerAdvice;
 
 import com.marta.logistika.dto.ErrorMessage;
-import com.marta.logistika.exception.EntityNotFoundException;
-import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.checked.CheckedServiceException;
+import com.marta.logistika.exception.unchecked.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -45,8 +45,8 @@ public class ExceptionHandlingControllerAdvice {
      * @param locale user locale
      * @return path to jsp error page
      */
-    @ExceptionHandler(ServiceException.class)
-    public String handleServiceException (final ServiceException e, Model uiModel, Locale locale) {
+    @ExceptionHandler(CheckedServiceException.class)
+    public String handleServiceException (final CheckedServiceException e, Model uiModel, Locale locale) {
         LOGGER.error(e.getMessage(), e);
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setTitle("error.smthWentWrong");

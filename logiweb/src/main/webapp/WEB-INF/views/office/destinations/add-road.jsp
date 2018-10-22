@@ -20,7 +20,7 @@
             </div>
             <div class="form-group col-sm-4">
                 <label for="distance" class="col-form-label"><spring:message code="destinations.cities.distanceKm"/></label>
-                <input type="text" class="form-control" id="distance" name="distance" required>
+                <input type="number" class="form-control" id="distance" name="distance" min="1" required>
             </div>
         </div>
 
