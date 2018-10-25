@@ -1,12 +1,9 @@
 package com.marta.logistika.controller;
 
-import com.marta.logistika.exception.checked.CheckedServiceException;
+import com.marta.logistika.dto.*;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TripTicketService;
-import com.marta.logistika.dto.OrderEntryForm;
 import com.marta.logistika.service.api.OrderService;
-import com.marta.logistika.dto.MonitorDataResponse;
-import com.marta.logistika.dto.OrderRecordFull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Locale;
+import java.util.Objects;
 
 
 @Controller
@@ -38,7 +37,7 @@ public class OrdersController {
     }
 
     /**
-     * Returns core "/orders" page with unassigned orders and unapproved tickets in process
+     * Returns core "/orders" page with unassigned orders and unapproved tickets to be processed
      * @param uiModel data to build the page
      * @return path to jsp
      */
@@ -52,18 +51,24 @@ public class OrdersController {
     }
 
     /**
-     * Produces data to be shown on core "/orders" page
-     * @return JSON data with unassigned orders and unapproved tickets in process
+     * Returns information on new (unassigned) orders - limited with additional filter if provided
+     * @param fromCityId departure city
+     * @param toCityId destination city
+     * @param date order creation date
+     * @return JSON response
      */
-    @GetMapping(value = "/monitor", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/view/unassigned", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public MonitorDataResponse provideDataForMonitor () {
-
-        MonitorDataResponse response = new MonitorDataResponse();
-        response.setOrders(orderService.listAllUnassigned());
-        response.setTickets(tripTicketService.listAllUnapproved());
-
-        return response;
+    public OrderStatsResponse showStatistics (@RequestParam(name = "fromCity") String fromCityId,
+                                              @RequestParam(name = "toCity") String toCityId,
+                                              @RequestParam(name = "date") String date) {
+        if(!Objects.equals(fromCityId, "all") && !Objects.equals(toCityId, "all")) {
+            if (Objects.equals(date, "all")) return orderService.getUnassignedOrders(Long.parseLong(fromCityId), Long.parseLong(toCityId), null);
+            else return orderService.getUnassignedOrders(Long.parseLong(fromCityId), Long.parseLong(toCityId), LocalDate.parse(date));
+        } else {
+            if (Objects.equals(date, "all")) return orderService.getUnassignedOrdersSummary();
+            else return orderService.getUnassignedOrdersSummary(LocalDate.parse(date));
+        }
     }
 
     /**
@@ -74,34 +79,34 @@ public class OrdersController {
      * @return JSON data with unassigned orders and unapproved tickets in process
      * and an error message in case the operation fails
      */
-    @GetMapping(value = "/add-order-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/add-single-order-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public MonitorDataResponse addOrderToTicket(
+    public SystemMessage addOrderToTicket(
             Locale locale,
             @RequestParam long orderId,
             @RequestParam long ticketId) {
+        LOGGER.debug(String.format("###LOGIWEB### User %s: Adding Single Order %d to Ticket %d",
+                SecurityContextHolder.getContext().getAuthentication().getName(),
+                orderId,
+                ticketId));
+        return tripTicketService.addSingleOrderToTicketAndReport(ticketId, orderId, locale);
+    }
 
-        MonitorDataResponse response = new MonitorDataResponse();
-
-        try {
-            tripTicketService.addOrderToTicket(ticketId, orderId);
-            LOGGER.info(String.format("###LOGIWEB### User %s: Adding Order %d to Ticket %d - successful",
-                    SecurityContextHolder.getContext().getAuthentication().getName(),
-                    orderId,
-                    ticketId));
-        } catch (CheckedServiceException e) {
-            LOGGER.error(String.format("###LOGIWEB### User %s: Adding Order %d to Ticket %d - operation failed (%s)",
-                    SecurityContextHolder.getContext().getAuthentication().getName(),
-                    orderId,
-                    ticketId,
-                    e.getLocalizedMessage(Locale.ENGLISH)));
-            response.setError(e.getLocalizedMessage(locale));
-        }
-
-        response.setOrders(orderService.listAllUnassigned());
-        response.setTickets(tripTicketService.listAllUnapproved());
-
-        return response;
+    /**
+     * Tries to add several orders to a trip ticket and returns updated data for the "/orders" page
+     */
+    @GetMapping(value = "/add-multiple-orders-to-ticket", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public SystemMessage addOrdersToTicket(
+            @RequestParam (name = "fromCity") long fromCityId,
+            @RequestParam (name = "toCity") long toCityId,
+            @RequestParam (name = "date") String date,
+            @RequestParam (name = "ticketId") long ticketId,
+            Locale locale) {
+        LocalDate parsedDate;
+        if(date.equals("all")) parsedDate = null;
+        else parsedDate = LocalDate.parse(date);
+        return tripTicketService.addMultipleOrdersToTicketAndReport(fromCityId, toCityId, parsedDate, ticketId, locale);
     }
     
     /**

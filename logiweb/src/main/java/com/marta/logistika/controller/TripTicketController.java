@@ -1,16 +1,14 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.*;
 import com.marta.logistika.exception.checked.NoDriversAvailableException;
 import com.marta.logistika.exception.checked.PastDepartureDateException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.TripTicketService;
-import com.marta.logistika.dto.FutureDateTimeRecord;
-import com.marta.logistika.dto.TicketAndOrder;
-import com.marta.logistika.dto.TripTicketCreateForm;
-import com.marta.logistika.dto.TruckFilterForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Locale;
 
 @Controller
@@ -199,6 +198,15 @@ public class TripTicketController {
         uiModel.addAttribute("tickets", ticketService.listAll());
 
         return "office/tickets/list";
+    }
+
+    /**
+     * @return Returns list of unapproved tickets
+     */
+    @GetMapping (value = "/list/unapproved", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public List<TripTicketRecord> listAllUnapprovedTickets () {
+        return ticketService.listAllUnapproved();
     }
 
 

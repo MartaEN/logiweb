@@ -42,4 +42,14 @@ public class OrderEntryForm implements Serializable {
     public void setToCity(CityEntity toCity) {
         this.toCity = toCity;
     }
+
+    @Override
+    public String toString() {
+        return "OrderEntryForm{" +
+                "description='" + description + '\'' +
+                ", weight=" + weight +
+                ", fromCity=" + fromCity +
+                ", toCity=" + toCity +
+                '}';
+    }
 }

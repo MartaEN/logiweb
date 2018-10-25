@@ -1,12 +1,10 @@
 package com.marta.logistika.service.impl;
 
+import com.marta.logistika.dto.SystemMessage;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
-import com.marta.logistika.exception.checked.NoDriversAvailableException;
-import com.marta.logistika.exception.checked.NoRouteFoundException;
-import com.marta.logistika.exception.checked.OrderDoesNotFitToTicketException;
-import com.marta.logistika.exception.checked.PastDepartureDateException;
+import com.marta.logistika.exception.checked.*;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
 import com.marta.logistika.exception.unchecked.UncheckedServiceException;
 import com.marta.logistika.service.api.TripTicketService;
@@ -19,64 +17,46 @@ import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
+import com.marta.logistika.service.impl.helpers.TripTicketServiceHelper;
+import com.marta.logistika.service.impl.helpers.WebsocketUpdateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.marta.logistika.dto.Instruction.*;
 import static com.marta.logistika.dto.Instruction.Task.*;
 
 @Service("tripTicketService")
-public class TripTicketServiceImpl extends AbstractService implements TripTicketService, ApplicationListener<BrokerAvailabilityEvent> {
+public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
 
     private final TripTicketDao ticketDao;
     private final TruckDao truckDao;
     private final DriverDao driverDao;
     private final OrderDao orderDao;
     private final TripTicketServiceHelper helper;
+    private final WebsocketUpdateHelper websocketUpdateHelper;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final SimpMessageSendingOperations messagingTemplate;
-    private AtomicBoolean brokerAvailable = new AtomicBoolean();
     private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketServiceImpl.class);
 
     @Autowired
-    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, ApplicationEventPublisher applicationEventPublisher, SimpMessageSendingOperations messagingTemplate) {
+    public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, WebsocketUpdateHelper websocketUpdateHelper, ApplicationEventPublisher applicationEventPublisher) {
         this.ticketDao = ticketDao;
         this.truckDao = truckDao;
         this.driverDao = driverDao;
         this.orderDao = orderDao;
         this.helper = helper;
+        this.websocketUpdateHelper = websocketUpdateHelper;
         this.applicationEventPublisher = applicationEventPublisher;
-        this.messagingTemplate = messagingTemplate;
-    }
-
-    /**
-     * required method implementation as per ApplicationListener interface
-     * @param event broker availability event
-     */
-    @Override
-    public void onApplicationEvent(BrokerAvailabilityEvent event) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::onApplicationEvent(event::%s)", event));
-        this.brokerAvailable.set(event.isBrokerAvailable());
     }
 
     /**
@@ -149,56 +129,43 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setDepartureDateTime(departureDateTime);
     }
 
-    /**
-     * Adds order to trip ticket, minimizing the total trip distance and checking truck capacity limits
-     * @param ticketId id of the trip ticket that has to intake new order
-     * @param orderId id of the order that has to be placed to the ticket
-     * @throws NoRouteFoundException in case order destination point can't be reached from trip ticket starting point with existing roads
-     * @throws OrderDoesNotFitToTicketException in case order doesn't fit to ticket due to truck capacity limit
-     * and in case of weight limit breakage
-     */
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
-    public void addOrderToTicket(long ticketId, long orderId) throws NoRouteFoundException, OrderDoesNotFitToTicketException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::addOrderToTicket(ticketdID::%d,orderId::%d)", ticketId, orderId));
-
-        // find ticket and order and check their statuses
+    @Transactional
+    public SystemMessage addSingleOrderToTicketAndReport(long ticketId, long orderId, Locale locale) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         OrderEntity order = orderDao.findById(orderId);
-        if (ticket.getStatus() != TripTicketStatus.CREATED) throw new UncheckedServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
-        if (order.getStatus() != OrderStatus.NEW) throw new UncheckedServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
-
-        // find suggested load and unload stopovers for the order
-        int [] suggestedLoadUnloadForNewOrder = helper.suggestLoadUnloadPoints(ticket, order);
-        int loadPoint = suggestedLoadUnloadForNewOrder[0];
-        int unloadPoint = suggestedLoadUnloadForNewOrder [1];
-
-        // add load and unload operations for the order
-        if ( ! ticket.getStopoverWithSequenceNo(loadPoint).getCity().equals(order.getFromCity())) {
-            ++unloadPoint;
-            helper.insertNewStopover(ticket, order.getFromCity(), ++loadPoint);
-        }
-        ticket.getStopoverWithSequenceNo(loadPoint).addLoadFor(order);
-
-        if ( ! ticket.getStopoverWithSequenceNo(unloadPoint).getCity().equals(order.getToCity())) {
-            helper.insertNewStopover(ticket, order.getToCity(), unloadPoint);
-        }
-        ticket.getStopoverWithSequenceNo(unloadPoint).addUnloadFor(order);
-
-        // update weights and check against truck capacity
-        helper.updateWeights(ticket);
         try {
-            helper.checkWeightLimit(ticket);
-        } catch (OrderDoesNotFitToTicketException e) {
-            throw new OrderDoesNotFitToTicketException(e, order.getId());
+            helper.addOrderToTicket(order, ticket);
+            return new SystemMessage("Success", String.format("Order %d is added to ticket %d", orderId, ticketId));
+        } catch (CheckedServiceException e) {
+            return new SystemMessage("Failed", e.getLocalizedMessage(locale));
+        } catch (Exception e) {
+            return new SystemMessage("Failed", "Something went wrong at server side");
         }
-        ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
+    }
 
-        // update order status in case of successful weight check
-        order.setStatus(OrderStatus.ASSIGNED);
+    @Override
+    @Transactional
+    public SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale) {
+        LOGGER.debug(String.format("TripTicketServiceImpl::addMultipleOrdersToTicketAndReport(fromCityId::%d,toCityId::%d,date::%s,ticketId::%d)", fromCityId, toCityId, date, ticketId));
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        List<OrderEntity> orders;
+        if(date == null) orders = orderDao.listUnassigned(fromCityId, toCityId);
+        else orders = orderDao.listUnassigned(fromCityId, toCityId, date);
+        int totalQuantity = 0;
+        int totalWeight = 0;
 
-        //publish update event
-        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
+        for (OrderEntity order: orders) {
+            try {
+                helper.addOrderToTicket(order, ticket);
+                totalQuantity++;
+                totalWeight += order.getWeight();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return new SystemMessage("Adding orders to tickets",
+                String.format("%d orders with total weight of %d kg added to ticket %d", totalQuantity, totalWeight, ticketId));
     }
 
 
@@ -214,31 +181,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         OrderEntity order = orderDao.findById(orderId);
-
-        for (int i = 0; i < ticket.getStopovers().size(); i++) {
-
-            StopoverEntity stopover = ticket.getStopovers().get(i);
-
-            for (int j = 0; j < stopover.getLoads().size(); j++) {
-                if(stopover.getLoads().get(j).getOrder().equals(order))
-                    stopover.getLoads().remove(j);
-            }
-
-            for (int j = 0; j < stopover.getUnloads().size(); j++) {
-                if(stopover.getUnloads().get(j).getOrder().equals(order))
-                    stopover.getUnloads().remove(j);
-            }
-
-        }
-
-        helper.removeEmptyStopovers(ticket);
-        helper.updateWeights(ticket);
-        try {
-            ticket.setAvgLoad((int) (helper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
-        } catch (NoRouteFoundException e) {
-            LOGGER.warn("###LOGIWEB### NoRouteFoundException thrown while removing order from ticket", e);
-        }
-
+        helper.removeOrderFromTicket(order, ticket);
         order.setStatus(OrderStatus.NEW);
 
         //publish update event
@@ -645,12 +588,11 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * @param principal initiating driver
      */
     private void sendUpdateToOtherDrivers(TripTicketEntity ticket, Principal principal) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::sendUpdateToOtherDrivers(ticketId::%d,initiator::%s)", ticket.getId(), principal.getName()));
-        if(this.brokerAvailable.get() && ticket.getDrivers().size() > 1) {
+        if(ticket.getDrivers().size() > 1) {
             DriverEntity initiatingDriver = driverDao.findByUsername(principal.getName());
             ticket.getDrivers().stream().filter(driver -> !driver.equals(initiatingDriver)).forEach(driver -> {
-                this.messagingTemplate.convertAndSendToUser(driver.getUsername(), "/logiweb/updates",
-                        getInstructionForDriver(driver));
+                LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::sending instruction update to driver %s", driver.getUsername()));
+                websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
             });
         }
     }

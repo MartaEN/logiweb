@@ -43,17 +43,19 @@
 <%-- Handelbars templates for order list and ticket list--%>
 <script src="/webjars/handlebars/handlebars.min.js"></script>
 <script src="${contextPath}/resources/js/handelbars-helpers.js"></script>
-<jsp:include page="template-orders.jsp"/>
+<jsp:include page="template-orders-summary.jsp"/>
+<jsp:include page="template-orders-drilldown.jsp"/>
 <jsp:include page="template-tickets.jsp"/>
 
 <%-- Modal window for new order entry form --%>
 <%--<jsp:include page="modal-add.jsp"/>--%>
 <%-- Modal window for error message --%>
 <jsp:include page="modal-error.jsp"/>
+<jsp:include page="modal-message.jsp"/>
 
 <%-- Scripts specific for the page --%>
-<script src="${contextPath}/resources/js/monitor-update.js"></script>
+<script src="${contextPath}/resources/js/filter-table.js"/>
 <script src="${contextPath}/resources/js/save-new-order.js"></script>
-<script src="${contextPath}/resources/js/tooltips.js"></script>
+<script src="${contextPath}/resources/js/monitor-update.js"></script>
 
 <jsp:include page="../../_fragments/page-template-after-main.jsp"/>

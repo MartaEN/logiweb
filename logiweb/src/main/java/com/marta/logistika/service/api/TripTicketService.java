@@ -1,5 +1,6 @@
 package com.marta.logistika.service.api;
 
+import com.marta.logistika.dto.SystemMessage;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
@@ -12,9 +13,11 @@ import com.marta.logistika.exception.checked.OrderDoesNotFitToTicketException;
 import org.springframework.lang.Nullable;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public interface TripTicketService {
@@ -22,7 +25,8 @@ public interface TripTicketService {
     // creating, filling and approving the ticket (office operations)
     long createTicket(String truckRegNum, LocalDateTime date, @Nullable CityEntity toCity);
     void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime);
-    void addOrderToTicket(long ticketId, long orderId) throws NoRouteFoundException, OrderDoesNotFitToTicketException;
+    SystemMessage addSingleOrderToTicketAndReport(long ticketId, long orderId, Locale locale);
+    SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale);
     void removeOrderFromTicket(long ticketId, long orderId);
     void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException;
     void deleteTicket(long ticketId);

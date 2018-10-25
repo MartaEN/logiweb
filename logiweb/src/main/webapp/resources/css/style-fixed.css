@@ -98,12 +98,13 @@ footer {
 }
 
 #orders {
-    flex:3;
+    /*flex: 1;*/
+    width: 660px;
     margin-right: 50px;
 }
 
 #tickets {
-    flex: 4;
+    flex: 1;
 }
 
 #orders thead tr:nth-child(1) th {
@@ -181,6 +182,10 @@ footer {
     width: 160px;
 }
 
+.width120 {
+    width: 120px;
+}
+
 .width100 {
     width: 100px;
 }
@@ -192,6 +197,11 @@ footer {
 .width40 {
     width: 40px;
 }
+
+.width20 {
+    width: 20px;
+}
+
 
 .error-message {
     color: red;
@@ -215,22 +225,32 @@ footer {
 
 #orders thead {
     display: block;
-    height: 100px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgb(222,226,230);
 }
 
 #orders tbody {
     display: block;
-    height: 400px;
+    height: 380px;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-td {
-    box-sizing: content-box;
+td, th {
+    box-sizing: border-box;
 }
 
 #ticket-list {
     height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.table-filters input {
+    width: 100%;
+}
+
+.comment-line {
+    padding: 5px;
+    border-bottom: 1px solid rgb(222,226,230);
 }

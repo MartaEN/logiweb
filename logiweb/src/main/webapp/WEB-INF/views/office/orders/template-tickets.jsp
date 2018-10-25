@@ -10,7 +10,7 @@
 
     {{#each this}}
 
-    <a href="/tickets/{{id}}/approve" class="ticket open-ticket target row-wrapper" property="{{id}}">
+    <a href="/tickets/{{id}}/approve" class="ticket open-ticket target row-wrapper" property="ticketId={{id}}">
         <div class="ticket-truck-info">
             <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> {{truck.regNumber}}</p>
             <p><i class="fas fa-truck-loading"></i> {{truck.capacity}} кг</p>
@@ -27,9 +27,6 @@
     </a>
 
     {{/each}}
-
-    <script src="resources/js/filter-table.js"/>
-
 
 {{else}}
 

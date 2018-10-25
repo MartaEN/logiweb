@@ -1,18 +1,26 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.OrderDao;
-import com.marta.logistika.dto.OrderRecordFull;
+import com.marta.logistika.dto.*;
+import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.event.EntityUpdateEvent;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
+import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
-import com.marta.logistika.dto.OrderEntryForm;
-import com.marta.logistika.dto.OrderRecordShort;
+import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TableauService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,48 +28,184 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
+    private final RoadService roadService;
+    private final CityService cityService;
     private final TableauService tableauService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final static int ROWS_PER_PAGE = 10;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, TableauService tableauService, ApplicationEventPublisher applicationEventPublisher) {
+    public OrderServiceImpl(OrderDao orderDao, RoadService roadService, CityService cityService, TableauService tableauService, ApplicationEventPublisher applicationEventPublisher) {
         this.orderDao = orderDao;
+        this.roadService = roadService;
+        this.cityService = cityService;
         this.tableauService = tableauService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    /**
+     * persists new order
+     * @param order new order
+     * @return persisted order id
+     */
     @Override
     @Transactional
     public long add(OrderEntryForm order) {
+        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::add(order::%s)", order));
         long newOrderId = orderDao.add(mapper.map(order, OrderEntity.class));
         tableauService.updateTableau();
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         return newOrderId;
     }
 
+    /**
+     * Returns order record
+     * @param id order id
+     * @return order record
+     */
     @Override
     public OrderRecordFull findById(long id) {
+        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::findById(id::%d)", id));
         return mapper.map(orderDao.findById(id), OrderRecordFull.class);
     }
 
+    //todo delete
     @Override
     public List<OrderRecordShort> listAllUnassigned() {
+        LOGGER.debug("###LOGIWEB### OrderServiceImpl::listAllUnassigned()");
         return orderDao.listAllUnassigned().stream()
                 .map(o -> mapper.map(o, OrderRecordShort.class))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Prepares statistics on all unassigned orders - by destination, total distance, number of orders, total weight
+     * @return list of order statistics lines
+     */
     @Override
+    public OrderStatsResponse getUnassignedOrdersSummary() {
+        LOGGER.debug("###LOGIWEB### OrderServiceImpl::getUnassignedOrdersSummary()");
+        OrderStatsResponse response = new OrderStatsResponse();
+        response.setResponseType(OrderStatsResponse.ResponseType.SUMMARY);
+        response.setDateFilter("all");
+
+        List<OrderStatsLine> orderStatsLines = orderDao.getUnassignedOrdersByRoute();
+        orderStatsLines.forEach(line -> {
+            try {
+                line.setDistance(roadService.getDistanceFromTo(line.getFromCity(), line.getToCity()));
+            } catch (NoRouteFoundException e) {
+                LOGGER.warn(String.format("###LOGIWEB### no route found for an order (from %s to %s", line.getFromCity().getName(), line.getToCity().getName()));
+                line.setDistance(-1L);
+            }
+        });
+        response.setOrderLines(orderStatsLines);
+
+        List<String> openDates = orderDao.getDatesOfUnassignedOrders().stream()
+                .map(d -> d.toLocalDate().toString())
+                .distinct()
+                .collect(Collectors.toList());
+        response.setOpenDates(openDates);
+
+        return response;
+    }
+
+    @Override
+    public OrderStatsResponse getUnassignedOrdersSummary(LocalDate date) {
+        LOGGER.debug("###LOGIWEB### OrderServiceImpl::getUnassignedOrdersByRouteForDate(date::%s)", date);
+        OrderStatsResponse response = new OrderStatsResponse();
+        response.setResponseType(OrderStatsResponse.ResponseType.SUMMARY);
+        response.setDateFilter(date.toString());
+
+        List<OrderStatsLine> orderStatsLines = orderDao.getUnassignedOrdersByRouteForDate(date);
+        orderStatsLines.forEach(line -> {
+            try {
+                line.setDate(date.toString());
+                line.setDistance(roadService.getDistanceFromTo(line.getFromCity(), line.getToCity()));
+            } catch (NoRouteFoundException e) {
+                LOGGER.warn(String.format("###LOGIWEB### no route found for an order (from %s to %s", line.getFromCity().getName(), line.getToCity().getName()));
+                line.setDistance(-1L);
+            }
+        });
+        response.setOrderLines(orderStatsLines);
+
+        List<String> openDates = orderDao.getDatesOfUnassignedOrders().stream()
+                .map(d -> d.toLocalDate().toString())
+                .distinct()
+                .collect(Collectors.toList());
+        response.setOpenDates(openDates);
+
+        return response;
+    }
+
+    /**
+     * Lists all unassigned orders requested to be transported between two specified cities
+     * @param fromCityId departure city id
+     * @param toCityId destination city id
+     * @param date filter date - if requested
+     * @return response object containing requested order list and request parameters
+     */
+    @Override
+    public OrderStatsResponse getUnassignedOrders(long fromCityId, long toCityId, @Nullable LocalDate date) {
+        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::getUnassignedOrders(fromCity::%d,toCity::%d,date::%s)", fromCityId, toCityId, date));
+        OrderStatsResponse response = new OrderStatsResponse();
+        response.setResponseType(OrderStatsResponse.ResponseType.DRILLDOWN);
+        if(date != null) response.setDateFilter(date.toString());
+
+        List<OrderStatsLine> orderStatsLines = new ArrayList<>();
+
+        CityEntity fromCity = cityService.findById(fromCityId);
+        CityEntity toCity = cityService.findById(toCityId);
+        response.setCitiesFilter(String.format("%s-%s", fromCity.getName(), toCity.getName()));
+        response.setCitiesFilterParams(String.format("fromCity=%d&toCity=%d", fromCityId, toCityId));
+
+        int distance = 0;
+        try {
+            distance = roadService.getDistanceFromTo(fromCity, toCity);
+        } catch (NoRouteFoundException e) {
+            e.printStackTrace();
+        }
+
+        List<OrderEntity> orders = orderDao.listUnassigned(fromCityId, toCityId);
+        for (OrderEntity order : orders) {
+            orderStatsLines.add(new OrderStatsLine(fromCity, toCity, order.getId(), order.getCreationDate().toLocalDate().toString(), order.getWeight(), distance));
+        }
+        response.setOrderLines(orderStatsLines);
+
+        List<String> openDates = orders.stream()
+                .map(OrderEntity::getCreationDate)
+                .map(LocalDateTime::toLocalDate)
+                .distinct()
+                .sorted()
+                .map(LocalDate::toString)
+                .collect(Collectors.toList());
+        response.setOpenDates(openDates);
+
+        return response;
+    }
+
+
+    /**
+     * Returns one page of order list
+     * @param page page number
+     * @return order list - one page
+     */
+    @Override
+    @Transactional
     public List<OrderRecordShort> getOrdersPage(int page) {
+        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::getOrdersPage(page::%d)", page));
         int index = (page - 1) * ROWS_PER_PAGE;
         return orderDao.getOrdersPage(index, ROWS_PER_PAGE).stream()
                 .map(o -> mapper.map(o, OrderRecordShort.class))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @return number of pages needed to show full orders list
+     */
     @Override
     public int countPages() {
+        LOGGER.debug("###LOGIWEB### OrderServiceImpl::countPages()");
         long rowCount = orderDao.count();
         int pageCount = (int) Math.ceil ( (float) rowCount / ROWS_PER_PAGE );
         return pageCount;

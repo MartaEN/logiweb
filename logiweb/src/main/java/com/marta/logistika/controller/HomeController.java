@@ -17,7 +17,6 @@ public class HomeController {
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login() {
 	    return "common/login";
-
 	}
 
     @GetMapping("/access-denied")

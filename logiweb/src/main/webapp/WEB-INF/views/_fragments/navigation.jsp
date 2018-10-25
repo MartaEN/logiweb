@@ -5,9 +5,8 @@
     <security:authorize access="hasRole('LOGIST')">
         <div>
             <a href="/orders" data-toggle="tooltip" data-placement="right" title="<spring:message code='menu.core'/>"><i class="fas fa-luggage-cart"></i></a>
-            <a href="/orders/summary" data-toggle="tooltip" data-placement="right" title="<spring:message code='menu.summary'/>"><i class="fas fa-chart-line"></i></a>
             <a href="/orders/view?page=1" data-toggle="tooltip" data-placement="right" title="<spring:message code='menu.orders'/>"><i class="fas fa-boxes"></i></a>
-            <a href="/tickets/view" data-toggle="tooltip" data-placement="right" title="<spring:message code='menu.tickets'/>"><i class="fas fa-route"></i></a>
+            <a href="/tickets/view" data-toggle="tooltip" data-placement="right" title="<spring:message code='menu.tickets'/>"><i class="fas fa-flag-checkered"></i></a>
         </div>
         <div>
             <div id="settings" class="collapse">
