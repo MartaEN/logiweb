@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <c:set value="${pageContext.request.contextPath}" var="contextPath" />
 <jsp:include page="../../_fragments/page-template-fixed-before-main.jsp"/>
 
@@ -9,19 +10,19 @@
 <div class="col-md-8">
 
     <div class="row-wrapper modal-header">
-        <h3 class="col-md-8">Заказы</h3>
+        <h3 class="col-md-8"><spring:message code='orders.orders'/></h3>
         <c:if test="${not empty orders}">
             <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Номер заказа" id="orderId" aria-describedby="showOrderId">
+                <input type="text" class="form-control" placeholder="<spring:message code='orders.number'/>" id="orderId" aria-describedby="showOrderId">
                 <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#viewOrderModal">Найти</button>
+                    <button id="search-order-btn" class="btn btn-outline-secondary" type="button"><spring:message code='buttons.search'/></button>
                 </div>
             </div>
         </c:if>
     </div>
 
     <c:if test="${empty orders}">
-        <p>Список заказов пуст</p>
+        <p><spring:message code='orders.list-empty'/></p>
     </c:if>
 
     <c:if test="${not empty orders}">
@@ -30,11 +31,12 @@
 
             <thead>
             <tr>
-                <th>№</th>
-                <th>Дата</th>
-                <th>Погрузка</th>
-                <th>Выгрузка</th>
-                <th>Статус</th>
+                <th><spring:message code='orders.no'/></th>
+                <th><spring:message code='orders.date'/></th>
+                <th><spring:message code='orders.load'/></th>
+                <th><spring:message code='orders.unload'/></th>
+                <th><spring:message code='orders.status'/></th>
+                <th></th>
             </tr>
             </thead>
 
@@ -45,6 +47,7 @@
                     <td>${order.fromCity.name}</td>
                     <td>${order.toCity.name}</td>
                     <td>${order.status.name()}</td>
+                    <td><a href="#" class="view-order-link" property="${order.id}"><i class="fas fa-search"></i></a></td>
                 </tr>
             </c:forEach>
 
@@ -73,14 +76,14 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="viewOrderTitle">Просмотр заказа</h5>
+                        <h5 class="modal-title" id="viewOrderTitle"><spring:message code='orders.view'/></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body" id="viewOrderDataPlaceholder"></div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><spring:message code='buttons.close'/></button>
                     </div>
                 </div>
             </div>
