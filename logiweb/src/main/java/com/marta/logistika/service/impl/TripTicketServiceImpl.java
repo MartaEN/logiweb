@@ -18,8 +18,6 @@ import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.service.impl.helpers.TripTicketServiceHelper;
 import com.marta.logistika.service.impl.helpers.WebsocketUpdateHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.Nullable;
@@ -46,7 +44,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private final TripTicketServiceHelper helper;
     private final WebsocketUpdateHelper websocketUpdateHelper;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketServiceImpl.class);
 
     @Autowired
     public TripTicketServiceImpl(TripTicketDao ticketDao, TruckDao truckDao, DriverDao driverDao, OrderDao orderDao, TripTicketServiceHelper helper, WebsocketUpdateHelper websocketUpdateHelper, ApplicationEventPublisher applicationEventPublisher) {
@@ -70,8 +67,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public long createTicket(String truckRegNum, LocalDateTime departureDateTime, @Nullable CityEntity toCity) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::createTicket(truckRegNum::%s,departureDateTime::%s,toCity::%s)", truckRegNum, departureDateTime, toCity));
-
         //create new ticket entity
         TripTicketEntity ticket = new TripTicketEntity();
         ticket.setStatus(CREATED);
@@ -115,8 +110,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::updateDepartureDateTime(ticketId::%d,departureDateTime::%s", ticketId, departureDateTime));
-
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getStatus() != CREATED) throw new UncheckedServiceException(
                 String.format("Can't update ticket if %d as it has status %s",
@@ -165,7 +158,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale) {
-        LOGGER.debug(String.format("TripTicketServiceImpl::addMultipleOrdersToTicketAndReport(fromCityId::%d,toCityId::%d,date::%s,ticketId::%d)", fromCityId, toCityId, date, ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> orders;
         if(date == null) orders = orderDao.listUnassigned(fromCityId, toCityId);
@@ -196,8 +188,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void removeOrderFromTicket(long ticketId, long orderId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::removeOrderFromTicket(ticketdID::%d,orderId::%d)", ticketId, orderId));
-
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         OrderEntity order = orderDao.findById(orderId);
         helper.removeOrderFromTicket(order, ticket);
@@ -218,8 +208,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::approveTicket(ticketId::%d)", ticketId));
-        TripTicketEntity ticket = ticketDao.findById(ticketId);
+       TripTicketEntity ticket = ticketDao.findById(ticketId);
 
         if (ticket.getStatus().equals(CREATED)) {
 
@@ -241,7 +230,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 ticket.getTruck().setBookedUntil(estimatedArrival);
                 ticket.getDrivers().forEach(d -> d.setBookedUntil(estimatedArrival));
             } catch (NoRouteFoundException e) {
-                LOGGER.warn("###LOGIWEB### NoRouteFoundException while approving a ticket");
                 ticket.setArrivalDateTime(MAX_FUTURE_DATE);
                 ticket.getTruck().setBookedUntil(MAX_FUTURE_DATE);
                 ticket.getDrivers().forEach(d -> d.setBookedUntil(MAX_FUTURE_DATE));
@@ -265,12 +253,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public Map<YearMonth, Long> getPlannedMinutesByYearMonth(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::getPlannedMinutesByYearMonth(ticketId::%d)", ticket.getId()));
         Map<YearMonth, Long> result = new HashMap<>();
         try {
             helper.calculateDurationAndArrivalDateTime(ticket);
         } catch (NoRouteFoundException e) {
-            LOGGER.warn("###LOGIWEB### NoRouteFoundException on already existing ticket");
             throw new UncheckedServiceException(String.format("NoRouteFoundException on already existing ticket id %d", ticket.getId()), e);
         }
         long totalPlannedMinutes = ticket.getStopovers().stream()
@@ -301,7 +287,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public TripTicketRecord findById(long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::findById(ticketId::%d)", ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if (ticket == null) throw new EntityNotFoundException(ticketId, TripTicketEntity.class);
         return mapper.map(ticket, TripTicketRecord.class);
@@ -314,7 +299,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public List<TripTicketRecord> listAll() {
-        LOGGER.debug("###LOGIWEB### TripTicketServiceImpl::listAll()");
         return ticketDao.listAll()
                 .stream()
                 .map(t -> mapper.map(t, TripTicketRecord.class))
@@ -328,7 +312,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public List<TripTicketRecord> listAllUnapproved() {
-        LOGGER.debug("###LOGIWEB### TripTicketServiceImpl::listAllUnapproved()");
         return ticketDao.listAllUnapproved()
                 .stream()
                 .map(t -> mapper.map(t, TripTicketRecord.class))
@@ -342,7 +325,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      */
     @Override
     public List<OrderEntity> listAllOrderInTicket(long id) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::listAllOrderInTicket(id::%d)", id));
         TripTicketEntity ticket = ticketDao.findById(id);
         return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
     }
@@ -356,7 +338,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public Instruction getInstructionForDriver(Principal principal) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::getInstructionForDriver(principal::%s)", principal.getName()));
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         return getInstructionForDriver(driver);
     }
@@ -368,7 +349,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * @return instruction to the driver usable in OnTheRoadController
      */
     private Instruction getInstructionForDriver(DriverEntity driver) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::getInstructionForDriver(driver::%s)", driver));
         Instruction instruction = new Instruction();
 
         TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), RUNNING);
@@ -476,7 +456,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void setOnline(Principal principal, long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::setOnline(principal::%s)", principal.getName()));
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getStatus() == APPROVED) ticket.setStatus(RUNNING);
@@ -492,7 +471,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void reachStopover(Principal principal, long ticketId, int step) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::reachStopover(principal::%s,ticketId::%d,step::%d)", principal.getName(), ticketId, step));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step) {
             if(ticket.getCurrentStep() == 0) ticket.setStatus(RUNNING);
@@ -513,7 +491,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void loadAtStopover(Principal principal, long ticketId, int step) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::loadAtStopover(principal::%s,ticketId::%d,step::%d)", principal.getName(), ticketId, step));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> ordersToLoad = ticket.getStopoverWithSequenceNo(step)
                 .getLoads().stream()
@@ -533,7 +510,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void unloadAtStopover(Principal principal, long ticketId, int step) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::unloadAtStopover(principal::%s,ticketId::%d,step::%d)", principal.getName(), ticketId, step));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> ordersToUnload = ticket.getStopoverWithSequenceNo(step)
                 .getUnloads().stream()
@@ -552,7 +528,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void setFirstDriver(Principal principal, long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::setFirstDriver(principal::%s,ticketId::%d)", principal.getName(), ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         helper.setFirstDriver(ticket, driver);
@@ -567,7 +542,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void startRoadBreak(Principal principal, long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::startStopoverBreak(principal::%s,ticketId::%d)", principal.getName(), ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         helper.startRoadBreak(ticket);
         sendUpdateToOtherDrivers(ticket, principal);
@@ -581,7 +555,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void finishRoadBreak(Principal principal, long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::finishRoadBreak(principal::%s,ticketId::%d)", principal.getName(), ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         helper.finishRoadBreak(ticket, driver);
@@ -595,7 +568,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void startStopoverBreak(Principal principal) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::startStopoverBreak(principal::%s)", principal.getName()));
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         helper.startStopoverBreak(driver);
     }
@@ -607,7 +579,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public void finishStopoverBreak(Principal principal, long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::finishStopoverBreak(principal::%s,ticketId::%d)", principal.getName(), ticketId));
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         helper.finishStopoverBreak(driver, ticket);
@@ -621,7 +592,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     @Transactional
     public LocalDateTime getMinNewDateTime(long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::getMinNewDateTime(ticketId::%d)", ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         return LocalDateTime.now().isAfter(ticket.getDepartureDateTime()) ?
                 LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES) :
@@ -637,8 +607,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         if(ticket.getDrivers().size() > 1) {
             DriverEntity initiatingDriver = driverDao.findByUsername(principal.getName());
             ticket.getDrivers().stream().filter(driver -> !driver.equals(initiatingDriver)).forEach(driver -> {
-                LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::sending instruction update to driver %s", driver.getUsername()));
-                websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
+               websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
             });
         }
     }
@@ -650,7 +619,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     private void sendUpdateToAllDrivers(TripTicketEntity ticket) {
         if(ticket.getDrivers().size() > 1) {
             ticket.getDrivers().forEach(driver -> {
-                LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::sending instruction update to driver %s", driver.getUsername()));
                 websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
             });
         }

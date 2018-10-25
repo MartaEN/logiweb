@@ -10,8 +10,6 @@ import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.OrderService;
 import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TableauService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.Nullable;
@@ -32,7 +30,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     private final CityService cityService;
     private final TableauService tableauService;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final static int ROWS_PER_PAGE = 10;
 
     @Autowired
@@ -52,7 +49,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     @Override
     @Transactional
     public long add(OrderEntryForm order) {
-        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::add(order::%s)", order));
         long newOrderId = orderDao.add(mapper.map(order, OrderEntity.class));
         tableauService.updateTableau();
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
@@ -66,7 +62,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
      */
     @Override
     public OrderRecordFull findById(long id) {
-        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::findById(id::%d)", id));
         return mapper.map(orderDao.findById(id), OrderRecordFull.class);
     }
 
@@ -76,7 +71,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
      */
     @Override
     public OrderStatsResponse getUnassignedOrdersSummary() {
-        LOGGER.debug("###LOGIWEB### OrderServiceImpl::getUnassignedOrdersSummary()");
         OrderStatsResponse response = new OrderStatsResponse();
         response.setResponseType(OrderStatsResponse.ResponseType.SUMMARY);
         response.setDateFilter("all");
@@ -86,7 +80,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
             try {
                 line.setDistance(roadService.getDistanceFromTo(line.getFromCity(), line.getToCity()));
             } catch (NoRouteFoundException e) {
-                LOGGER.warn(String.format("###LOGIWEB### no route found for an order (from %s to %s", line.getFromCity().getName(), line.getToCity().getName()));
                 line.setDistance(-1L);
             }
         });
@@ -103,7 +96,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     @Override
     public OrderStatsResponse getUnassignedOrdersSummary(LocalDate date) {
-        LOGGER.debug("###LOGIWEB### OrderServiceImpl::getUnassignedOrdersByRouteForDate(date::%s)", date);
         OrderStatsResponse response = new OrderStatsResponse();
         response.setResponseType(OrderStatsResponse.ResponseType.SUMMARY);
         response.setDateFilter(date.toString());
@@ -114,7 +106,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
                 line.setDate(date.toString());
                 line.setDistance(roadService.getDistanceFromTo(line.getFromCity(), line.getToCity()));
             } catch (NoRouteFoundException e) {
-                LOGGER.warn(String.format("###LOGIWEB### no route found for an order (from %s to %s", line.getFromCity().getName(), line.getToCity().getName()));
                 line.setDistance(-1L);
             }
         });
@@ -138,7 +129,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
      */
     @Override
     public OrderStatsResponse getUnassignedOrders(long fromCityId, long toCityId, @Nullable LocalDate date) {
-        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::getUnassignedOrders(fromCity::%d,toCity::%d,date::%s)", fromCityId, toCityId, date));
         OrderStatsResponse response = new OrderStatsResponse();
         response.setResponseType(OrderStatsResponse.ResponseType.DRILLDOWN);
         if(date != null) response.setDateFilter(date.toString());
@@ -184,7 +174,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     @Override
     @Transactional
     public List<OrderRecordShort> getOrdersPage(int page) {
-        LOGGER.debug(String.format("###LOGIWEB### OrderServiceImpl::getOrdersPage(page::%d)", page));
         int index = (page - 1) * ROWS_PER_PAGE;
         return orderDao.getOrdersPage(index, ROWS_PER_PAGE).stream()
                 .map(o -> mapper.map(o, OrderRecordShort.class))
@@ -196,7 +185,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
      */
     @Override
     public int countPages() {
-        LOGGER.debug("###LOGIWEB### OrderServiceImpl::countPages()");
         long rowCount = orderDao.count();
         int pageCount = (int) Math.ceil ( (float) rowCount / ROWS_PER_PAGE );
         return pageCount;

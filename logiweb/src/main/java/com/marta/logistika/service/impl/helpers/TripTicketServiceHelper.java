@@ -10,8 +10,6 @@ import com.marta.logistika.service.api.RoadService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.entity.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -39,7 +37,6 @@ public class TripTicketServiceHelper {
     private final TimeTrackerService timeService;
     private final StopoverHelper stopoverHelper;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketServiceHelper.class);
 
     @Autowired
     public TripTicketServiceHelper(TripTicketDao ticketDao, RoadService roadService, TimeTrackerService timeService, StopoverHelper stopoverHelper, ApplicationEventPublisher applicationEventPublisher) {
@@ -60,8 +57,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void addOrderToTicket(OrderEntity order, TripTicketEntity ticket) throws NoRouteFoundException, OrderDoesNotFitToTicketException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::addOrderToTicket(order::%d,ticket::%d)", order.getId(), ticket.getId()));
-
         // check order and ticket statuses
         if (ticket.getStatus() != CREATED) throw new UncheckedServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
         if (order.getStatus() != NEW) throw new UncheckedServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
@@ -108,8 +103,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public LocalDateTime calculateDurationAndArrivalDateTime(TripTicketEntity ticket) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::calculateDurationAndArrivalDateTime(ticket::%d)", ticket.getId()));
-
         List<StopoverEntity> stopovers = ticket.getStopovers();
         stopovers.sort(StopoverEntity::compareTo);
 
@@ -150,9 +143,7 @@ public class TripTicketServiceHelper {
 
         try {
             ticket.setAvgLoad((int) (stopoverHelper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
-        } catch (NoRouteFoundException e) {
-            LOGGER.warn("###LOGIWEB### NoRouteFoundException thrown while removing order from ticket", e);
-        }
+        } catch (NoRouteFoundException e) {}
     }
 
 
@@ -164,8 +155,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateDriversTimeRecordsForNewStage(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::updateDriversTimeRecordsForNewStage(ticket::%d)", ticket.getId()));
-
         // get actual task for the ticket
         Instruction.Task currentTask = getCurrentTask(ticket);
 
@@ -227,8 +216,7 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void setFirstDriver(TripTicketEntity ticket, DriverEntity initiatingDriver) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::setFirstDriver(ticket::%d,driver::%s)", ticket.getId(), initiatingDriver));
-        if(getCurrentTask(ticket).equals(GOTO)) {
+         if(getCurrentTask(ticket).equals(GOTO)) {
             if(initiatingDriver.getStatus().equals(SECONDING)) {
                 ticket.getDrivers().forEach(driver -> {
                     if(driver.equals(initiatingDriver)) driver.setStatus(DRIVING);
@@ -251,7 +239,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void setOnline(DriverEntity initiatingDriver, TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::setOnline(driver::%s,ticket::%d)", initiatingDriver, ticket.getId()));
         if(initiatingDriver.getStatus() != OFFLINE) throw new UncheckedServiceException(String.format("Driver can only go online from offline status. Driver %s has %s status", initiatingDriver, initiatingDriver.getStatus()));
         Task currentTask = getCurrentTask(ticket);
         switch (currentTask) {
@@ -288,7 +275,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void startRoadBreak(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::startRoadBreak(ticket::%d)", ticket.getId()));
         ticket.getDrivers().forEach(driver -> {
             switch (driver.getStatus()) {
                 case DRIVING:
@@ -313,7 +299,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void finishRoadBreak(TripTicketEntity ticket, DriverEntity initiatingDriver) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::finishRoadBreak(ticket::%d,driver::%s)", ticket.getId(), initiatingDriver));
         if (getCurrentTask(ticket).equals(GOTO)) {
             for (int i = 0; i < ticket.getDrivers().size(); i++) {
                 DriverEntity driver = ticket.getDrivers().get(i);
@@ -337,7 +322,6 @@ public class TripTicketServiceHelper {
      */
      @Transactional(propagation = Propagation.REQUIRED)
      public void startStopoverBreak(DriverEntity driver) {
-         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::startStopoverBreak(driver::%s)", driver));
          if(driver.getStatus().equals(HANDLING)) {
              driver.setStatus(STOPOVER_BREAK);
              timeService.closeReopenTimeRecord(driver);
@@ -354,7 +338,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void finishStopoverBreak(DriverEntity driver, TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::finishStopoverBreak(driver::%s,ticket::%d)", driver, ticket.getId()));
         Task currentTask = getCurrentTask(ticket);
         switch (currentTask) {
             case LOAD:
@@ -387,7 +370,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void checkTicketCompletion(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::checkTicketCompletion(ticket::%d)", ticket.getId()));
         Task currentTask = getCurrentTask(ticket);
         if(currentTask == CLOSE_TICKET) {
             //update ticket status
@@ -420,7 +402,6 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public Task getCurrentTask(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::getCurrentTask(ticket::%d)", ticket.getId()));
         if(ticket.getStatus() != APPROVED  && ticket.getStatus() == RUNNING) return NONE;
         StopoverEntity currentStopover = ticket.getStopoverWithSequenceNo(ticket.getCurrentStep());
         if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == SHIPPED)) return UNLOAD;

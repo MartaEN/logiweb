@@ -7,8 +7,6 @@ import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.RoadEntity;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +18,6 @@ import java.util.stream.Collectors;
 public class RoadServiceImpl extends AbstractService implements RoadService {
 
     private final RoadDao roadDao;
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoadServiceImpl.class);
 
     @Autowired
     public RoadServiceImpl(RoadDao roadDao) {
@@ -35,8 +32,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
     @Override
     @Transactional
     public void add(RoadEntity road) {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::add(road::%s)", road));
-
         //check road parameters validity
         if(road == null) throw new IllegalArgumentException("Invalid input: null road");
         if(road.getFromCity() == null || road.getToCity() == null) throw new IllegalArgumentException("Invalid input: null road end point(s)");
@@ -62,8 +57,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
     @Override
     @Transactional
     public void remove(long roadId) {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::remove(roadId::%d)", roadId));
-
         //find requested road
         RoadEntity road = roadDao.findById(roadId);
         if (road == null) throw new EntityNotFoundException(roadId, RoadEntity.class);
@@ -82,7 +75,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
      */
     @Override
     public List<RoadRecord> listAll() {
-        LOGGER.debug("###LOGIWEB### RoadServiceImpl::listAll()");
         return roadDao.listAll()
                 .stream()
                 .map(r -> mapper.map(r, RoadRecord.class))
@@ -96,7 +88,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
      */
     @Override
     public List<RoadRecord> listAllRoadsFrom(CityEntity city) {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::listAllRoadsFrom(city::%s)", city));
         return roadDao.listAllRoadsFrom(city)
                 .stream()
                 .map(r -> mapper.map(r, RoadRecord.class))
@@ -105,7 +96,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
 
     @Override
     public List<CityEntity> listAllUnlinkedCities(CityEntity fromCity) {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::listAllUnlinkedCities(fromCity::%s)", fromCity));
         return roadDao.listAllUnlinkedCities(fromCity);
     }
 
@@ -117,9 +107,7 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
      */
     @Override
     public List<RoadRecord> findRouteFromTo(CityEntity fromCity, CityEntity toCity) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::findRouteFromTo(fromCity::%s,toCity::%s)", fromCity.getName(), toCity.getName()));
-
-        // internal class for route calculation
+       // internal class for route calculation
         class Route {
             private LinkedList<RoadEntity> roadList;
             private int distance;
@@ -192,8 +180,7 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
      */
     @Override
     public int getDistanceFromTo(CityEntity fromCity, CityEntity toCity) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::getDistanceFromTo(fromCity::%s,toCity::%s)", fromCity.getName(), toCity.getName()));
-        if (fromCity.equals(toCity)) return 0;
+         if (fromCity.equals(toCity)) return 0;
         return findRouteFromTo(fromCity, toCity)
                 .stream()
                 .mapToInt(RoadRecord::getDistance)
@@ -208,7 +195,6 @@ public class RoadServiceImpl extends AbstractService implements RoadService {
      */
     @Override
     public int getRouteDistance(List<CityEntity> route) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### RoadServiceImpl::getRouteDistance(route::%s)", route));
         int distance = 0;
         for (int i = 1; i < route.size(); i++) {
             distance += getDistanceFromTo(route.get(i), route.get(i-1));

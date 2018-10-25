@@ -4,7 +4,6 @@ import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public abstract class AbstractService {
 

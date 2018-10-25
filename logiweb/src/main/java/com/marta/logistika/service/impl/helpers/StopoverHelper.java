@@ -1,6 +1,5 @@
 package com.marta.logistika.service.impl.helpers;
 
-import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.StopoverEntity;
@@ -8,17 +7,11 @@ import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.exception.checked.OrderDoesNotFitToTicketException;
 import com.marta.logistika.service.api.RoadService;
-import com.marta.logistika.service.api.TimeTrackerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +19,6 @@ import java.util.stream.Collectors;
 public class StopoverHelper {
 
     private final RoadService roadService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripTicketServiceHelper.class);
 
     @Autowired
     public StopoverHelper(RoadService roadService) {
@@ -43,8 +35,6 @@ public class StopoverHelper {
      *             unload on or immediately before current route element number "unload"
      */
     int[] suggestLoadUnloadPoints (TripTicketEntity ticketEntity, OrderEntity order) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::suggestLoadUnloadPoints(ticket::%d,order::%d)", ticketEntity.getId(), order.getId()));
-
         List<CityEntity> currentRoute = ticketEntity.getCities();
         List<Integer> weights = ticketEntity.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         CityEntity fromCity = order.getFromCity();
@@ -106,7 +96,6 @@ public class StopoverHelper {
      * @return weighted average truck load
      */
     float getAvgLoad (TripTicketEntity ticket) throws NoRouteFoundException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::getAvgLoad(ticket::%d)", ticket.getId()));
         List<CityEntity> route = ticket.getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
         List<Integer> weights = ticket.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         return getAvgLoad(route, weights);
@@ -120,7 +109,7 @@ public class StopoverHelper {
             totalDistance += distance;
             totalLoad += distance * weights.get(i);
         }
-        return (float) totalLoad / totalDistance;
+        return totalLoad / totalDistance;
     }
 
     /**
@@ -131,7 +120,6 @@ public class StopoverHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     void insertNewStopover(TripTicketEntity ticket, CityEntity city, int sequenceNo) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::insertNewStopover(ticket::%d,city::%s,sequenceNo::%d)", ticket.getId(), city.getName(), sequenceNo));
         ticket.getStopovers().forEach(s -> {
             if(s.getSequenceNo() >= sequenceNo) s.setSequenceNo(s.getSequenceNo() + 1);
         });
@@ -148,7 +136,6 @@ public class StopoverHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeEmptyStopovers(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::removeEmptyStopovers(ticket::%d)", ticket.getId()));
         for (int i = ticket.getStopovers().size() - 2 ; i > 0 ; i--) {
             StopoverEntity stopover = ticket.getStopovers().get(i);
             if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0)
@@ -165,7 +152,6 @@ public class StopoverHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     void updateWeights(TripTicketEntity ticket) {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::updateWeights(ticket::%d)", ticket.getId()));
         int cumulativeWeight = 0;
         List<StopoverEntity> route = ticket.getStopovers();
         route.sort(StopoverEntity::compareTo);
@@ -180,7 +166,6 @@ public class StopoverHelper {
      * @throws OrderDoesNotFitToTicketException is thrown in case total weight exceeds truck capacity limit at any stopover
      */
     void checkWeightLimit (TripTicketEntity ticket) throws OrderDoesNotFitToTicketException {
-        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::checkWeightLimit(ticket::%d)", ticket.getId()));
         for (StopoverEntity s : ticket.getStopovers()) {
             if (s.getTotalWeight() > ticket.getTruck().getCapacity()) {
                 throw new OrderDoesNotFitToTicketException(ticket.getId(),
