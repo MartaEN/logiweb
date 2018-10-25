@@ -14,7 +14,6 @@ import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.dto.OrderRecordDriverInstruction;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.*;
-import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.dao.api.DriverDao;
 import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.service.impl.helpers.TripTicketServiceHelper;
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static com.marta.logistika.dto.Instruction.*;
 import static com.marta.logistika.dto.Instruction.Task.*;
+import static com.marta.logistika.enums.TripTicketStatus.*;
 
 @Service("tripTicketService")
 public class TripTicketServiceImpl extends AbstractService implements TripTicketService {
@@ -74,7 +74,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         //create new ticket entity
         TripTicketEntity ticket = new TripTicketEntity();
-        ticket.setStatus(TripTicketStatus.CREATED);
+        ticket.setStatus(CREATED);
 
         //validate and assign trip departure date
         if(departureDateTime.isBefore(LocalDateTime.now())) throw new UncheckedServiceException("Trip starting date should be in the future");
@@ -118,7 +118,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::updateDepartureDateTime(ticketId::%d,departureDateTime::%s", ticketId, departureDateTime));
 
         TripTicketEntity ticket = ticketDao.findById(ticketId);
-        if(ticket.getStatus() != TripTicketStatus.CREATED) throw new UncheckedServiceException(
+        if(ticket.getStatus() != CREATED) throw new UncheckedServiceException(
                 String.format("Can't update ticket if %d as it has status %s",
                         ticketId,
                         ticket.getStatus()));
@@ -202,7 +202,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::approveTicket(ticketId::%d)", ticketId));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
 
-        if (ticket.getStatus().equals(TripTicketStatus.CREATED)) {
+        if (ticket.getStatus().equals(CREATED)) {
 
             // check the departure date
             if (ticket.getDepartureDateTime().isBefore(LocalDateTime.now()))
@@ -229,7 +229,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             }
 
             // update ticket and its orders statuses
-            ticket.setStatus(TripTicketStatus.APPROVED);
+            ticket.setStatus(APPROVED);
             ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
 
             //publish update event
@@ -356,8 +356,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::getInstructionForDriver(driver::%s)", driver));
         Instruction instruction = new Instruction();
 
-        TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.RUNNING);
-        if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), TripTicketStatus.APPROVED);
+        TripTicketEntity currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), RUNNING);
+        if (currentTicket == null) currentTicket = ticketDao.findByDriverAndStatus(driver.getPersonalId(), APPROVED);
         if (currentTicket == null) {
             instruction.setDirectiveMessage("Маршрутных заданий нет. Отдыхайте!");
             return instruction;
@@ -451,6 +451,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::reachStopover(principal::%s,ticketId::%d,step::%d)", principal.getName(), ticketId, step));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step) {
+            if(ticket.getCurrentStep() == -1) ticket.setStatus(RUNNING);
             ticket.setCurrentStep(step);
             helper.updateDriversTimeRecordsForNewStage(ticket);
             helper.checkTicketCompletion(ticket);

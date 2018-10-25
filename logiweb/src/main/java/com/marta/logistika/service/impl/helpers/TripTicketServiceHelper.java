@@ -216,6 +216,7 @@ public class TripTicketServiceHelper {
      * @param ticket trip ticket
      * @param initiatingDriver reporting driver
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void setFirstDriver(TripTicketEntity ticket, DriverEntity initiatingDriver) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::setFirstDriver(ticket::%d,driver::%s)", ticket.getId(), initiatingDriver));
         if(getCurrentTask(ticket).equals(GOTO)) {
@@ -288,6 +289,7 @@ public class TripTicketServiceHelper {
      * Method registers the start of stopover break for the driver
      * @param driver reporting driver
      */
+     @Transactional(propagation = Propagation.REQUIRED)
      public void startStopoverBreak(DriverEntity driver) {
          LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::startStopoverBreak(driver::%s)", driver));
          if(driver.getStatus().equals(DriverStatus.HANDLING)) {
@@ -304,6 +306,7 @@ public class TripTicketServiceHelper {
      * @param driver reporting driver
      * @param ticket trip ticket
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void finishStopoverBreak(DriverEntity driver, TripTicketEntity ticket) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::finishStopoverBreak(driver::%s,ticket::%d)", driver, ticket.getId()));
         if(getCurrentTask(ticket).equals(LOAD) || getCurrentTask(ticket).equals(UNLOAD)) {
@@ -324,7 +327,8 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public void checkTicketCompletion(TripTicketEntity ticket) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::checkTicketCompletion(ticket::%d)", ticket.getId()));
-        if(getCurrentTask(ticket) == CLOSE_TICKET) {
+        Task currentTask = getCurrentTask(ticket);
+        if(currentTask == CLOSE_TICKET) {
             //update ticket status
             ticket.setStatus(TripTicketStatus.CLOSED);
 
@@ -353,6 +357,7 @@ public class TripTicketServiceHelper {
      * @param ticket trip ticket
      * @return current task
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Task getCurrentTask(TripTicketEntity ticket) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::getCurrentTask(ticket::%d)", ticket.getId()));
         int currentStep = ticket.getCurrentStep();
