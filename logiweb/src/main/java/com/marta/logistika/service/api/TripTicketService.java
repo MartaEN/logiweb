@@ -29,7 +29,6 @@ public interface TripTicketService {
     SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale);
     void removeOrderFromTicket(long ticketId, long orderId);
     void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException;
-    void deleteTicket(long ticketId);
 
     // processing ticket on the road (driver operations)
     Instruction getInstructionForDriver(Principal principal);

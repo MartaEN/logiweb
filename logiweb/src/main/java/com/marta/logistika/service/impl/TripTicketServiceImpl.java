@@ -129,6 +129,13 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setDepartureDateTime(departureDateTime);
     }
 
+    /**
+     * Attempts adding the orders to a trip ticket.
+     * @param ticketId target trip ticket id
+     * @param orderId order id
+     * @param locale user locale
+     * @return system message with the result of operation
+     */
     @Override
     @Transactional
     public SystemMessage addSingleOrderToTicketAndReport(long ticketId, long orderId, Locale locale) {
@@ -144,6 +151,17 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
     }
 
+    /**
+     * Attempts adding several orders to a trip ticket, and tells how many additions were successful.
+     * Orders to be added are selected by given criteria.
+     * @param fromCityId order selection criteria - departure city id
+     * @param toCityId order selection criteria - destination city id
+     * @param date order selection criteria - order creation date
+     * @param ticketId target trip ticket id
+     * @param locale user's locale
+     * @return system message with the result of operation
+     */
+    //todo entry point for the most tricky operation - adding several orders to ticket
     @Override
     @Transactional
     public SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale) {
@@ -157,6 +175,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         for (OrderEntity order: orders) {
             try {
+                //todo call of method which will actually add order to ticket
                 helper.addOrderToTicket(order, ticket);
                 totalQuantity++;
                 totalWeight += order.getWeight();
@@ -235,11 +254,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             //publish update event
             applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         }
-    }
-
-    @Override
-    public void deleteTicket(long ticketId) {
-        //todo
     }
 
     /**

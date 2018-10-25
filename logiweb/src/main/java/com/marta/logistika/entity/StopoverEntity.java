@@ -17,14 +17,12 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
     @JoinColumn (name = "city")
     private CityEntity city;
 
-    //про EAGER: я знаю, что так нельзя, просто хотела оттестировать бизнес-логику
-    //до того как углубиться в настройки JPA. Поправлю
+    //todo
     @OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn (name = "stopover", nullable = false)
     private List<TransactionUnloadEntity> unloads = new ArrayList<>();
 
-    //про EAGER: я знаю, что так нельзя, просто хотела оттестировать бизнес-логику
-    //до того как углубиться в настройки JPA. Поправлю
+    //todo
     @OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn (name = "stopover", nullable = false)
     private List<TransactionLoadEntity> loads = new ArrayList<>();

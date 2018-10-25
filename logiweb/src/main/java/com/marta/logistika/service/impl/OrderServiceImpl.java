@@ -70,15 +70,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         return mapper.map(orderDao.findById(id), OrderRecordFull.class);
     }
 
-    //todo delete
-    @Override
-    public List<OrderRecordShort> listAllUnassigned() {
-        LOGGER.debug("###LOGIWEB### OrderServiceImpl::listAllUnassigned()");
-        return orderDao.listAllUnassigned().stream()
-                .map(o -> mapper.map(o, OrderRecordShort.class))
-                .collect(Collectors.toList());
-    }
-
     /**
      * Prepares statistics on all unassigned orders - by destination, total distance, number of orders, total weight
      * @return list of order statistics lines

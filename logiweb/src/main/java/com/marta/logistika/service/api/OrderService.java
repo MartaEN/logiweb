@@ -10,7 +10,6 @@ public interface OrderService {
 
     long add (OrderEntryForm order);
     OrderRecordFull findById(long id);
-    List<OrderRecordShort> listAllUnassigned();
     OrderStatsResponse getUnassignedOrdersSummary();
     OrderStatsResponse getUnassignedOrdersSummary(LocalDate date);
     OrderStatsResponse getUnassignedOrders(long fromCityId, long toCityId, @Nullable LocalDate date);

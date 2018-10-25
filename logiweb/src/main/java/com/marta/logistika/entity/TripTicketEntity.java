@@ -31,8 +31,7 @@ public class TripTicketEntity extends AbstractEntity {
             inverseJoinColumns={@JoinColumn(name="driver")})
     private List<DriverEntity> drivers = new ArrayList<>();
 
-    //про EAGER: я знаю, что так нельзя, просто хотела оттестировать бизнес-логику
-    //до того как углубиться в настройки JPA. Поправлю
+    //todo
     @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "trip", nullable = false)
     private List<StopoverEntity> stopovers = new ArrayList<>();
