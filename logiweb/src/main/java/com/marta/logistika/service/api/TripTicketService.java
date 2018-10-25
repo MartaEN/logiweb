@@ -32,6 +32,7 @@ public interface TripTicketService {
 
     // processing ticket on the road (driver operations)
     Instruction getInstructionForDriver(Principal principal);
+    void setOnline(Principal principal, long ticketId);
     void reachStopover(Principal principal, long ticketId, int step);
     void loadAtStopover(Principal principal, long ticketId, int step);
     void unloadAtStopover(Principal principal, long ticketId, int step);

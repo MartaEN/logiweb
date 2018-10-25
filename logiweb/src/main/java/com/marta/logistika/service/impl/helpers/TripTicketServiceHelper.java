@@ -1,10 +1,7 @@
 package com.marta.logistika.service.impl.helpers;
 
-import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.enums.DriverStatus;
-import com.marta.logistika.enums.OrderStatus;
-import com.marta.logistika.enums.TripTicketStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.checked.NoRouteFoundException;
 import com.marta.logistika.exception.checked.OrderDoesNotFitToTicketException;
@@ -27,6 +24,9 @@ import java.util.List;
 
 import static com.marta.logistika.dto.Instruction.*;
 import static com.marta.logistika.dto.Instruction.Task.*;
+import static com.marta.logistika.enums.DriverStatus.*;
+import static com.marta.logistika.enums.TripTicketStatus.*;
+import static com.marta.logistika.enums.OrderStatus.*;
 
 @Component
 public class TripTicketServiceHelper {
@@ -63,8 +63,8 @@ public class TripTicketServiceHelper {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::addOrderToTicket(order::%d,ticket::%d)", order.getId(), ticket.getId()));
 
         // check order and ticket statuses
-        if (ticket.getStatus() != TripTicketStatus.CREATED) throw new UncheckedServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
-        if (order.getStatus() != OrderStatus.NEW) throw new UncheckedServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
+        if (ticket.getStatus() != CREATED) throw new UncheckedServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
+        if (order.getStatus() != NEW) throw new UncheckedServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
 
         // find suggested load and unload stopovers for the order
         int [] suggestedLoadUnloadForNewOrder = stopoverHelper.suggestLoadUnloadPoints(ticket, order);
@@ -93,7 +93,7 @@ public class TripTicketServiceHelper {
         ticket.setAvgLoad((int) (stopoverHelper.getAvgLoad(ticket) / ticket.getTruck().getCapacity() * 100));
 
         // update order status in case of successful weight check
-        order.setStatus(OrderStatus.ASSIGNED);
+        order.setStatus(ASSIGNED);
 
         //publish update event
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
@@ -171,42 +171,51 @@ public class TripTicketServiceHelper {
 
         boolean isFirstDriverSet = false;
 
+        // if ticket is closing, all drivers are set offline
+        if (currentTask == CLOSE_TICKET) {
+            ticket.getDrivers().forEach(driver -> {
+                driver.setStatus(OFFLINE);
+                timeService.closeTimeRecord(driver);
+            });
+            applicationEventPublisher.publishEvent(new EntityUpdateEvent());
+            return;
+        }
+
+        //otherwise define new driver status for each driver
         for (int i = 0; i < ticket.getDrivers().size(); i++) {
             DriverEntity driver = ticket.getDrivers().get(i);
             DriverStatus previousDriverStatus = driver.getStatus();
 
-            // update driver status
-            switch (currentTask) {
-                case GOTO:
-                    if(isFirstDriverSet) {
-                        driver.setStatus(DriverStatus.SECONDING);
-                    } else {
-                        driver.setStatus(DriverStatus.DRIVING);
-                        isFirstDriverSet = true;
-                    }
+            // update driver statuses
+            switch (driver.getStatus()) {
+                case OFFLINE:
+                case STOPOVER_BREAK:
+                case ROAD_BREAK:
                     break;
-                case LOAD:
-                case UNLOAD:
-                    if(driver.getStatus() != DriverStatus.STOPOVER_BREAK) driver.setStatus(DriverStatus.HANDLING);
-                    break;
-                case CLOSE_TICKET:
-                    driver.setStatus(DriverStatus.OFFLINE);
-                    break;
-                case START:
                 default:
-                    throw new RuntimeException(String.format("Invalid task %s for ticket id %d", currentTask, ticket.getId()));
+                    switch (currentTask) {
+                        case LOAD:
+                        case UNLOAD:
+                            driver.setStatus(HANDLING);
+                            break;
+                        case GOTO:
+                            boolean anyOtherDriverMissing = ticket.getDrivers().stream().anyMatch(d -> d.getStatus() == STOPOVER_BREAK || d.getStatus() == OFFLINE);
+                            if (anyOtherDriverMissing) {
+                                driver.setStatus(WAITING);
+                            } else if(isFirstDriverSet) {
+                                driver.setStatus(SECONDING);
+                            } else {
+                                driver.setStatus(DRIVING);
+                                isFirstDriverSet = true;
+                            }
+                            break;
+                        default:
+                            throw new RuntimeException(String.format("Invalid task %s for ticket id %d", currentTask, ticket.getId()));
+                    }
             }
 
             //update driver time records
-            if( ! driver.getStatus().equals(previousDriverStatus)) {
-                if (previousDriverStatus == DriverStatus.OFFLINE) {
-                    timeService.openNewTimeRecord(driver);
-                    applicationEventPublisher.publishEvent(new EntityUpdateEvent());
-                } else if (currentTask == CLOSE_TICKET) {
-                    timeService.closeTimeRecord(driver);
-                    applicationEventPublisher.publishEvent(new EntityUpdateEvent());
-                } else timeService.closeReopenTimeRecord(driver);
-            }
+            if ( ! driver.getStatus().equals(previousDriverStatus)) timeService.closeReopenTimeRecord(driver);
         }
     }
 
@@ -220,10 +229,10 @@ public class TripTicketServiceHelper {
     public void setFirstDriver(TripTicketEntity ticket, DriverEntity initiatingDriver) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::setFirstDriver(ticket::%d,driver::%s)", ticket.getId(), initiatingDriver));
         if(getCurrentTask(ticket).equals(GOTO)) {
-            if(initiatingDriver.getStatus().equals(DriverStatus.SECONDING)) {
+            if(initiatingDriver.getStatus().equals(SECONDING)) {
                 ticket.getDrivers().forEach(driver -> {
-                    if(driver.equals(initiatingDriver)) driver.setStatus(DriverStatus.DRIVING);
-                    else driver.setStatus(DriverStatus.SECONDING);
+                    if(driver.equals(initiatingDriver)) driver.setStatus(DRIVING);
+                    else driver.setStatus(SECONDING);
                     timeService.closeReopenTimeRecord(driver);
                 });
             } else {
@@ -237,6 +246,43 @@ public class TripTicketServiceHelper {
     }
 
     /**
+     * Method registers driver going online (opening his next shift)
+     * @param initiatingDriver requesting driver
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void setOnline(DriverEntity initiatingDriver, TripTicketEntity ticket) {
+        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::setOnline(driver::%s,ticket::%d)", initiatingDriver, ticket.getId()));
+        if(initiatingDriver.getStatus() != OFFLINE) throw new UncheckedServiceException(String.format("Driver can only go online from offline status. Driver %s has %s status", initiatingDriver, initiatingDriver.getStatus()));
+        Task currentTask = getCurrentTask(ticket);
+        switch (currentTask) {
+            case LOAD:
+            case UNLOAD:
+                initiatingDriver.setStatus(HANDLING);
+                break;
+            case GOTO:
+                boolean anyOtherDriversOffline = ticket.getDrivers().stream()
+                        .filter(d -> !d.equals(initiatingDriver))
+                        .anyMatch(d -> d.getStatus() == OFFLINE || d.getStatus() == STOPOVER_BREAK || d.getStatus() == ROAD_BREAK);
+                if (anyOtherDriversOffline) {
+                    initiatingDriver.setStatus(WAITING);
+                } else {
+                    initiatingDriver.setStatus(DRIVING);
+                    ticket.getDrivers().forEach(otherDriver -> {
+                        if (!otherDriver.equals(initiatingDriver)) {
+                            otherDriver.setStatus(SECONDING);
+                            timeService.closeReopenTimeRecord(otherDriver);
+                        }
+                    });
+                }
+                break;
+            default:
+                throw new UncheckedServiceException("No ticket tasks for driver going online");
+        }
+        timeService.openNewTimeRecord(initiatingDriver);
+        applicationEventPublisher.publishEvent(new EntityUpdateEvent());
+    }
+
+    /**
      * Method registers the road break for the ticket
      * @param ticket to be updated
      */
@@ -247,7 +293,7 @@ public class TripTicketServiceHelper {
             switch (driver.getStatus()) {
                 case DRIVING:
                 case SECONDING:
-                    driver.setStatus(DriverStatus.ROAD_BREAK);
+                    driver.setStatus(ROAD_BREAK);
                     timeService.closeReopenTimeRecord(driver);
                     break;
                 case HANDLING:
@@ -272,9 +318,9 @@ public class TripTicketServiceHelper {
             for (int i = 0; i < ticket.getDrivers().size(); i++) {
                 DriverEntity driver = ticket.getDrivers().get(i);
                 if(driver.equals(initiatingDriver)) {
-                    driver.setStatus(DriverStatus.DRIVING);
+                    driver.setStatus(DRIVING);
                 } else {
-                    driver.setStatus(DriverStatus.SECONDING);
+                    driver.setStatus(SECONDING);
                 }
                 timeService.closeReopenTimeRecord(driver);
             }
@@ -292,8 +338,8 @@ public class TripTicketServiceHelper {
      @Transactional(propagation = Propagation.REQUIRED)
      public void startStopoverBreak(DriverEntity driver) {
          LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::startStopoverBreak(driver::%s)", driver));
-         if(driver.getStatus().equals(DriverStatus.HANDLING)) {
-             driver.setStatus(DriverStatus.STOPOVER_BREAK);
+         if(driver.getStatus().equals(HANDLING)) {
+             driver.setStatus(STOPOVER_BREAK);
              timeService.closeReopenTimeRecord(driver);
          } else {
              throw new UncheckedServiceException(String.format("Stopover break can be only taken from handling status. Driver %s has %s status",
@@ -309,13 +355,28 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public void finishStopoverBreak(DriverEntity driver, TripTicketEntity ticket) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::finishStopoverBreak(driver::%s,ticket::%d)", driver, ticket.getId()));
-        if(getCurrentTask(ticket).equals(LOAD) || getCurrentTask(ticket).equals(UNLOAD)) {
-            driver.setStatus(DriverStatus.HANDLING);
-            timeService.closeReopenTimeRecord(driver);
-        } else {
-            throw new UncheckedServiceException(String.format(
-                    "Stopover break can only be taken while ticket task is 'LOAD' or 'UNLOAD';  ticket id %d current task is %s",
-                    ticket.getId(), getCurrentTask(ticket)));
+        Task currentTask = getCurrentTask(ticket);
+        switch (currentTask) {
+            case LOAD:
+            case UNLOAD:
+                driver.setStatus(HANDLING);
+                timeService.closeReopenTimeRecord(driver);
+                break;
+            case GOTO:
+                boolean anyOtherDriversOffline = ticket.getDrivers().stream()
+                        .filter(d -> !d.equals(driver))
+                        .anyMatch(d -> d.getStatus() == OFFLINE || d.getStatus() == STOPOVER_BREAK || d.getStatus() == ROAD_BREAK);
+                if (anyOtherDriversOffline) {
+                    driver.setStatus(WAITING);
+                } else {
+                    driver.setStatus(DRIVING);
+                    for (DriverEntity otherDriver: ticket.getDrivers()) {
+                        if( !otherDriver.equals(driver)) otherDriver.setStatus(SECONDING);
+                    }
+                }
+                break;
+            default:
+                throw new UncheckedServiceException("No ticket tasks for driver returning from stopover break");
         }
     }
 
@@ -330,10 +391,10 @@ public class TripTicketServiceHelper {
         Task currentTask = getCurrentTask(ticket);
         if(currentTask == CLOSE_TICKET) {
             //update ticket status
-            ticket.setStatus(TripTicketStatus.CLOSED);
+            ticket.setStatus(CLOSED);
 
             //update truck status and availability
-            TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), TripTicketStatus.APPROVED);
+            TripTicketEntity nextTripForThisTruck = ticketDao.findByTruckAndStatus(ticket.getTruck().getRegNumber(), APPROVED);
             if(nextTripForThisTruck == null) {
                 ticket.getTruck().setBookedUntil(LocalDateTime.now());
                 ticket.getTruck().setParked(true);
@@ -341,7 +402,7 @@ public class TripTicketServiceHelper {
 
             //update each driver status and availability
             ticket.getDrivers().forEach(d -> {
-                TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(d.getPersonalId(), TripTicketStatus.APPROVED);
+                TripTicketEntity nextTripForThisDriver = ticketDao.findByDriverAndStatus(d.getPersonalId(), APPROVED);
                 if(nextTripForThisDriver == null) {
                     d.setBookedUntil(LocalDateTime.now());
                 }
@@ -360,14 +421,11 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public Task getCurrentTask(TripTicketEntity ticket) {
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceHelper::getCurrentTask(ticket::%d)", ticket.getId()));
-        int currentStep = ticket.getCurrentStep();
-        if(currentStep == -1) return START;
-        if(currentStep >= ticket.getStopovers().size()) return NONE;
-
+        if(ticket.getStatus() != APPROVED  && ticket.getStatus() == RUNNING) return NONE;
         StopoverEntity currentStopover = ticket.getStopoverWithSequenceNo(ticket.getCurrentStep());
-        if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.SHIPPED)) return UNLOAD;
-        if(currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == OrderStatus.READY_TO_SHIP)) return LOAD;
-        if(currentStep == ticket.getStopovers().size() - 1) return CLOSE_TICKET;
+        if(currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == SHIPPED)) return UNLOAD;
+        if(currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == READY_TO_SHIP)) return LOAD;
+        if(ticket.getCurrentStep() == ticket.getStopovers().size() - 1) return CLOSE_TICKET;
         return GOTO;
     }
 

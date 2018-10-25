@@ -19,6 +19,7 @@
         {{#ifEquals driverStatus "HANDLING"}} <i class="fas fa-truck-loading"></i> {{/ifEquals}}
         {{#ifEquals driverStatus "ROAD_BREAK"}} <i class="fas fa-tree"></i> {{/ifEquals}}
         {{#ifEquals driverStatus "STOPOVER_BREAK"}} <i class="fas fa-utensils"></i> {{/ifEquals}}
+        {{#ifEquals driverStatus "WAITING"}} <i class="fas fa-pause-circle"></i> {{/ifEquals}}
     </a>
 
 </div>

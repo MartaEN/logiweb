@@ -6,7 +6,8 @@ public enum DriverStatus {
     SECONDING ("ONLINE"),
     HANDLING ("ONLINE"),
     ROAD_BREAK ("ONLINE"),
-    STOPOVER_BREAK ("ONLINE");
+    STOPOVER_BREAK ("ONLINE"),
+    WAITING ("ONLINE");
 
     private String briefStatValue;
 

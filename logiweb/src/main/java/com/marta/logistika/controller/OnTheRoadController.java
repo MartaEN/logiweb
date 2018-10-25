@@ -40,6 +40,17 @@ public class OnTheRoadController {
     }
 
     /**
+     * Record the message from the driver that he is going online (starting his shift)
+     * @return JSON next instruction to the driver
+     */
+    @PostMapping(value = "/start", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public Instruction goOnline(Principal principal, @ModelAttribute InstructionDetails instruction) {
+        ticketService.setOnline(principal, instruction.getTicketId());
+        return getInstruction(principal);
+    }
+
+    /**
      * Record the message from the driver that the truck has reached the next stopover
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver

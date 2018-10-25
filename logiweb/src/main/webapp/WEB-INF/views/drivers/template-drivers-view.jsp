@@ -10,6 +10,9 @@
     <%--instruction tab--%>
     <div class="tab-pane fade show active" id="driver-core-screen__instruction" role="tabpanel">
         <div class="card card-body">
+            {{#if alert}}
+                <div class="alert alert-danger" role="alert">{{alert}}</div>
+            {{/if}}
             <div>
                 {{#if currentStop}}
                 <h3>{{currentStop.name}}</h3>
@@ -81,6 +84,7 @@
             {{#ifEquals driverStatus "ROAD_BREAK"}} Стоянка {{/ifEquals}}
             {{#ifEquals driverStatus "STOPOVER_BREAK"}} Перерыв {{/ifEquals}}
             {{#ifEquals driverStatus "OFFLINE"}} Не в сети {{/ifEquals}}
+            {{#ifEquals driverStatus "WAITING"}} Ожидание напарника {{/ifEquals}}
             </h5>
         </div>
         {{#ifEquals driverStatus "DRIVING"}}

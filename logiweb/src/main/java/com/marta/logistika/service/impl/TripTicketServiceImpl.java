@@ -99,7 +99,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             truck.setLocation(toCity);
         }
         truck.setParked(false);
-        ticket.setCurrentStep(-1);
+        ticket.setCurrentStep(0);
 
         //publish update event
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
@@ -252,6 +252,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).forEach(o -> o.setStatus(OrderStatus.READY_TO_SHIP));
 
             //publish update event
+            sendUpdateToAllDrivers(ticket);
             applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         }
     }
@@ -378,34 +379,46 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
         instruction.setTicket(mapper.map(currentTicket, TripTicketRecord.class));
 
-
         DriverStatus driverStatus = driver.getStatus();
         instruction.setDriverStatus(driverStatus);
         switch (driverStatus) {
+            case OFFLINE:
+                instruction.setTask(START);
+                instruction.setTargetStep(0);
+                instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
+                        currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
+                        currentTicket.getDepartureDateTime().toString().substring(0, 10),
+                        currentTicket.getDepartureDateTime().toString().substring(11, 16)));
+                instruction.setRequestedActionMessage("Открыть смену");
+                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                    instruction.setAlert("Вашего выхода на линию ожидают напарники");
+                }
+                break;
             case ROAD_BREAK:
                 instruction.setTask(FINISH_ROAD_BREAK);
                 instruction.setDirectiveMessage("Ваш статус: стоянка для отдыха");
                 instruction.setRequestedActionMessage("Завершить стоянку");
+                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                    instruction.setAlert("Вашего выхода на линию ожидают напарники");
+                }
                 break;
             case STOPOVER_BREAK:
                 instruction.setTask(FINISH_STOPOVER_BREAK);
                 instruction.setDirectiveMessage("Ваш статус: перерыв");
                 instruction.setRequestedActionMessage("Завершить перерыв");
+                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                    instruction.setAlert("Вашего выхода на линию ожидают напарники");
+                }
+                break;
+            case WAITING:
+                instruction.setTask(WAIT);
+                instruction.setDirectiveMessage("Для продолжения маршрута дождитесь Вашего напарника");
                 break;
             default:
                 int step = currentTicket.getCurrentStep();
                 StopoverEntity currentStopover;
                 Task task = helper.getCurrentTask(currentTicket);
                 switch (task) {
-                    case START:
-                        instruction.setTask(GOTO);
-                        instruction.setTargetStep(0);
-                        instruction.setDirectiveMessage(String.format("Старт Вашей следующей поездки: %s, %s, %s",
-                                currentTicket.getStopoverWithSequenceNo(0).getCity().getName(),
-                                currentTicket.getDepartureDateTime().toString().substring(0, 10),
-                                currentTicket.getDepartureDateTime().toString().substring(11, 16)));
-                        instruction.setRequestedActionMessage("Открыть смену");
-                        break;
                     case GOTO:
                         instruction.setTask(GOTO);
                         instruction.setTargetStep(step + 1);
@@ -454,6 +467,23 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         return instruction;
     }
 
+
+    /**
+     * Method records driver going online (opening a new shift)
+     * @param principal requesting driver
+     * @param ticketId ticket id
+     */
+    @Override
+    @Transactional
+    public void setOnline(Principal principal, long ticketId) {
+        LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::setOnline(principal::%s)", principal.getName()));
+        DriverEntity driver = driverDao.findByUsername(principal.getName());
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
+        if(ticket.getStatus() == APPROVED) ticket.setStatus(RUNNING);
+        helper.setOnline(driver, ticket);
+        sendUpdateToOtherDrivers(ticket, principal);
+    }
+
     /**
      * Method records finished move to the new stopover and updates time tracking for all the drivers
      * @param ticketId ticket id
@@ -465,7 +495,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::reachStopover(principal::%s,ticketId::%d,step::%d)", principal.getName(), ticketId, step));
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         if(ticket.getCurrentStep() + 1 == step) {
-            if(ticket.getCurrentStep() == -1) ticket.setStatus(RUNNING);
+            if(ticket.getCurrentStep() == 0) ticket.setStatus(RUNNING);
             ticket.setCurrentStep(step);
             helper.updateDriversTimeRecordsForNewStage(ticket);
             helper.checkTicketCompletion(ticket);
@@ -581,6 +611,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         helper.finishStopoverBreak(driver, ticket);
+        sendUpdateToOtherDrivers(ticket, principal);
     }
 
     /**
@@ -612,4 +643,16 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         }
     }
 
+    /**
+     * sends websocket update on ticket status to all the drivers in the shift
+     * @param ticket ticket
+     */
+    private void sendUpdateToAllDrivers(TripTicketEntity ticket) {
+        if(ticket.getDrivers().size() > 1) {
+            ticket.getDrivers().forEach(driver -> {
+                LOGGER.debug(String.format("###LOGIWEB### TripTicketServiceImpl::sending instruction update to driver %s", driver.getUsername()));
+                websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
+            });
+        }
+    }
 }

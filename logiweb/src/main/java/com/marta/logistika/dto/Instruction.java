@@ -11,6 +11,7 @@ public class Instruction {
     private int targetStep;
     private Task task;
     private String url;
+    private String alert;
     private String directiveMessage;
     private String requestedActionMessage;
     private CityEntity currentStop;
@@ -22,6 +23,7 @@ public class Instruction {
         GOTO ("goto"),
         LOAD ("load"),
         UNLOAD ("unload"),
+        WAIT (""),
         FINISH_STOPOVER_BREAK ("stopover-break-over"),
         FINISH_ROAD_BREAK("road-break-over"),
         CLOSE_TICKET("finish"),
@@ -62,6 +64,14 @@ public class Instruction {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getAlert() {
+        return alert;
+    }
+
+    public void setAlert(String alert) {
+        this.alert = alert;
     }
 
     public String getDirectiveMessage() {
