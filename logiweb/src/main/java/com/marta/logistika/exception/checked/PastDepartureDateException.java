@@ -6,7 +6,7 @@ public class PastDepartureDateException extends CheckedServiceException {
 
     private long ticketId;
 
-    public PastDepartureDateException(long ticketId){
+    public PastDepartureDateException(long ticketId) {
         super("com.marta.logistika.error.pastDepartureDate");
         this.ticketId = ticketId;
     }

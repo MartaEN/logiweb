@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface CityDao extends GenericDao<CityEntity> {
 
-    CityEntity findById (long id);
+    CityEntity findById(long id);
+
     List<CityEntity> listAll();
-    boolean cityNameExists (String cityName);
+
+    boolean cityNameExists(String cityName);
 }

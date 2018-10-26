@@ -6,7 +6,8 @@ public class ErrorMessage implements Serializable {
     private String title;
     private String message;
 
-    public ErrorMessage() {}
+    public ErrorMessage() {
+    }
 
     public ErrorMessage(String title, String message) {
         this.title = title;

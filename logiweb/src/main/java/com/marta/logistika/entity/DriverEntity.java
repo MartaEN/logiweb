@@ -10,22 +10,22 @@ import java.util.Objects;
 @Table(name = "drivers")
 public class DriverEntity extends AbstractEntity {
 
-    @Column (nullable = false, unique = true, length = 12)
+    @Column(nullable = false, unique = true, length = 12)
     private String personalId;
 
-    @Column (nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column (nullable = false, length = 65)
+    @Column(nullable = false, length = 65)
     private String firstName;
 
-    @Column (nullable = false, length = 65)
+    @Column(nullable = false, length = 65)
     private String lastName;
 
     @Enumerated(EnumType.STRING)
     private DriverStatus status;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDateTime bookedUntil;
 
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)

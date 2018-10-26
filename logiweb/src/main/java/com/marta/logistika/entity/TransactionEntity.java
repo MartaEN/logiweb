@@ -6,8 +6,8 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table (name = "transactions")
-@Inheritance (strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "transactions")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", length = 6)
 @DiscriminatorOptions(force = true)
 public abstract class TransactionEntity extends AbstractEntity {

@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/")
 public class HomeController {
 
-	@GetMapping
-	public String home(){
-		return "redirect:/orders";
-	}
+    @GetMapping
+    public String home() {
+        return "redirect:/orders";
+    }
 
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String login() {
-	    return "common/login";
-	}
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public String login() {
+        return "common/login";
+    }
 
     @GetMapping("/access-denied")
     public String showAccessDenied() {
-	    return "common/403";
+        return "common/403";
     }
-		
+
 }

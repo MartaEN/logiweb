@@ -32,7 +32,7 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
 
     @Override
     public DriverEntity findByPersonalId(String personalId) {
-        if(personalId == null) return null;
+        if (personalId == null) return null;
         return em.createQuery(
                 "SELECT d FROM DriverEntity d WHERE d.personalId=:personalId",
                 DriverEntity.class)
@@ -42,7 +42,7 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
 
     @Override
     public DriverEntity findByUsername(String username) {
-        if(username == null) return null;
+        if (username == null) return null;
         return em.createQuery(
                 "SELECT d FROM DriverEntity d WHERE d.username=:username",
                 DriverEntity.class)
@@ -75,7 +75,7 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
         Map<DriverStatus, Integer> driverStats = new HashMap<>();
         List<Object[]> results = em.createQuery(
                 "SELECT d.status AS status, COUNT(d) AS total FROM DriverEntity d GROUP BY d.status")
-        .getResultList();
+                .getResultList();
         for (Object[] result : results) {
             driverStats.put((DriverStatus) result[0], ((Number) result[1]).intValue());
         }

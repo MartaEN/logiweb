@@ -1,7 +1,7 @@
 package com.marta.logistika.dao.impl;
 
-import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.dao.api.TripTicketDao;
+import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.enums.TripTicketStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
@@ -12,7 +12,7 @@ import javax.persistence.NoResultException;
 import java.util.List;
 
 @Repository("ticketRepository")
-public  class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements TripTicketDao {
+public class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements TripTicketDao {
 
     @Override
     @Transactional
@@ -38,7 +38,8 @@ public  class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public @Nullable TripTicketEntity findByDriverAndStatus(String personalId, TripTicketStatus status) {
+    public @Nullable
+    TripTicketEntity findByDriverAndStatus(String personalId, TripTicketStatus status) {
         TripTicketEntity ticket = null;
         try {
             ticket = em.createQuery(
@@ -47,12 +48,14 @@ public  class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements
                     .setParameter("status", status)
                     .setParameter("personalId", personalId)
                     .getSingleResult();
-        } catch (NoResultException e) {}
+        } catch (NoResultException e) {
+        }
         return ticket;
     }
 
     @Override
-    public @Nullable TripTicketEntity findByTruckAndStatus(String regNumber, TripTicketStatus status) {
+    public @Nullable
+    TripTicketEntity findByTruckAndStatus(String regNumber, TripTicketStatus status) {
         TripTicketEntity ticket = null;
         try {
             ticket = em.createQuery(
@@ -61,7 +64,8 @@ public  class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements
                     .setParameter("status", status)
                     .setParameter("regNumber", regNumber)
                     .getSingleResult();
-        } catch (NoResultException e) {}
+        } catch (NoResultException e) {
+        }
         return ticket;
     }
 

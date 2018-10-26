@@ -7,8 +7,11 @@ import java.time.YearMonth;
 public interface TimeTrackerService {
 
     void openNewTimeRecord(DriverEntity driver);
+
     void closeReopenTimeRecord(DriverEntity driver);
+
     void closeTimeRecord(DriverEntity driver);
-    long calculateMonthlyMinutes (DriverEntity driver, YearMonth month);
+
+    long calculateMonthlyMinutes(DriverEntity driver, YearMonth month);
 
 }

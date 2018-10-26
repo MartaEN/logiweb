@@ -8,10 +8,16 @@ import java.util.List;
 
 public interface TripTicketDao extends GenericDao<TripTicketEntity> {
 
-    TripTicketEntity findById (long id);
+    TripTicketEntity findById(long id);
+
     List<TripTicketEntity> listAll();
+
     List<TripTicketEntity> listAllUnapproved();
-    @Nullable TripTicketEntity findByDriverAndStatus(String personalId, TripTicketStatus status);
-    @Nullable TripTicketEntity findByTruckAndStatus(String regNumber, TripTicketStatus status);
+
+    @Nullable
+    TripTicketEntity findByDriverAndStatus(String personalId, TripTicketStatus status);
+
+    @Nullable
+    TripTicketEntity findByTruckAndStatus(String regNumber, TripTicketStatus status);
 
 }

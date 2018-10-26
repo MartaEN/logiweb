@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 @DiscriminatorValue("UNLOAD")
 public class TransactionUnloadEntity extends TransactionEntity {
 
-    public TransactionUnloadEntity() {}
+    public TransactionUnloadEntity() {
+    }
 
     public TransactionUnloadEntity(OrderEntity order) {
         this.order = order;

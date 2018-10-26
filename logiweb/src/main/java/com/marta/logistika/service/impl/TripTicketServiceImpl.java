@@ -1,21 +1,24 @@
 package com.marta.logistika.service.impl;
 
+import com.marta.logistika.dao.api.DriverDao;
+import com.marta.logistika.dao.api.OrderDao;
+import com.marta.logistika.dao.api.TripTicketDao;
+import com.marta.logistika.dao.api.TruckDao;
+import com.marta.logistika.dto.Instruction;
+import com.marta.logistika.dto.OrderRecordDriverInstruction;
 import com.marta.logistika.dto.SystemMessage;
+import com.marta.logistika.dto.TripTicketRecord;
+import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
-import com.marta.logistika.exception.checked.*;
+import com.marta.logistika.exception.checked.CheckedServiceException;
+import com.marta.logistika.exception.checked.NoDriversAvailableException;
+import com.marta.logistika.exception.checked.NoRouteFoundException;
+import com.marta.logistika.exception.checked.PastDepartureDateException;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
 import com.marta.logistika.exception.unchecked.UncheckedServiceException;
 import com.marta.logistika.service.api.TripTicketService;
-import com.marta.logistika.dao.api.OrderDao;
-import com.marta.logistika.dao.api.TripTicketDao;
-import com.marta.logistika.dto.Instruction;
-import com.marta.logistika.dto.OrderRecordDriverInstruction;
-import com.marta.logistika.dto.TripTicketRecord;
-import com.marta.logistika.entity.*;
-import com.marta.logistika.dao.api.DriverDao;
-import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.service.impl.helpers.TripTicketServiceHelper;
 import com.marta.logistika.service.impl.helpers.WebsocketUpdateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.marta.logistika.dto.Instruction.*;
+import static com.marta.logistika.dto.Instruction.Task;
 import static com.marta.logistika.dto.Instruction.Task.*;
 import static com.marta.logistika.enums.TripTicketStatus.*;
 
@@ -60,9 +66,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * Method creates new trip ticket and books the truck.
      * Departure city is defined as truck location city.
      * Arrival city, if not specified, is set the same as departure city (round-trip).
-     * @param truckRegNum truck to be booked
+     *
+     * @param truckRegNum       truck to be booked
      * @param departureDateTime departure date and time
-     * @param toCity destination city (may be omitted)
+     * @param toCity            destination city (may be omitted)
      */
     @Override
     @Transactional
@@ -72,14 +79,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setStatus(CREATED);
 
         //validate and assign trip departure date
-        if(departureDateTime.isBefore(LocalDateTime.now())) throw new UncheckedServiceException("Trip starting date should be in the future");
+        if (departureDateTime.isBefore(LocalDateTime.now()))
+            throw new UncheckedServiceException("Trip starting date should be in the future");
         ticket.setDepartureDateTime(departureDateTime);
 
         //validate and assign truck and mark it as booked
         TruckEntity truck = truckDao.findByRegNumber(truckRegNum);
-        if(!truck.isServiceable()) throw new UncheckedServiceException(String.format(
+        if (!truck.isServiceable()) throw new UncheckedServiceException(String.format(
                 "Can't book truck %s - it is out of service", truck.getRegNumber()));
-        if(truck.getBookedUntil().isAfter(departureDateTime)) throw new UncheckedServiceException(String.format(
+        if (truck.getBookedUntil().isAfter(departureDateTime)) throw new UncheckedServiceException(String.format(
                 "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truck.getRegNumber(), departureDateTime, truck.getBookedUntil()));
         truck.setBookedUntil(MAX_FUTURE_DATE);
         ticket.setTruck(truck);
@@ -104,29 +112,31 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Updates departure date and time in the trip ticket
-     * @param ticketId ticket id
+     *
+     * @param ticketId          ticket id
      * @param departureDateTime new departure date and time
      */
     @Override
     @Transactional
     public void updateDepartureDateTime(long ticketId, LocalDateTime departureDateTime) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
-        if(ticket.getStatus() != CREATED) throw new UncheckedServiceException(
+        if (ticket.getStatus() != CREATED) throw new UncheckedServiceException(
                 String.format("Can't update ticket if %d as it has status %s",
                         ticketId,
                         ticket.getStatus()));
-        if(departureDateTime.isBefore(getMinNewDateTime(ticketId))) throw new UncheckedServiceException(
+        if (departureDateTime.isBefore(getMinNewDateTime(ticketId))) throw new UncheckedServiceException(
                 String.format("Cant' update departure date for ticket id %d: " +
-                        "new departure time should be in the future and not earlier then the current departure time",
+                                "new departure time should be in the future and not earlier then the current departure time",
                         ticketId));
         ticket.setDepartureDateTime(departureDateTime);
     }
 
     /**
      * Attempts adding the orders to a trip ticket.
+     *
      * @param ticketId target trip ticket id
-     * @param orderId order id
-     * @param locale user locale
+     * @param orderId  order id
+     * @param locale   user locale
      * @return system message with the result of operation
      */
     @Override
@@ -147,11 +157,12 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Attempts adding several orders to a trip ticket, and tells how many additions were successful.
      * Orders to be added are selected by given criteria.
+     *
      * @param fromCityId order selection criteria - departure city id
-     * @param toCityId order selection criteria - destination city id
-     * @param date order selection criteria - order creation date
-     * @param ticketId target trip ticket id
-     * @param locale user's locale
+     * @param toCityId   order selection criteria - destination city id
+     * @param date       order selection criteria - order creation date
+     * @param ticketId   target trip ticket id
+     * @param locale     user's locale
      * @return system message with the result of operation
      */
     //todo entry point for the most tricky operation - adding several orders to ticket
@@ -160,12 +171,12 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     public SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
         List<OrderEntity> orders;
-        if(date == null) orders = orderDao.listUnassigned(fromCityId, toCityId);
+        if (date == null) orders = orderDao.listUnassigned(fromCityId, toCityId);
         else orders = orderDao.listUnassigned(fromCityId, toCityId, date);
         int totalQuantity = 0;
         int totalWeight = 0;
 
-        for (OrderEntity order: orders) {
+        for (OrderEntity order : orders) {
             try {
                 //todo call of method which will actually add order to ticket
                 helper.addOrderToTicket(order, ticket);
@@ -182,8 +193,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method removes order from the ticket and updates route and truck load data.
+     *
      * @param ticketId ticket id
-     * @param orderId order id
+     * @param orderId  order id
      */
     @Override
     @Transactional
@@ -201,14 +213,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * Method finalizes trip ticket and marks it as approved for execution.
      * Finalization includes correction of the departure date to the future (if necessary)
      * and assigning the drivers.
+     *
      * @param ticketId ticket id to be approved
-     * @throws PastDepartureDateException in case ticket departure date is in the past
+     * @throws PastDepartureDateException  in case ticket departure date is in the past
      * @throws NoDriversAvailableException in case no drivers are available for the ticket
      */
     @Override
     @Transactional
     public void approveTicket(long ticketId) throws PastDepartureDateException, NoDriversAvailableException {
-       TripTicketEntity ticket = ticketDao.findById(ticketId);
+        TripTicketEntity ticket = ticketDao.findById(ticketId);
 
         if (ticket.getStatus().equals(CREATED)) {
 
@@ -247,6 +260,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * calculates planned trip ticket execution time, in minutes, split by year and month
+     *
      * @param ticket trip ticket
      * @return map with planned trip ticket execution time by monthly periods
      */
@@ -281,6 +295,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * finds trip ticket by id
+     *
      * @param ticketId ticket id
      * @return ticket
      */
@@ -294,6 +309,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * lists all trip tickets
+     *
      * @return ticket list
      */
     @Override
@@ -307,6 +323,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * lists all created but unapproved trip tickets
+     *
      * @return ticket list
      */
     @Override
@@ -320,6 +337,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * lists all orders assigned to the ticket
+     *
      * @param id ticket id
      * @return orders list
      */
@@ -332,6 +350,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Method looks up for a current trip ticket assigned to the driver
      * and compiles the instruction to the driver based on current ticket step and its loads / unloads list
+     *
      * @param principal driver initiating the request
      * @return instruction to the driver usable in OnTheRoadController
      */
@@ -345,6 +364,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Method looks up for a current trip ticket assigned to the driver
      * and compiles the instruction to the driver based on current ticket step and its loads / unloads list
+     *
      * @param driver driver initiating the request
      * @return instruction to the driver usable in OnTheRoadController
      */
@@ -370,7 +390,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                         currentTicket.getDepartureDateTime().toString().substring(0, 10),
                         currentTicket.getDepartureDateTime().toString().substring(11, 16)));
                 instruction.setRequestedActionMessage("Открыть смену");
-                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                if (currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
                     instruction.setAlert("Вашего выхода на линию ожидают напарники");
                 }
                 break;
@@ -378,7 +398,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 instruction.setTask(FINISH_ROAD_BREAK);
                 instruction.setDirectiveMessage("Ваш статус: стоянка для отдыха");
                 instruction.setRequestedActionMessage("Завершить стоянку");
-                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                if (currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
                     instruction.setAlert("Вашего выхода на линию ожидают напарники");
                 }
                 break;
@@ -386,7 +406,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 instruction.setTask(FINISH_STOPOVER_BREAK);
                 instruction.setDirectiveMessage("Ваш статус: перерыв");
                 instruction.setRequestedActionMessage("Завершить перерыв");
-                if(currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
+                if (currentTicket.getDrivers().stream().anyMatch(d -> d.getStatus() == DriverStatus.WAITING)) {
                     instruction.setAlert("Вашего выхода на линию ожидают напарники");
                 }
                 break;
@@ -450,30 +470,32 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method records driver going online (opening a new shift)
+     *
      * @param principal requesting driver
-     * @param ticketId ticket id
+     * @param ticketId  ticket id
      */
     @Override
     @Transactional
     public void setOnline(Principal principal, long ticketId) {
         DriverEntity driver = driverDao.findByUsername(principal.getName());
         TripTicketEntity ticket = ticketDao.findById(ticketId);
-        if(ticket.getStatus() == APPROVED) ticket.setStatus(RUNNING);
+        if (ticket.getStatus() == APPROVED) ticket.setStatus(RUNNING);
         helper.setOnline(driver, ticket);
         sendUpdateToOtherDrivers(ticket, principal);
     }
 
     /**
      * Method records finished move to the new stopover and updates time tracking for all the drivers
+     *
      * @param ticketId ticket id
-     * @param step sequence number of the stopover to move to
+     * @param step     sequence number of the stopover to move to
      */
     @Override
     @Transactional
     public void reachStopover(Principal principal, long ticketId, int step) {
         TripTicketEntity ticket = ticketDao.findById(ticketId);
-        if(ticket.getCurrentStep() + 1 == step) {
-            if(ticket.getCurrentStep() == 0) ticket.setStatus(RUNNING);
+        if (ticket.getCurrentStep() + 1 == step) {
+            if (ticket.getCurrentStep() == 0) ticket.setStatus(RUNNING);
             ticket.setCurrentStep(step);
             helper.updateDriversTimeRecordsForNewStage(ticket);
             helper.checkTicketCompletion(ticket);
@@ -485,8 +507,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Method marks all load operations at the given stopover as completed
      * (order statuses changed to shipped), and updates time tracking for the driver
+     *
      * @param ticketId ticket id
-     * @param step sequence number of the stopover
+     * @param step     sequence number of the stopover
      */
     @Override
     @Transactional
@@ -504,8 +527,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     /**
      * Method marks all unload operations at the given stopover as completed
      * (order statuses changed to delivered), and updates time tracking for the driver
+     *
      * @param ticketId ticket id
-     * @param step sequence number of the stopover
+     * @param step     sequence number of the stopover
      */
     @Override
     @Transactional
@@ -522,8 +546,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method registers the reporting driver as the first (driving) one, and changes all the rest to seconding status.
+     *
      * @param principal reporting driver
-     * @param ticketId ticket id
+     * @param ticketId  ticket id
      */
     @Override
     @Transactional
@@ -536,8 +561,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method registers drivers taking a road break (status ROAD_BREAK is assigned to all truck drivers).
+     *
      * @param principal reporting driver
-     * @param ticketId ticket id
+     * @param ticketId  ticket id
      */
     @Override
     @Transactional
@@ -549,8 +575,9 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method registers drivers finishing a road break (status RESTING is assigned to all truck drivers).
+     *
      * @param principal reporting driver
-     * @param ticketId ticket id
+     * @param ticketId  ticket id
      */
     @Override
     @Transactional
@@ -563,6 +590,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method registers drivers taking a stopover break (break status is assigned to him but not to other truck drivers).
+     *
      * @param principal reporting driver
      */
     @Override
@@ -574,6 +602,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * Method registers driver's stopover break is over
+     *
      * @param principal reporting driver
      */
     @Override
@@ -600,24 +629,26 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
     /**
      * sends websocket update on ticket status to other drivers in the shift
-     * @param ticket ticket
+     *
+     * @param ticket    ticket
      * @param principal initiating driver
      */
     private void sendUpdateToOtherDrivers(TripTicketEntity ticket, Principal principal) {
-        if(ticket.getDrivers().size() > 1) {
+        if (ticket.getDrivers().size() > 1) {
             DriverEntity initiatingDriver = driverDao.findByUsername(principal.getName());
             ticket.getDrivers().stream().filter(driver -> !driver.equals(initiatingDriver)).forEach(driver -> {
-               websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
+                websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
             });
         }
     }
 
     /**
      * sends websocket update on ticket status to all the drivers in the shift
+     *
      * @param ticket ticket
      */
     private void sendUpdateToAllDrivers(TripTicketEntity ticket) {
-        if(ticket.getDrivers().size() > 1) {
+        if (ticket.getDrivers().size() > 1) {
             ticket.getDrivers().forEach(driver -> {
                 websocketUpdateHelper.sendUpdate(driver.getUsername(), getInstructionForDriver(driver));
             });

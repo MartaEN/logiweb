@@ -19,19 +19,25 @@ public class Instruction {
     private DriverStatus driverStatus;
 
     public enum Task {
-        START ("start"),
-        GOTO ("goto"),
-        LOAD ("load"),
-        UNLOAD ("unload"),
-        WAIT (""),
-        FINISH_STOPOVER_BREAK ("stopover-break-over"),
+        START("start"),
+        GOTO("goto"),
+        LOAD("load"),
+        UNLOAD("unload"),
+        WAIT(""),
+        FINISH_STOPOVER_BREAK("stopover-break-over"),
         FINISH_ROAD_BREAK("road-break-over"),
         CLOSE_TICKET("finish"),
-        NONE ("none");
+        NONE("none");
 
         private String url;
-        Task(String url) { this.url = url; }
-        public String getUrl() { return url; }
+
+        Task(String url) {
+            this.url = url;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
     public TripTicketRecord getTicket() {

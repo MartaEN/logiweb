@@ -35,7 +35,8 @@ public class TripTicketController {
 
     /**
      * Shows page with trip ticket information
-     * @param id trip ticket id
+     *
+     * @param id      trip ticket id
      * @param uiModel data to build page
      * @return path to jsp
      */
@@ -51,8 +52,9 @@ public class TripTicketController {
 
     /**
      * Shows page where user can view, edit and approve the selected trip ticket
+     *
      * @param ticketId ticket id
-     * @param uiModel contains data to build the page
+     * @param uiModel  contains data to build the page
      * @return path to jsp
      */
     @GetMapping(value = "/{ticketId}/approve")
@@ -63,13 +65,14 @@ public class TripTicketController {
 
     /**
      * Tries to assign drivers and approve the ticket
+     *
      * @param ticketId ticket id
-     * @param uiModel data to build the page
-     * @param locale user locale
+     * @param uiModel  data to build the page
+     * @param locale   user locale
      * @return path to jsp
      */
     @PostMapping(value = "/{ticketId}/approve")
-    public String signTicket (@PathVariable("ticketId") long ticketId, Model uiModel, Locale locale) {
+    public String signTicket(@PathVariable("ticketId") long ticketId, Model uiModel, Locale locale) {
 
         prepareTicketApproveForm(ticketId, uiModel);
 
@@ -91,18 +94,19 @@ public class TripTicketController {
 
     /**
      * Updates departure date and time in the trip ticket edit and approval page
-     * @param ticketId ticket id
+     *
+     * @param ticketId             ticket id
      * @param futureDateTimeRecord data transfer object to request new input from user
-     * @param bindingResult validation result
-     * @param uiModel data to build the page
+     * @param bindingResult        validation result
+     * @param uiModel              data to build the page
      * @return path to jsp
      */
-    @PostMapping (value = "/{ticketId}/update-departure")
-    public String updateDepartureDateTime (@PathVariable("ticketId") long ticketId,
-                                           @Valid @ModelAttribute FutureDateTimeRecord futureDateTimeRecord,
-                                           BindingResult bindingResult,
-                                           Model uiModel,
-                                           Locale locale) {
+    @PostMapping(value = "/{ticketId}/update-departure")
+    public String updateDepartureDateTime(@PathVariable("ticketId") long ticketId,
+                                          @Valid @ModelAttribute FutureDateTimeRecord futureDateTimeRecord,
+                                          BindingResult bindingResult,
+                                          Model uiModel,
+                                          Locale locale) {
 
         if (bindingResult.hasErrors()) {
             prepareTicketApproveForm(ticketId, uiModel);
@@ -118,8 +122,9 @@ public class TripTicketController {
 
     /**
      * Populates model with data
+     *
      * @param ticketId ticket id
-     * @param uiModel ui model
+     * @param uiModel  ui model
      */
     private void prepareTicketApproveForm(long ticketId, Model uiModel) {
         uiModel.addAttribute("ticket", ticketService.findById(ticketId));
@@ -131,6 +136,7 @@ public class TripTicketController {
 
     /**
      * Produces trip ticket creation page
+     *
      * @param uiModel data to build the page
      * @return path to jsp
      */
@@ -145,6 +151,7 @@ public class TripTicketController {
 
     /**
      * Persists the ticket as submitted by user and redirects to core "/orders" page
+     *
      * @param ticketCreateForm new trip ticket data submitted by user
      * @return redirect to core "/orders" page
      */
@@ -153,7 +160,7 @@ public class TripTicketController {
                                   BindingResult bindingResult,
                                   Locale locale) {
 
-        if(bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {
             return "office/tickets/create";
         }
 
@@ -171,6 +178,7 @@ public class TripTicketController {
 
     /**
      * Removes order from a trip ticket in the ticket edit and approval page
+     *
      * @param ticketAndOrder data transfer object for ticket and order id
      * @return redirect to ticket edit and approval page
      */
@@ -189,11 +197,12 @@ public class TripTicketController {
 
     /**
      * Produces trip ticket view page
+     *
      * @param uiModel data to build the page
      * @return path to jsp
      */
-    @GetMapping (value = "/view")
-    public String viewAllTickets (Model uiModel) {
+    @GetMapping(value = "/view")
+    public String viewAllTickets(Model uiModel) {
 
         uiModel.addAttribute("tickets", ticketService.listAll());
 
@@ -203,9 +212,9 @@ public class TripTicketController {
     /**
      * @return Returns list of unapproved tickets
      */
-    @GetMapping (value = "/list/unapproved", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/list/unapproved", produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public List<TripTicketRecord> listAllUnapprovedTickets () {
+    public List<TripTicketRecord> listAllUnapprovedTickets() {
         return ticketService.listAllUnapproved();
     }
 

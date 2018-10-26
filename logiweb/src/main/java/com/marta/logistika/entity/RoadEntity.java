@@ -15,7 +15,7 @@ public class RoadEntity extends AbstractEntity {
     @JoinColumn(name = "toCity")
     private CityEntity toCity;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private int distance;
 
     public CityEntity getFromCity() {

@@ -1,8 +1,8 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.Instruction;
-import com.marta.logistika.service.api.TripTicketService;
 import com.marta.logistika.dto.InstructionDetails;
+import com.marta.logistika.service.api.TripTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -23,10 +23,11 @@ public class OnTheRoadController {
 
     /**
      * Renders core drivers' page
+     *
      * @return path to jsp
      */
     @GetMapping
-    public String home(){
+    public String home() {
         return "drivers/view";
     }
 
@@ -41,6 +42,7 @@ public class OnTheRoadController {
 
     /**
      * Record the message from the driver that he is going online (starting his shift)
+     *
      * @return JSON next instruction to the driver
      */
     @PostMapping(value = "/start", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -52,6 +54,7 @@ public class OnTheRoadController {
 
     /**
      * Record the message from the driver that the truck has reached the next stopover
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -64,6 +67,7 @@ public class OnTheRoadController {
 
     /**
      * Record the message from the driver that the load has been completed
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -76,6 +80,7 @@ public class OnTheRoadController {
 
     /**
      * Records the message from the driver that the unload has been completed
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -88,6 +93,7 @@ public class OnTheRoadController {
 
     /**
      * Sets the requesting driver as the driving one
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -100,6 +106,7 @@ public class OnTheRoadController {
 
     /**
      * Records the message from the driver that a road break is being made
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -112,6 +119,7 @@ public class OnTheRoadController {
 
     /**
      * Records the message from the driver that a road break is over
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */
@@ -124,6 +132,7 @@ public class OnTheRoadController {
 
     /**
      * Records the message from the driver he is making a stopover break
+     *
      * @return JSON next instruction to the driver
      */
     @PostMapping(value = "/stopover-break", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -135,6 +144,7 @@ public class OnTheRoadController {
 
     /**
      * Records the message from the driver that his stopover break is over
+     *
      * @return JSON next instruction to the driver
      */
     @PostMapping(value = "/stopover-break-over", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -146,6 +156,7 @@ public class OnTheRoadController {
 
     /**
      * Record the message from the driver that his shift is over
+     *
      * @param instruction InstructionDetails
      * @return JSON next instruction to the driver
      */

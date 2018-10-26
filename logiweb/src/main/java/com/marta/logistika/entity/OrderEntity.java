@@ -7,16 +7,16 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table (name = "orders")
+@Table(name = "orders")
 public class OrderEntity extends AbstractEntity {
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDateTime creationDate;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private String description;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private int weight;
 
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)

@@ -28,13 +28,14 @@ public class StopoverHelper {
     /**
      * Method suggests best placement of new load and unload points on the route
      * to minimize total route distance and average load on the way.
+     *
      * @param ticketEntity - ticket to be updated
-     * @param order - order to be placed to ticket
+     * @param order        - order to be placed to ticket
      * @return returns an array containing suggested load and unload points:
-     *             load on or immediately after current route element number "load"
-     *             unload on or immediately before current route element number "unload"
+     * load on or immediately after current route element number "load"
+     * unload on or immediately before current route element number "unload"
      */
-    int[] suggestLoadUnloadPoints (TripTicketEntity ticketEntity, OrderEntity order) throws NoRouteFoundException {
+    int[] suggestLoadUnloadPoints(TripTicketEntity ticketEntity, OrderEntity order) throws NoRouteFoundException {
         List<CityEntity> currentRoute = ticketEntity.getCities();
         List<Integer> weights = ticketEntity.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         CityEntity fromCity = order.getFromCity();
@@ -47,11 +48,11 @@ public class StopoverHelper {
         float load = (float) Integer.MAX_VALUE;
 
         for (int i = 0; i < currentRoute.size() - 1; i++) {
-            if (currentRoute.size() > 2 && currentRoute.get(i+1).equals(fromCity)) continue;
+            if (currentRoute.size() > 2 && currentRoute.get(i + 1).equals(fromCity)) continue;
             currentRoute.add(i + 1, fromCity);
 
             for (int j = i + 1; j < currentRoute.size() - 1; j++) {
-                if(currentRoute.get(j).equals(toCity)) continue;
+                if (currentRoute.get(j).equals(toCity)) continue;
                 currentRoute.add(j + 1, toCity);
                 int tmpRouteDistance = roadService.getRouteDistance(currentRoute);
 
@@ -85,27 +86,28 @@ public class StopoverHelper {
             currentRoute.remove(i + 1);
         }
 
-        return new int[] {loadPoint, unloadPoint};
+        return new int[]{loadPoint, unloadPoint};
 
     }
 
     /**
      * Calculates weighted average load for the truck
+     *
      * @param ticket trip ticket ticket
-     * @throws NoRouteFoundException in case no route found
      * @return weighted average truck load
+     * @throws NoRouteFoundException in case no route found
      */
-    float getAvgLoad (TripTicketEntity ticket) throws NoRouteFoundException {
+    float getAvgLoad(TripTicketEntity ticket) throws NoRouteFoundException {
         List<CityEntity> route = ticket.getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
         List<Integer> weights = ticket.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         return getAvgLoad(route, weights);
     }
 
-    private float getAvgLoad (List<CityEntity> route, List<Integer> weights) throws NoRouteFoundException {
+    private float getAvgLoad(List<CityEntity> route, List<Integer> weights) throws NoRouteFoundException {
         int totalDistance = 0;
         float totalLoad = 0;
         for (int i = 0; i < route.size() - 1; i++) {
-            int distance = roadService.getDistanceFromTo(route.get(i), route.get(i+1));
+            int distance = roadService.getDistanceFromTo(route.get(i), route.get(i + 1));
             totalDistance += distance;
             totalLoad += distance * weights.get(i);
         }
@@ -114,14 +116,15 @@ public class StopoverHelper {
 
     /**
      * Method inserts new stopover into a trip ticket route and updates sequencing for the remaining stopovers in the route
-     * @param ticket - trip ticket to be updated
-     * @param city - place for a new stopover
+     *
+     * @param ticket     - trip ticket to be updated
+     * @param city       - place for a new stopover
      * @param sequenceNo - indication where the new stopover should be inserted
      */
     @Transactional(propagation = Propagation.REQUIRED)
     void insertNewStopover(TripTicketEntity ticket, CityEntity city, int sequenceNo) {
         ticket.getStopovers().forEach(s -> {
-            if(s.getSequenceNo() >= sequenceNo) s.setSequenceNo(s.getSequenceNo() + 1);
+            if (s.getSequenceNo() >= sequenceNo) s.setSequenceNo(s.getSequenceNo() + 1);
         });
         StopoverEntity newStopover = new StopoverEntity();
         newStopover.setSequenceNo(sequenceNo);
@@ -132,11 +135,12 @@ public class StopoverHelper {
     /**
      * Method removes stopovers with no load / unload operations from the trip tickets.
      * The endpoints (start and finish) are not removed even if empty.
+     *
      * @param ticket ticket to be processed
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeEmptyStopovers(TripTicketEntity ticket) {
-        for (int i = ticket.getStopovers().size() - 2 ; i > 0 ; i--) {
+        for (int i = ticket.getStopovers().size() - 2; i > 0; i--) {
             StopoverEntity stopover = ticket.getStopovers().get(i);
             if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0)
                 ticket.getStopovers().remove(stopover);
@@ -148,6 +152,7 @@ public class StopoverHelper {
 
     /**
      * Method recalculates total weight at the end of each stopover for a given tip ticket number
+     *
      * @param ticket trip ticket to be updated
      */
     @Transactional(propagation = Propagation.REQUIRED)
@@ -162,10 +167,11 @@ public class StopoverHelper {
 
     /**
      * Method checks total weight at the end of each trip stopover against truck weight limit
+     *
      * @param ticket trip ticket to be validated
      * @throws OrderDoesNotFitToTicketException is thrown in case total weight exceeds truck capacity limit at any stopover
      */
-    void checkWeightLimit (TripTicketEntity ticket) throws OrderDoesNotFitToTicketException {
+    void checkWeightLimit(TripTicketEntity ticket) throws OrderDoesNotFitToTicketException {
         for (StopoverEntity s : ticket.getStopovers()) {
             if (s.getTotalWeight() > ticket.getTruck().getCapacity()) {
                 throw new OrderDoesNotFitToTicketException(ticket.getId(),

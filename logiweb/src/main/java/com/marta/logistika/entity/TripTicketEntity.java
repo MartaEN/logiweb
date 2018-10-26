@@ -16,10 +16,10 @@ public class TripTicketEntity extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private TripTicketStatus status;
 
-    @Column (name = "departure", nullable = false)
+    @Column(name = "departure", nullable = false)
     private LocalDateTime departureDateTime;
 
-    @Column (name = "arrival")
+    @Column(name = "arrival")
     private LocalDateTime arrivalDateTime;
 
     @ManyToOne(optional = false)
@@ -27,16 +27,16 @@ public class TripTicketEntity extends AbstractEntity {
     private TruckEntity truck;
 
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name="shifts",  joinColumns={@JoinColumn(name="trip")},
-            inverseJoinColumns={@JoinColumn(name="driver")})
+    @JoinTable(name = "shifts", joinColumns = {@JoinColumn(name = "trip")},
+            inverseJoinColumns = {@JoinColumn(name = "driver")})
     private List<DriverEntity> drivers = new ArrayList<>();
 
     //todo
-    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "trip", nullable = false)
     private List<StopoverEntity> stopovers = new ArrayList<>();
 
-    @Column(name="step")
+    @Column(name = "step")
     private int currentStep;
 
     private int avgLoad;
@@ -90,7 +90,7 @@ public class TripTicketEntity extends AbstractEntity {
         this.stopovers = stopovers;
     }
 
-    public StopoverEntity getStopoverWithSequenceNo (int sequenceNo) {
+    public StopoverEntity getStopoverWithSequenceNo(int sequenceNo) {
         return stopovers.stream()
                 .filter(s -> s.getSequenceNo() == sequenceNo)
                 .findFirst().orElse(null);

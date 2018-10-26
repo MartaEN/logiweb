@@ -97,7 +97,7 @@ public class DriversController {
 
     @GetMapping(value = "/find-drivers")
     @ResponseBody
-    public List<DriverRecord> findDrivers (@RequestParam long ticketId) {
+    public List<DriverRecord> findDrivers(@RequestParam long ticketId) {
 
         return driverService.findDrivers(ticketId);
     }

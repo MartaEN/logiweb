@@ -8,7 +8,9 @@ import java.time.YearMonth;
 public interface TimeTrackerDao extends GenericDao<TimeTrackerEntity> {
 
     boolean hasOpenTimeRecord(DriverEntity driver);
+
     TimeTrackerEntity getOpenTimeRecord(DriverEntity driver);
-    long calculateMonthlyMinutes (DriverEntity driver, YearMonth month);
+
+    long calculateMonthlyMinutes(DriverEntity driver, YearMonth month);
 
 }

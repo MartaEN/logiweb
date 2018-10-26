@@ -1,9 +1,9 @@
 package com.marta.logistika.service.impl;
 
-import com.marta.logistika.dto.TruckFilterForm;
-import com.marta.logistika.entity.TruckEntity;
 import com.marta.logistika.dao.api.TruckDao;
+import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.dto.TruckRecord;
+import com.marta.logistika.entity.TruckEntity;
 import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.TruckService;
@@ -32,9 +32,9 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     @Override
     @Transactional
     public void add(TruckRecord truck) {
-        if(truckDao.regNumberExists(truck.getRegNumber())) {
+        if (truckDao.regNumberExists(truck.getRegNumber())) {
             throw new ServiceException(String.format("Truck with registration number %s already exists", truck.getRegNumber()));
-        } else if(isTruckRecordValid(truck)) {
+        } else if (isTruckRecordValid(truck)) {
             truck.setParked(true);
             truckDao.add(mapper.map(truck, TruckEntity.class));
             applicationEventPublisher.publishEvent(new EntityUpdateEvent());
@@ -48,7 +48,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
     public void update(TruckRecord truckEditFormInput) {
         try {
             TruckEntity truckEntity = truckDao.findByRegNumber(truckEditFormInput.getRegNumber());
-            if(isTruckRecordValid(truckEditFormInput)) {
+            if (isTruckRecordValid(truckEditFormInput)) {
                 truckEntity.setCapacity(truckEditFormInput.getCapacity());
                 truckEntity.setShiftSize(truckEditFormInput.getShiftSize());
                 truckEntity.setServiceable(truckEditFormInput.isServiceable());
@@ -91,6 +91,7 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
 
     /**
      * Prepares summary statistics on total number of online / offline / unserviceable trucks
+     *
      * @return map with resulting statistics
      */
     @Override
@@ -102,10 +103,10 @@ public class TruckServiceImpl extends AbstractService implements TruckService {
         return briefTruckStats;
     }
 
-    private boolean isTruckRecordValid (TruckRecord truckRecord) {
-        if ( ! truckRecord.getRegNumber().matches("^[a-zA-Z]{2}[0-9]{5}$")) return false;
-        if ( truckRecord.getCapacity() < 0 ) return false;
-        if ( truckRecord.getShiftSize() <0 || truckRecord.getShiftSize() > 2 ) return false;
+    private boolean isTruckRecordValid(TruckRecord truckRecord) {
+        if (!truckRecord.getRegNumber().matches("^[a-zA-Z]{2}[0-9]{5}$")) return false;
+        if (truckRecord.getCapacity() < 0) return false;
+        if (truckRecord.getShiftSize() < 0 || truckRecord.getShiftSize() > 2) return false;
         return true;
     }
 }

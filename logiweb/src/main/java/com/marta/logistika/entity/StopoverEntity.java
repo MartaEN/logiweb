@@ -10,30 +10,31 @@ import java.util.Objects;
 @Table(name = "stopovers")
 public class StopoverEntity extends AbstractEntity implements Comparable<StopoverEntity> {
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private int sequenceNo;
 
-    @ManyToOne (optional = false)
-    @JoinColumn (name = "city")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "city")
     private CityEntity city;
 
     //todo
-    @OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn (name = "stopover", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "stopover", nullable = false)
     private List<TransactionUnloadEntity> unloads = new ArrayList<>();
 
     //todo
-    @OneToMany (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn (name = "stopover", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "stopover", nullable = false)
     private List<TransactionLoadEntity> loads = new ArrayList<>();
 
-    @Column (name = "weight")
+    @Column(name = "weight")
     private int totalWeight;
 
-    @Column (name = "duration")
+    @Column(name = "duration")
     private Duration estimatedDuration;
 
-    public StopoverEntity() {}
+    public StopoverEntity() {
+    }
 
     public StopoverEntity(CityEntity city, int sequenceNo) {
         this.city = city;
@@ -93,15 +94,15 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
         return Integer.compare(sequenceNo, o.sequenceNo);
     }
 
-    public void addLoadFor (OrderEntity order) {
+    public void addLoadFor(OrderEntity order) {
         loads.add(new TransactionLoadEntity(order));
     }
 
-    public void addUnloadFor (OrderEntity order) {
-        unloads.add (new TransactionUnloadEntity(order));
+    public void addUnloadFor(OrderEntity order) {
+        unloads.add(new TransactionUnloadEntity(order));
     }
 
-    public int getIncrementalWeight () {
+    public int getIncrementalWeight() {
         return loads.stream().map(TransactionEntity::getOrder)
                 .mapToInt(OrderEntity::getWeight).sum()
                 - unloads.stream().map(TransactionEntity::getOrder)

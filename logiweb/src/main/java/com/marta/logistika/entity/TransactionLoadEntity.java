@@ -7,7 +7,8 @@ import javax.persistence.Entity;
 @DiscriminatorValue("LOAD")
 public class TransactionLoadEntity extends TransactionEntity {
 
-    public TransactionLoadEntity() {}
+    public TransactionLoadEntity() {
+    }
 
     public TransactionLoadEntity(OrderEntity order) {
         this.order = order;

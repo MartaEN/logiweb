@@ -6,7 +6,7 @@ public class NoDriversAvailableException extends CheckedServiceException {
 
     private long ticketId;
 
-    public NoDriversAvailableException(long ticketId){
+    public NoDriversAvailableException(long ticketId) {
         super("com.marta.logistika.error.noDriversAvailable");
         this.ticketId = ticketId;
     }

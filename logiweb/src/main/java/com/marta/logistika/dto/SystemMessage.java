@@ -7,7 +7,8 @@ public class SystemMessage implements Serializable {
     private String title;
     private String body;
 
-    public SystemMessage() {}
+    public SystemMessage() {
+    }
 
     public SystemMessage(String title, String body) {
         this.title = title;

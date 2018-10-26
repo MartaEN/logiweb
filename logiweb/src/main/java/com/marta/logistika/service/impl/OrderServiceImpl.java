@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service ("orderService")
+@Service("orderService")
 public class OrderServiceImpl extends AbstractService implements OrderService {
 
     private final OrderDao orderDao;
@@ -43,6 +43,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     /**
      * persists new order
+     *
      * @param order new order
      * @return persisted order id
      */
@@ -57,6 +58,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     /**
      * Returns order record
+     *
      * @param id order id
      * @return order record
      */
@@ -67,6 +69,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     /**
      * Prepares statistics on all unassigned orders - by destination, total distance, number of orders, total weight
+     *
      * @return list of order statistics lines
      */
     @Override
@@ -122,16 +125,17 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     /**
      * Lists all unassigned orders requested to be transported between two specified cities
+     *
      * @param fromCityId departure city id
-     * @param toCityId destination city id
-     * @param date filter date - if requested
+     * @param toCityId   destination city id
+     * @param date       filter date - if requested
      * @return response object containing requested order list and request parameters
      */
     @Override
     public OrderStatsResponse getUnassignedOrders(long fromCityId, long toCityId, @Nullable LocalDate date) {
         OrderStatsResponse response = new OrderStatsResponse();
         response.setResponseType(OrderStatsResponse.ResponseType.DRILLDOWN);
-        if(date != null) response.setDateFilter(date.toString());
+        if (date != null) response.setDateFilter(date.toString());
 
         List<OrderStatsLine> orderStatsLines = new ArrayList<>();
 
@@ -168,6 +172,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
     /**
      * Returns one page of order list
+     *
      * @param page page number
      * @return order list - one page
      */
@@ -186,7 +191,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     @Override
     public int countPages() {
         long rowCount = orderDao.count();
-        int pageCount = (int) Math.ceil ( (float) rowCount / ROWS_PER_PAGE );
+        int pageCount = (int) Math.ceil((float) rowCount / ROWS_PER_PAGE);
         return pageCount;
     }
 }

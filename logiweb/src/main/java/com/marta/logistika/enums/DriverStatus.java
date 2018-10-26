@@ -1,13 +1,13 @@
 package com.marta.logistika.enums;
 
 public enum DriverStatus {
-    OFFLINE ("OFFLINE"),
-    DRIVING ("ONLINE"),
-    SECONDING ("ONLINE"),
-    HANDLING ("ONLINE"),
-    ROAD_BREAK ("ONLINE"),
-    STOPOVER_BREAK ("ONLINE"),
-    WAITING ("ONLINE");
+    OFFLINE("OFFLINE"),
+    DRIVING("ONLINE"),
+    SECONDING("ONLINE"),
+    HANDLING("ONLINE"),
+    ROAD_BREAK("ONLINE"),
+    STOPOVER_BREAK("ONLINE"),
+    WAITING("ONLINE");
 
     private String briefStatValue;
 

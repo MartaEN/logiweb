@@ -25,7 +25,7 @@ public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
 
     @Override
     public List<RoadEntity> listAllRoadsFrom(CityEntity fromCity) {
-        if(fromCity == null) return null;
+        if (fromCity == null) return null;
         return em.createQuery(
                 "SELECT r FROM RoadEntity r WHERE r.fromCity=:fromCity ORDER BY r.distance",
                 RoadEntity.class)
@@ -35,7 +35,7 @@ public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
 
     @Override
     public List<RoadEntity> listAllRoadsTo(CityEntity toCity) {
-        if(toCity == null) return null;
+        if (toCity == null) return null;
         return em.createQuery(
                 "SELECT r FROM RoadEntity r WHERE r.toCity=:toCity ORDER BY r.distance",
                 RoadEntity.class)

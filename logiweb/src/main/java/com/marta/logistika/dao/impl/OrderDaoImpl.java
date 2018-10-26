@@ -1,11 +1,10 @@
 package com.marta.logistika.dao.impl;
 
+import com.marta.logistika.dao.api.OrderDao;
 import com.marta.logistika.dto.OrderStatsLine;
 import com.marta.logistika.entity.OrderEntity;
-import com.marta.logistika.dao.api.OrderDao;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

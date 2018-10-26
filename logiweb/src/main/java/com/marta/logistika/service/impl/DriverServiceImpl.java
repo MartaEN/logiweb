@@ -1,14 +1,14 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.DriverDao;
-import com.marta.logistika.enums.DriverStatus;
-import com.marta.logistika.event.EntityUpdateEvent;
-import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.dao.api.TripTicketDao;
 import com.marta.logistika.dto.DriverRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.entity.DriverEntity;
 import com.marta.logistika.entity.TripTicketEntity;
+import com.marta.logistika.enums.DriverStatus;
+import com.marta.logistika.event.EntityUpdateEvent;
+import com.marta.logistika.exception.ServiceException;
 import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
@@ -49,7 +49,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     @Override
     @Transactional
     public void add(DriverRecord driver) {
-        if(driverDao.personalIdExists(driver.getPersonalId())) {
+        if (driverDao.personalIdExists(driver.getPersonalId())) {
             throw new ServiceException(String.format("Employee with personal id %s already exists", driver.getPersonalId()));
         }
         System.out.println(mapper.map(driver, DriverEntity.class));
@@ -62,7 +62,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     public void update(DriverRecord driverEditFormInput) {
         try {
             DriverEntity driverEntity = driverDao.findByPersonalId(driverEditFormInput.getPersonalId());
-            if(isDriverRecordValid(driverEditFormInput)) {
+            if (isDriverRecordValid(driverEditFormInput)) {
                 driverEntity.setFirstName(driverEditFormInput.getFirstName());
                 driverEntity.setLastName(driverEditFormInput.getLastName());
                 driverEntity.setLocation(driverEditFormInput.getLocation());
@@ -128,6 +128,7 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
 
     /**
      * Prepares summary statistics on total number of online / offline drivers
+     *
      * @return map with resulting statistics
      */
     @Override
@@ -143,10 +144,10 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     }
 
 
-    private boolean isDriverRecordValid (DriverRecord driverRecord) {
-        if ( ! driverRecord.getPersonalId().matches("^[0-9]{6}$")) return false;
-        if ( ! driverRecord.getFirstName().matches("^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")) return false;
-        if ( ! driverRecord.getLastName().matches("^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")) return false;
+    private boolean isDriverRecordValid(DriverRecord driverRecord) {
+        if (!driverRecord.getPersonalId().matches("^[0-9]{6}$")) return false;
+        if (!driverRecord.getFirstName().matches("^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")) return false;
+        if (!driverRecord.getLastName().matches("^[А-Яа-яЁё]+[-]?[А-Яа-яЁё]+$")) return false;
         return true;
     }
 

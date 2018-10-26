@@ -20,6 +20,7 @@ public abstract class CheckedServiceException extends Exception {
 
     /**
      * Helper method to cope with encoding in Resource bundle
+     *
      * @param locale user locale
      * @return message from the "messages" resource bundle in UTF-8
      */
@@ -35,6 +36,7 @@ public abstract class CheckedServiceException extends Exception {
 
     /**
      * Returns error message in user locale
+     *
      * @param locale user locale
      * @return localized message
      */

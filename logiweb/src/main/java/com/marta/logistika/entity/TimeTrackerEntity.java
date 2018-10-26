@@ -14,13 +14,13 @@ public class TimeTrackerEntity extends AbstractEntity {
     @JoinColumn(name = "driver")
     private DriverEntity driver;
 
-    @Column(name="start")
+    @Column(name = "start")
     private LocalDateTime start;
 
-    @Column(name="finish")
+    @Column(name = "finish")
     private LocalDateTime finish;
 
-    @Column(name="minutes")
+    @Column(name = "minutes")
     private long minutes;
 
     @Enumerated(EnumType.STRING)

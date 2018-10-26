@@ -25,7 +25,7 @@ public class WebsocketUpdateHelper implements ApplicationListener<BrokerAvailabi
     }
 
     public void sendUpdate(String username, Object message) {
-        if(brokerAvailable.get()) {
+        if (brokerAvailable.get()) {
             this.messagingTemplate.convertAndSendToUser(username, "/logiweb/updates", message);
         }
     }

@@ -1,7 +1,7 @@
 package com.marta.logistika.dao.impl;
 
-import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.dao.api.CityDao;
+import com.marta.logistika.entity.CityEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

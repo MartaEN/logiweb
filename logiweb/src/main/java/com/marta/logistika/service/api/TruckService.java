@@ -5,15 +5,20 @@ import com.marta.logistika.dto.TruckRecord;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface TruckService {
 
     void add(TruckRecord truck);
+
     void update(TruckRecord truck);
+
     void remove(TruckRecord truck);
+
     List<TruckRecord> listAll();
-    List<TruckRecord> listAllFilteredBy (TruckFilterForm filter);
+
+    List<TruckRecord> listAllFilteredBy(TruckFilterForm filter);
+
     TruckRecord findTruckByRegNum(String regNum);
-    LinkedHashMap<String,Long> getTruckStatistics();
+
+    LinkedHashMap<String, Long> getTruckStatistics();
 }

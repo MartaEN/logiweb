@@ -8,7 +8,10 @@ import java.util.List;
 public interface CityService {
 
     void add(CityEntity city) throws DuplicateCityException;
+
     void remove(long id);
+
     CityEntity findById(long id);
+
     List<CityEntity> listAll();
 }

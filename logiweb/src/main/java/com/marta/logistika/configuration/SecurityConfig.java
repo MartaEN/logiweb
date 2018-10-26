@@ -37,31 +37,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
-        http.addFilterBefore(filter,CsrfFilter.class);
+        http.addFilterBefore(filter, CsrfFilter.class);
 
         http.authorizeRequests()
                 .antMatchers("/orders/**", "/tickets/**", "/trucks/**", "/drivers/**", "/destinations/**").hasRole("LOGIST")
                 .antMatchers("/logiweb/**").hasRole("DRIVER")
                 .and()
                 .formLogin()
-                    .loginPage("/login")
-                    .loginProcessingUrl("/authenticate")
-                    .successHandler(myAuthenticationSuccessHandler())
-                    .permitAll()
+                .loginPage("/login")
+                .loginProcessingUrl("/authenticate")
+                .successHandler(myAuthenticationSuccessHandler())
+                .permitAll()
                 .and()
                 .logout()
-                    .logoutSuccessUrl("/login?logout")
-                    .permitAll()
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
                 .and()
                 .exceptionHandling()
-                    .accessDeniedPage("/access-denied")
+                .accessDeniedPage("/access-denied")
                 .and()
                 .csrf().disable();
 
     }
 
     @Bean
-    public AuthenticationSuccessHandler myAuthenticationSuccessHandler(){
+    public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
         return new UrlAuthenticationSuccessHandler();
     }
 }

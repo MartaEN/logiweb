@@ -1,8 +1,8 @@
 package com.marta.logistika.dao.impl;
 
+import com.marta.logistika.dao.api.TruckDao;
 import com.marta.logistika.dto.TruckFilterForm;
 import com.marta.logistika.entity.TruckEntity;
-import com.marta.logistika.dao.api.TruckDao;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class TruckDaoImpl extends AbstractDao<TruckEntity> implements TruckDao {
 
     @Override
     public TruckEntity findByRegNumber(String regNumber) {
-        if(regNumber == null) return null;
+        if (regNumber == null) return null;
         return em.createQuery(
                 "SELECT t FROM TruckEntity t WHERE t.regNumber=:regNumber",
                 TruckEntity.class)

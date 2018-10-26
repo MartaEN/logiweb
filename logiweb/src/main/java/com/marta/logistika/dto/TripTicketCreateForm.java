@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 
 public class TripTicketCreateForm {
 
-    @Future private LocalDateTime departureDateTime;
+    @Future
+    private LocalDateTime departureDateTime;
     private Long toCity;
     private String truckRegNumber;
 

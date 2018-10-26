@@ -8,13 +8,13 @@ public class OrderDoesNotFitToTicketException extends CheckedServiceException {
     private long ticketId;
     private String details;
 
-    public OrderDoesNotFitToTicketException(long ticketId, String details){
+    public OrderDoesNotFitToTicketException(long ticketId, String details) {
         super("com.marta.logistika.error.orderDoesNotFitToTicket");
         this.ticketId = ticketId;
         this.details = details;
     }
 
-    public OrderDoesNotFitToTicketException(OrderDoesNotFitToTicketException e, long orderId){
+    public OrderDoesNotFitToTicketException(OrderDoesNotFitToTicketException e, long orderId) {
         super("com.marta.logistika.error.orderDoesNotFitToTicket");
         this.ticketId = e.getTicketId();
         this.details = e.getDetails();

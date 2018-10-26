@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan("com.marta.logistika")
 @Import(value = {
         DataSourceConfig.class,
-} )
+})
 public class ApplicationConfig {
 
 

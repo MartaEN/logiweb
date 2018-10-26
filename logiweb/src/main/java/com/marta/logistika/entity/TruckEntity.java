@@ -8,22 +8,22 @@ import java.util.Objects;
 @Table(name = "trucks")
 public class TruckEntity extends AbstractEntity {
 
-    @Column (unique = true, nullable = false, length = 7)
+    @Column(unique = true, nullable = false, length = 7)
     private String regNumber;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private int capacity;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private int shiftSize;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private boolean isServiceable;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private boolean isParked;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDateTime bookedUntil;
 
 
@@ -92,7 +92,6 @@ public class TruckEntity extends AbstractEntity {
     public void setLocation(CityEntity location) {
         this.location = location;
     }
-
 
 
     @Override

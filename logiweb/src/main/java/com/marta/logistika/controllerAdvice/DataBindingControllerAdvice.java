@@ -85,7 +85,7 @@ public class DataBindingControllerAdvice {
         binder.registerCustomEditor(DriverRecord.class, "personalId", new PropertyEditorSupport() {
 
             public void setAsText(String personalId) {
-                DriverRecord driver= driverService.findDriverByPersonalId(personalId);
+                DriverRecord driver = driverService.findDriverByPersonalId(personalId);
                 setValue(driver);
             }
 

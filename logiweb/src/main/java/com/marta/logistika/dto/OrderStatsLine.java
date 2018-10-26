@@ -12,7 +12,8 @@ public class OrderStatsLine {
     private long totalWeight;
     private long distance;
 
-    public OrderStatsLine() {}
+    public OrderStatsLine() {
+    }
 
     public OrderStatsLine(CityEntity fromCity, CityEntity toCity, long numberOfOrders, long totalWeight) {
         this.fromCity = fromCity;

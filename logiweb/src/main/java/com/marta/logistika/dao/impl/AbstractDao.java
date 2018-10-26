@@ -13,6 +13,7 @@ abstract class AbstractDao<T extends AbstractEntity> implements GenericDao<T> {
 
     /**
      * Persists new entity and returns its id
+     *
      * @param entity entity to be persisted
      * @return id
      */
@@ -31,7 +32,6 @@ abstract class AbstractDao<T extends AbstractEntity> implements GenericDao<T> {
     public void remove(T entity) {
         em.remove(entity);
     }
-
 
 
 }

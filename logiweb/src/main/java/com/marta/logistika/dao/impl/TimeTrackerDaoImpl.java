@@ -37,7 +37,7 @@ public class TimeTrackerDaoImpl extends AbstractDao<TimeTrackerEntity> implement
         LocalDateTime finish = month.atEndOfMonth().atTime(LocalTime.MAX);
 
         Long result = em.createQuery("SELECT SUM(t.minutes) FROM TimeTrackerEntity t " +
-                "WHERE t.driver=:driver AND t.finish >=:start AND t.finish <=:finish ",
+                        "WHERE t.driver=:driver AND t.finish >=:start AND t.finish <=:finish ",
                 Long.class)
                 .setParameter("driver", driver)
                 .setParameter("start", start)

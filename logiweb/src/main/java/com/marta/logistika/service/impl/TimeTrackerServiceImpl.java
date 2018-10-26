@@ -26,12 +26,14 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
 
     /**
      * Method creates new time record entry for the driver with his current status
+     *
      * @param driver driver
      */
     @Override
     @Transactional
     public void openNewTimeRecord(DriverEntity driver) {
-        if (timeTrackerDao.hasOpenTimeRecord(driver)) throw new UncheckedServiceException(String.format("Previous time record for driver %s is not closed", driver.toString()));
+        if (timeTrackerDao.hasOpenTimeRecord(driver))
+            throw new UncheckedServiceException(String.format("Previous time record for driver %s is not closed", driver.toString()));
         TimeTrackerEntity timeRecord = new TimeTrackerEntity();
         timeRecord.setDriver(driver);
         timeRecord.setStatus(driver.getStatus());
@@ -41,6 +43,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
 
     /**
      * Closes a currently open time record and opens a new one
+     *
      * @param driver driver
      */
     @Override
@@ -57,6 +60,7 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     /**
      * Method closes driver's time entry.
      * In case time record crosses midnight(s), is it split into separate records for each calendar day.
+     *
      * @param driver driver
      */
     @Override
@@ -85,11 +89,11 @@ public class TimeTrackerServiceImpl extends AbstractService implements TimeTrack
     }
 
 
-
     /**
      * Method returns time spent by the driver at work in the given month, in minutes
+     *
      * @param driver driver
-     * @param month month and year
+     * @param month  month and year
      * @return total time at work in minutes
      */
     @Override

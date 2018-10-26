@@ -15,12 +15,12 @@ import java.util.Arrays;
 @Aspect
 public class LoggingAspect {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-	@Around("execution(* com.marta.logistika.service..*.*(..)) || execution(* com.marta.logistika.controller..*.*(..))")
-	public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("execution(* com.marta.logistika.service..*.*(..)) || execution(* com.marta.logistika.controller..*.*(..))")
+    public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
 
-	    Object returnedValue = joinPoint.proceed();
+        Object returnedValue = joinPoint.proceed();
 
         StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
         logMessage.append(joinPoint.getTarget().getClass().getName());
@@ -36,11 +36,11 @@ public class LoggingAspect {
 
         LOGGER.debug(logMessage.toString());
         return returnedValue;
-	}
+    }
 
     @AfterThrowing(
             pointcut = "execution(* com.marta.logistika.service..*.*(..)) || execution(* com.marta.logistika.controller..*.*(..))",
-            throwing= "error")
+            throwing = "error")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
 
         StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
@@ -55,5 +55,5 @@ public class LoggingAspect {
 
         LOGGER.error(logMessage.toString(), error);
     }
-	
+
 }
