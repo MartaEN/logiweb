@@ -47,7 +47,7 @@ public class ExceptionHandlingControllerAdvice {
      */
     @ExceptionHandler(CheckedServiceException.class)
     public String handleServiceException (final CheckedServiceException e, Model uiModel, Locale locale) {
-        LOGGER.error(e.getMessage(), e);
+//        LOGGER.error(e.getMessage(), e);
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setTitle("error.smthWentWrong");
         errorMessage.setMessage(e.getLocalizedMessage(locale));
@@ -66,7 +66,7 @@ public class ExceptionHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public String handleThrowable(final Exception e, HttpServletRequest request, Model uiModel) {
-        LOGGER.error(String.format("Request %s resulted in exception", request.getRequestURL()), e);
+        LOGGER.error(String.format("Request %s resulted in exception %s", request.getRequestURL(), e.getLocalizedMessage()));
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setTitle("error.smthWentWrong");
         errorMessage.setMessage("error.internalServerError");
