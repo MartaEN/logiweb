@@ -418,13 +418,19 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public Task getCurrentTask(TripTicketEntity ticket) {
-        if (ticket.getStatus() != APPROVED && ticket.getStatus() == RUNNING) return NONE;
+        if (ticket.getStatus() != APPROVED && ticket.getStatus() != RUNNING) {
+            return NONE;
+        }
         StopoverEntity currentStopover = ticket.getStopoverWithSequenceNo(ticket.getCurrentStep());
-        if (currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == SHIPPED))
+        if (currentStopover.getUnloads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == SHIPPED)) {
             return UNLOAD;
-        if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == READY_TO_SHIP))
+        }
+        if (currentStopover.getLoads().stream().map(TransactionEntity::getOrder).anyMatch(o -> o.getStatus() == READY_TO_SHIP)) {
             return LOAD;
-        if (ticket.getCurrentStep() == ticket.getStopovers().size() - 1) return CLOSE_TICKET;
+        }
+        if (ticket.getCurrentStep() == ticket.getStopovers().size() - 1) {
+            return CLOSE_TICKET;
+        }
         return GOTO;
     }
 
