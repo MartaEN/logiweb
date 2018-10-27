@@ -185,14 +185,16 @@ public class OrdersController {
     public String viewNumberedPage(@RequestParam("page") int page, Model uiModel) {
 
         long totalPageCount = orderService.countPages();
-        if (page > orderService.countPages() || page < 1) return "redirect:/orders/view?page=1";
+        if (totalPageCount == 0) {
+            return "office/orders/list";
+        }
+        if (page > orderService.countPages() || page < 1) {
+            return "redirect:/orders/view?page=1";
+        }
 
         uiModel.addAttribute("orders", orderService.getOrdersPage(page));
-
-        if (totalPageCount != 0) {
-            uiModel.addAttribute("page", page);
-            uiModel.addAttribute("totalPages", totalPageCount);
-        }
+        uiModel.addAttribute("page", page);
+        uiModel.addAttribute("totalPages", totalPageCount);
 
         return "office/orders/list";
     }

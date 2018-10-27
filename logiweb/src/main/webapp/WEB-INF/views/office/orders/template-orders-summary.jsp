@@ -5,7 +5,7 @@
 
 {{debug}}
 
-{{#if this}}
+{{#if this.orderLines}}
 
 <table id="orders-table filter-table" class="table table-hover">
 <thead>

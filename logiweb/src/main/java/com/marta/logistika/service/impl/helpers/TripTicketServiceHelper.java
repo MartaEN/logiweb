@@ -59,10 +59,12 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void addOrderToTicket(OrderEntity order, TripTicketEntity ticket) throws NoRouteFoundException, OrderDoesNotFitToTicketException {
         // check order and ticket statuses
-        if (ticket.getStatus() != CREATED)
+        if (ticket.getStatus() != CREATED) {
             throw new UncheckedServiceException(String.format("Can't add to trip ticket id %d - ticket has already been approved", ticket.getId()));
-        if (order.getStatus() != NEW)
+        }
+        if (order.getStatus() != NEW) {
             throw new UncheckedServiceException(String.format("Order id %d has already been assigned to some trip ticket", order.getId()));
+        }
 
         // find suggested load and unload stopovers for the order
         int[] suggestedLoadUnloadForNewOrder = stopoverHelper.suggestLoadUnloadPoints(ticket, order);
