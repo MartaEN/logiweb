@@ -8,7 +8,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "orders")
-public class OrderEntity extends AbstractEntity {
+public class OrderEntity extends AbstractEntity implements Comparable<OrderEntity> {
 
     @Column(nullable = false)
     private LocalDateTime creationDate;
@@ -82,6 +82,11 @@ public class OrderEntity extends AbstractEntity {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public int compareTo(OrderEntity o) {
+        return Long.compare(id, o.id);
     }
 
     @Override

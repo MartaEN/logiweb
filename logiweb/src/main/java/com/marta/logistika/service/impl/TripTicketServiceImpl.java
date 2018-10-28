@@ -162,7 +162,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
      * @param locale     user's locale
      * @return system message with the result of operation
      */
-    //todo entry point for the most tricky operation - adding several orders to ticket
     @Override
     @Transactional
     public SystemMessage addMultipleOrdersToTicketAndReport(long fromCityId, long toCityId, @Nullable LocalDate date, long ticketId, Locale locale) {
@@ -175,7 +174,6 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
 
         for (OrderEntity order : orders) {
             try {
-                //todo call of method which will actually add order to ticket
                 helper.addOrderToTicket(order, ticket);
                 totalQuantity++;
                 totalWeight += order.getWeight();
@@ -341,7 +339,11 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
     @Override
     public List<OrderEntity> listAllOrderInTicket(long id) {
         TripTicketEntity ticket = ticketDao.findById(id);
-        return ticket.getStopovers().stream().flatMap(s -> s.getLoads().stream()).map(TransactionEntity::getOrder).collect(Collectors.toList());
+        return ticket.getStopovers().stream()
+                .flatMap(s -> s.getLoads().stream())
+                .map(TransactionEntity::getOrder)
+                .sorted(OrderEntity::compareTo)
+                .collect(Collectors.toList());
     }
 
     /**
