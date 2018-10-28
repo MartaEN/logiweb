@@ -30,7 +30,6 @@ public class TripTicketEntity extends AbstractEntity {
             inverseJoinColumns = {@JoinColumn(name = "driver")})
     private List<DriverEntity> drivers = new ArrayList<>();
 
-    //todo
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "trip", nullable = false)
     private Set<StopoverEntity> stopovers = new TreeSet<>();

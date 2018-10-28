@@ -2,9 +2,9 @@ package com.marta.logistika.entity;
 
 import javax.persistence.*;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "stopovers")
@@ -17,15 +17,13 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
     @JoinColumn(name = "city")
     private CityEntity city;
 
-    //todo
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "stopover", nullable = false)
-    private List<TransactionUnloadEntity> unloads = new ArrayList<>();
+    private Set<TransactionUnloadEntity> unloads = new HashSet<>();
 
-    //todo
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "stopover", nullable = false)
-    private List<TransactionLoadEntity> loads = new ArrayList<>();
+    private Set<TransactionLoadEntity> loads = new HashSet<>();
 
     @Column(name = "weight")
     private int totalWeight;
@@ -57,19 +55,19 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
         this.sequenceNo = sequenceNo;
     }
 
-    public List<TransactionUnloadEntity> getUnloads() {
+    public Set<TransactionUnloadEntity> getUnloads() {
         return unloads;
     }
 
-    public void setUnloads(List<TransactionUnloadEntity> unloads) {
+    public void setUnloads(Set<TransactionUnloadEntity> unloads) {
         this.unloads = unloads;
     }
 
-    public List<TransactionLoadEntity> getLoads() {
+    public Set<TransactionLoadEntity> getLoads() {
         return loads;
     }
 
-    public void setLoads(List<TransactionLoadEntity> loads) {
+    public void setLoads(Set<TransactionLoadEntity> loads) {
         this.loads = loads;
     }
 
@@ -89,11 +87,6 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
         this.estimatedDuration = estimatedDuration;
     }
 
-    @Override
-    public int compareTo(StopoverEntity o) {
-        return Integer.compare(sequenceNo, o.sequenceNo);
-    }
-
     public void addLoadFor(OrderEntity order) {
         loads.add(new TransactionLoadEntity(order));
     }
@@ -110,16 +103,21 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
     }
 
     @Override
+    public int compareTo(StopoverEntity o) {
+        return Integer.compare(sequenceNo, o.sequenceNo);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StopoverEntity that = (StopoverEntity) o;
-        return id == that.id && this.getSequenceNo() == that.getSequenceNo() && this.getCity() == that.getCity();
+        return id == that.id && this.getSequenceNo() == that.getSequenceNo() && this.getCity().equals(that.getCity());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, sequenceNo, city);
     }
 
     @Override

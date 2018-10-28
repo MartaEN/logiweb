@@ -14,10 +14,4 @@ public class TransactionLoadEntity extends TransactionEntity {
         this.order = order;
     }
 
-    @Override
-    public String toString() {
-        return "TransactionLoadEntity{" +
-                "order id =" + order.getId() +
-                '}';
-    }
 }

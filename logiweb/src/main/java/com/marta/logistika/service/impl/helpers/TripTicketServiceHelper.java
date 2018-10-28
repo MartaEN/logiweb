@@ -130,13 +130,15 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeOrderFromTicket(OrderEntity order, TripTicketEntity ticket) {
         for (StopoverEntity stopover : ticket.getStopovers()) {
-            for (int j = 0; j < stopover.getLoads().size(); j++) {
-                if (stopover.getLoads().get(j).getOrder().equals(order))
-                    stopover.getLoads().remove(j);
+            for(TransactionLoadEntity load: stopover.getLoads()) {
+                if(load.getOrder().equals(order)) {
+                    stopover.getLoads().remove(load);
+                }
             }
-            for (int j = 0; j < stopover.getUnloads().size(); j++) {
-                if (stopover.getUnloads().get(j).getOrder().equals(order))
-                    stopover.getUnloads().remove(j);
+            for(TransactionUnloadEntity unload: stopover.getUnloads()) {
+                if(unload.getOrder().equals(order)) {
+                    stopover.getUnloads().remove(unload);
+                }
             }
         }
         stopoverHelper.removeEmptyStopovers(ticket);
