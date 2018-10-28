@@ -81,6 +81,7 @@ public class TripTicketController {
             LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - successful",
                     SecurityContextHolder.getContext().getAuthentication().getName(),
                     ticketId));
+            uiModel.addAttribute("ticket", ticketService.findById(ticketId));
             return "office/tickets/view";
         } catch (PastDepartureDateException | NoDriversAvailableException e) {
             uiModel.addAttribute("error", e.getLocalizedMessage(locale));
