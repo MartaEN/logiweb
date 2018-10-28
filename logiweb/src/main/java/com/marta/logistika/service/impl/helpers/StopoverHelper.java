@@ -99,8 +99,8 @@ public class StopoverHelper {
      * @throws NoRouteFoundException in case no route found
      */
     float getAvgLoad(TripTicketEntity ticket) throws NoRouteFoundException {
-        List<CityEntity> route = ticket.getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
-        List<Integer> weights = ticket.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
+        List<CityEntity> route = ticket.getStopoversSorted().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
+        List<Integer> weights = ticket.getStopoversSorted().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         return getAvgLoad(route, weights);
     }
 
@@ -152,6 +152,7 @@ public class StopoverHelper {
                 ticket.getStopovers().remove(stopover);
             }
         }
+        stopovers = ticket.getStopoversSorted();
         for (int i = 0; i < stopovers.size(); i++) {
             stopovers.get(i).setSequenceNo(i);
         }
@@ -165,7 +166,7 @@ public class StopoverHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     void updateWeights(TripTicketEntity ticket) {
         int cumulativeWeight = 0;
-        List<StopoverEntity> route = new ArrayList<>(ticket.getStopoversSorted());
+        List<StopoverEntity> route = ticket.getStopoversSorted();
         for (StopoverEntity s : route) {
             s.setTotalWeight(cumulativeWeight += s.getIncrementalWeight());
         }

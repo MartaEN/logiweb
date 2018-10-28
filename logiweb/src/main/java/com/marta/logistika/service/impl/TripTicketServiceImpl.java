@@ -177,7 +177,10 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 helper.addOrderToTicket(order, ticket);
                 totalQuantity++;
                 totalWeight += order.getWeight();
-            } catch (NoRouteFoundException | OrderDoesNotFitToTicketException e) {
+            } catch (OrderDoesNotFitToTicketException e) {
+                //todo how to rollback automatically
+                helper.removeOrderFromTicket(order, ticket);
+            } catch (NoRouteFoundException e) {
                 //so far do nothing - later can be used for feedback to user
             }
         }

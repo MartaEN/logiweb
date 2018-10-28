@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.marta.logistika.dto.Instruction.Task;
@@ -56,7 +57,7 @@ public class TripTicketServiceHelper {
      * @throws OrderDoesNotFitToTicketException in case order doesn't fit to ticket due to truck capacity limit
      *                                          and in case of weight limit breakage
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = {NoRouteFoundException.class, OrderDoesNotFitToTicketException.class})
     public void addOrderToTicket(OrderEntity order, TripTicketEntity ticket) throws NoRouteFoundException, OrderDoesNotFitToTicketException {
         // check order and ticket statuses
         if (ticket.getStatus() != CREATED) {
@@ -130,16 +131,18 @@ public class TripTicketServiceHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeOrderFromTicket(OrderEntity order, TripTicketEntity ticket) {
         for (StopoverEntity stopover : ticket.getStopovers()) {
-            for(TransactionLoadEntity load: stopover.getLoads()) {
-                if(load.getOrder().equals(order)) {
-                    stopover.getLoads().remove(load);
+            Iterator<TransactionLoadEntity> loadsIterator = stopover.getLoads().iterator();
+            loadsIterator.forEachRemaining(load -> {
+                if (load.getOrder().equals(order)) {
+                    loadsIterator.remove();
                 }
-            }
-            for(TransactionUnloadEntity unload: stopover.getUnloads()) {
-                if(unload.getOrder().equals(order)) {
-                    stopover.getUnloads().remove(unload);
+            });
+            Iterator<TransactionUnloadEntity> unloadsIterator = stopover.getUnloads().iterator();
+            unloadsIterator.forEachRemaining(unload -> {
+                if (unload.getOrder().equals(order)) {
+                    unloadsIterator.remove();
                 }
-            }
+            });
         }
         stopoverHelper.removeEmptyStopovers(ticket);
         stopoverHelper.updateWeights(ticket);
