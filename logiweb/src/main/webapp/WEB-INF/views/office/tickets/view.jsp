@@ -23,7 +23,7 @@
             <th>Город</th>
             <th>Загрузка, кг</th>
         </tr>
-        <c:forEach items="${ticket.stopovers}" var="stopover">
+        <c:forEach items="${ticket.stopoversSorted}" var="stopover">
             <tr>
                 <td>${stopover.sequenceNo + 1}</td>
                 <td>${stopover.city.name}</td>

@@ -49,6 +49,7 @@ public class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements 
                     .setParameter("personalId", personalId)
                     .getSingleResult();
         } catch (NoResultException e) {
+            //ok to return null in case of no result
         }
         return ticket;
     }
@@ -65,6 +66,7 @@ public class TripTicketDaoImpl extends AbstractDao<TripTicketEntity> implements 
                     .setParameter("regNumber", regNumber)
                     .getSingleResult();
         } catch (NoResultException e) {
+            //ok to return null in case of no result
         }
         return ticket;
     }

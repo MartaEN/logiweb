@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,15 +30,15 @@ public class StopoverHelper {
      * Method suggests best placement of new load and unload points on the route
      * to minimize total route distance and average load on the way.
      *
-     * @param ticketEntity - ticket to be updated
-     * @param order        - order to be placed to ticket
+     * @param ticket - ticket to be updated
+     * @param order  - order to be placed to ticket
      * @return returns an array containing suggested load and unload points:
      * load on or immediately after current route element number "load"
      * unload on or immediately before current route element number "unload"
      */
-    int[] suggestLoadUnloadPoints(TripTicketEntity ticketEntity, OrderEntity order) throws NoRouteFoundException {
-        List<CityEntity> currentRoute = ticketEntity.getCities();
-        List<Integer> weights = ticketEntity.getStopovers().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
+    int[] suggestLoadUnloadPoints(TripTicketEntity ticket, OrderEntity order) throws NoRouteFoundException {
+        List<CityEntity> currentRoute = ticket.getCities();
+        List<Integer> weights = ticket.getStopoversSorted().stream().map(StopoverEntity::getTotalWeight).collect(Collectors.toList());
         CityEntity fromCity = order.getFromCity();
         CityEntity toCity = order.getToCity();
         int newWeight = order.getWeight();
@@ -140,13 +141,19 @@ public class StopoverHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeEmptyStopovers(TripTicketEntity ticket) {
-        for (int i = ticket.getStopovers().size() - 2; i > 0; i--) {
-            StopoverEntity stopover = ticket.getStopovers().get(i);
-            if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0)
+        List<StopoverEntity> stopovers = ticket.getStopoversSorted();
+        int lastStopoverNo = stopovers.size() - 1;
+        for (StopoverEntity stopover : ticket.getStopoversSorted()) {
+            // we never remove first and last stopover
+            if (stopover.getSequenceNo() == 0 || stopover.getSequenceNo() == lastStopoverNo) {
+                continue;
+            }
+            if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0) {
                 ticket.getStopovers().remove(stopover);
+            }
         }
-        for (int i = 0; i < ticket.getStopovers().size(); i++) {
-            ticket.getStopovers().get(i).setSequenceNo(i);
+        for (int i = 0; i < stopovers.size(); i++) {
+            stopovers.get(i).setSequenceNo(i);
         }
     }
 
@@ -158,8 +165,7 @@ public class StopoverHelper {
     @Transactional(propagation = Propagation.REQUIRED)
     void updateWeights(TripTicketEntity ticket) {
         int cumulativeWeight = 0;
-        List<StopoverEntity> route = ticket.getStopovers();
-        route.sort(StopoverEntity::compareTo);
+        List<StopoverEntity> route = new ArrayList<>(ticket.getStopoversSorted());
         for (StopoverEntity s : route) {
             s.setTotalWeight(cumulativeWeight += s.getIncrementalWeight());
         }

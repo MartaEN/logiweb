@@ -4,12 +4,13 @@ import com.marta.logistika.enums.TripTicketStatus;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TripTicketRecord implements Serializable {
 
     private long id;
     private TruckShortRecord truck;
-    private List<StopoverShortRecord> stopovers;
+    private List<StopoverShortRecord> stopoversSorted;
     private int currentStep;
     private List<DriverRecord> drivers;
     private String departureDateTime;
@@ -32,12 +33,12 @@ public class TripTicketRecord implements Serializable {
         this.truck = truck;
     }
 
-    public List<StopoverShortRecord> getStopovers() {
-        return stopovers;
+    public List<StopoverShortRecord> getStopoversSorted() {
+        return stopoversSorted;
     }
 
-    public void setStopovers(List<StopoverShortRecord> stopovers) {
-        this.stopovers = stopovers;
+    public void setStopoversSorted(List<StopoverShortRecord> stopoversSorted) {
+        this.stopoversSorted = stopoversSorted;
     }
 
     public int getCurrentStep() {

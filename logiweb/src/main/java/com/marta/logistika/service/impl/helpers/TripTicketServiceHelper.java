@@ -109,7 +109,7 @@ public class TripTicketServiceHelper {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public LocalDateTime calculateDurationAndArrivalDateTime(TripTicketEntity ticket) throws NoRouteFoundException {
-        List<StopoverEntity> stopovers = ticket.getStopovers();
+        List<StopoverEntity> stopovers = ticket.getStopoversSorted();
         stopovers.sort(StopoverEntity::compareTo);
 
         stopovers.get(0).setEstimatedDuration(STOPOVER_DURATION);
@@ -129,21 +129,16 @@ public class TripTicketServiceHelper {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeOrderFromTicket(OrderEntity order, TripTicketEntity ticket) {
-        for (int i = 0; i < ticket.getStopovers().size(); i++) {
-
-            StopoverEntity stopover = ticket.getStopovers().get(i);
-
+        for (StopoverEntity stopover : ticket.getStopovers()) {
             for (int j = 0; j < stopover.getLoads().size(); j++) {
                 if (stopover.getLoads().get(j).getOrder().equals(order))
                     stopover.getLoads().remove(j);
             }
-
             for (int j = 0; j < stopover.getUnloads().size(); j++) {
                 if (stopover.getUnloads().get(j).getOrder().equals(order))
                     stopover.getUnloads().remove(j);
             }
         }
-
         stopoverHelper.removeEmptyStopovers(ticket);
         stopoverHelper.updateWeights(ticket);
 

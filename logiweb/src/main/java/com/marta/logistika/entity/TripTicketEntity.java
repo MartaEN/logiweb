@@ -1,12 +1,11 @@
 package com.marta.logistika.entity;
 
 import com.marta.logistika.enums.TripTicketStatus;
+import org.dozer.Mapping;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -34,7 +33,7 @@ public class TripTicketEntity extends AbstractEntity {
     //todo
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "trip", nullable = false)
-    private List<StopoverEntity> stopovers = new ArrayList<>();
+    private Set<StopoverEntity> stopovers = new TreeSet<>();
 
     @Column(name = "step")
     private int currentStep;
@@ -81,12 +80,11 @@ public class TripTicketEntity extends AbstractEntity {
         this.drivers = drivers;
     }
 
-    public List<StopoverEntity> getStopovers() {
-        stopovers.sort(StopoverEntity::compareTo);
+    public Set<StopoverEntity> getStopovers() {
         return stopovers;
     }
 
-    public void setStopovers(List<StopoverEntity> stopovers) {
+    public void setStopovers(Set<StopoverEntity> stopovers) {
         this.stopovers = stopovers;
     }
 
@@ -97,7 +95,12 @@ public class TripTicketEntity extends AbstractEntity {
     }
 
     public List<CityEntity> getCities() {
-        return getStopovers().stream().map(StopoverEntity::getCity).collect(Collectors.toList());
+        return getStopovers().stream().sorted().map(StopoverEntity::getCity).collect(Collectors.toList());
+    }
+
+    @Mapping("stopoversSorted")
+    public List<StopoverEntity> getStopoversSorted() {
+        return getStopovers().stream().sorted().collect(Collectors.toList());
     }
 
     public int getAvgLoad() {

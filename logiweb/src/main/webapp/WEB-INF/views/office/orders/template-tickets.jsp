@@ -20,9 +20,9 @@
             <i class="far fa-calendar-alt"></i> {{{trimDate departureDateTime}}} <i class="far fa-clock"></i> {{{trimTime departureDateTime}}}
         </div>
         <div class="ticket-route-info">
-            {{#stopovers}}
+            {{#stopoversSorted}}
                 {{city.name}}({{totalWeight}})
-            {{/stopovers}}
+            {{/stopoversSorted}}
         </div>
     </a>
 

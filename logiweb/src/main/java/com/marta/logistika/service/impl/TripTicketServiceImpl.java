@@ -12,10 +12,7 @@ import com.marta.logistika.entity.*;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.enums.OrderStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
-import com.marta.logistika.exception.checked.CheckedServiceException;
-import com.marta.logistika.exception.checked.NoDriversAvailableException;
-import com.marta.logistika.exception.checked.NoRouteFoundException;
-import com.marta.logistika.exception.checked.PastDepartureDateException;
+import com.marta.logistika.exception.checked.*;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
 import com.marta.logistika.exception.unchecked.UncheckedServiceException;
 import com.marta.logistika.service.api.TripTicketService;
@@ -182,8 +179,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 helper.addOrderToTicket(order, ticket);
                 totalQuantity++;
                 totalWeight += order.getWeight();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (NoRouteFoundException | OrderDoesNotFitToTicketException e) {
+                //so far do nothing - later can be used for feedback to user
             }
         }
         return new SystemMessage("Adding orders to tickets",

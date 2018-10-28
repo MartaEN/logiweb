@@ -38,7 +38,7 @@
             <c:forEach items="${tickets}" var="ticket">
                 <tr class="table-data">
                     <td>${ticket.id}</td>
-                    <td>${ticket.stopovers.get(0).city.name}</td>
+                    <td>${ticket.stopoversSorted.get(0).city.name}</td>
                     <td><i class="far fa-calendar-alt"></i> ${ticket.departureDateTime.substring(0, 10)} <i class="far fa-clock"></i> ${ticket.departureDateTime.substring(11, 16)}</td>
                     <td>${ticket.truck.regNumber}</td>
                     <td>${ticket.status.toString()}</td>
