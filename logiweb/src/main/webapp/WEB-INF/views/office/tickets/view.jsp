@@ -17,7 +17,7 @@
     <p>Плановая дата отправления: ${ticket.departureDateTime.substring(0,10)} ${ticket.departureDateTime.substring(11,16)}</p>
 
     <h5>Маршрутные точки</h5>
-    <table>
+    <table class="table table-sm">
         <tr>
             <th>№</th>
             <th>Город</th>
@@ -37,7 +37,7 @@
         В данном маршрутном листе нет ни одного заказа
     </c:if>
     <c:if test="${not empty orders}">
-        <table>
+        <table class="table table-sm">
             <tr>
                 <th>№</th>
                 <th>Дата</th>
