@@ -114,7 +114,7 @@ public class StopoverEntity extends AbstractEntity implements Comparable<Stopove
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StopoverEntity that = (StopoverEntity) o;
-        return id == that.id;
+        return id == that.id && this.getSequenceNo() == that.getSequenceNo() && this.getCity() == that.getCity();
     }
 
     @Override
