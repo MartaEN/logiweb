@@ -44,7 +44,7 @@ public class TripTicketController {
     public String viewTicket(@PathVariable("id") Long id, Model uiModel) {
 
         uiModel.addAttribute("ticket", ticketService.findById(id));
-        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(id));
+        uiModel.addAttribute("orders", ticketService.listAllOrdersInTicket(id));
         uiModel.addAttribute("returnTo", "tickets/view");
 
         return "office/tickets/view";
@@ -129,7 +129,7 @@ public class TripTicketController {
      */
     private void prepareTicketApproveForm(long ticketId, Model uiModel) {
         uiModel.addAttribute("ticket", ticketService.findById(ticketId));
-        uiModel.addAttribute("orders", ticketService.listAllOrderInTicket(ticketId));
+        uiModel.addAttribute("orders", ticketService.listAllOrdersInTicket(ticketId));
         uiModel.addAttribute("ticketAndOrder", new TicketAndOrder());
         uiModel.addAttribute("departureDateTime", new FutureDateTimeRecord());
         uiModel.addAttribute("minNewDateTime", ticketService.getMinNewDateTime(ticketId));
