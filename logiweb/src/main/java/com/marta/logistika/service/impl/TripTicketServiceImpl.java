@@ -70,16 +70,21 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         ticket.setStatus(CREATED);
 
         //validate and assign trip departure date
-        if (departureDateTime.isBefore(LocalDateTime.now()))
+        if (departureDateTime.isBefore(LocalDateTime.now())) {
             throw new UncheckedServiceException("Trip starting date should be in the future");
+        }
         ticket.setDepartureDateTime(departureDateTime);
 
         //validate and assign truck and mark it as booked
         TruckEntity truck = truckDao.findByRegNumber(truckRegNum);
-        if (!truck.isServiceable()) throw new UncheckedServiceException(String.format(
-                "Can't book truck %s - it is out of service", truck.getRegNumber()));
-        if (truck.getBookedUntil().isAfter(departureDateTime)) throw new UncheckedServiceException(String.format(
-                "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truck.getRegNumber(), departureDateTime, truck.getBookedUntil()));
+        if (!truck.isServiceable()) {
+            throw new UncheckedServiceException(String.format(
+                    "Can't book truck %s - it is out of service", truck.getRegNumber()));
+        }
+        if (truck.getBookedUntil().isAfter(departureDateTime)) {
+            throw new UncheckedServiceException(String.format(
+                    "Can't book truck %s for the trip starting %tF: the truck is booked until %tF", truck.getRegNumber(), departureDateTime, truck.getBookedUntil()));
+        }
         truck.setBookedUntil(MAX_FUTURE_DATE);
         ticket.setTruck(truck);
 
@@ -131,6 +136,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             helper.addOrderToTicket(order, ticket);
             return new SystemMessage("Success", String.format("Order %d is added to ticket %d", orderId, ticketId));
         } catch (CheckedServiceException e) {
+            helper.removeOrderFromTicket(order, ticket);
             return new SystemMessage("Failed", e.getLocalizedMessage(locale));
         } catch (Exception e) {
             return new SystemMessage("Failed", "Something went wrong at server side");
