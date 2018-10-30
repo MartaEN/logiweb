@@ -1,21 +1,19 @@
 --
--- create database for storing users and passwords and fill it with test data
+-- create database for storing users and first user (username = 'admin', password = 'admin', role = 'ROLE_LOGIST')
 --
 
-DROP DATABASE  IF EXISTS `logistika_users`;
-CREATE DATABASE  IF NOT EXISTS `logistika_users`;
+DROP DATABASE IF EXISTS `logistika_users`;
+CREATE DATABASE `logistika_users`;
 USE `logistika_users`;
 
 --
 -- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(68) NOT NULL,
   `enabled` tinyint(1) NOT NULL,
-  `personalId` varchar(12) NOT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -25,15 +23,12 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` 
 VALUES 
-('obender','{bcrypt}$2a$10$0VswPVRBzNvQvxRQDOpzJeIFgcGZeNvURN0wd8z6S88NWjOdijiRm',1,'000001'),
-('akozlevich','{bcrypt}$2a$10$lSxOGZAcNBq7CRiiJs/IKuY6B2YAPpOKT97ojwKUyMZJ.olzv2HkO',1,'000123'),
-('abalaganov','{bcrypt}$2a$10$CgUHYU7TCNwV45hEz9H92OITn3R9zgS6LMXACJsUb0KSzM0SbL0pS',1,'000345');
+('admin','{bcrypt}$2a$10$wMOMzGzr4X3bXFPITW8r8uIgWAlgQWWPA5Dd5sGImxkOYGOJpWNf6',1);
 
 --
 -- Table structure for table `authorities`
 --
 
-DROP TABLE IF EXISTS `authorities`;
 CREATE TABLE `authorities` (
   `username` varchar(50) NOT NULL,
   `authority` varchar(50) NOT NULL,
@@ -47,6 +42,4 @@ CREATE TABLE `authorities` (
 
 INSERT INTO `authorities` 
 VALUES 
-('obender','ROLE_LOGIST'),
-('akozlevich','ROLE_DRIVER'),
-('abalaganov','ROLE_DRIVER');
+('admin','ROLE_LOGIST');

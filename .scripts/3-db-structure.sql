@@ -1,4 +1,4 @@
-CREATE DATABASE  IF NOT EXISTS `logistika`;
+CREATE DATABASE IF NOT EXISTS `logistika`;
 USE `logistika`;
 
 -- MySQL dump 10.13  Distrib 5.7.21, for Win64 (x86_64)
@@ -49,6 +49,7 @@ CREATE TABLE `drivers` (
   `username` varchar(50) NOT NULL,
   `location` bigint(20) NOT NULL,
   `status` varchar(24) NOT NULL,
+  `deleted` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_gq374lh46a7wq07rhyiuwt27m` (`personalId`),
   UNIQUE KEY `UK_hfm3gk84eakexruf4mnv2tdpm` (`username`),
