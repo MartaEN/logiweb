@@ -1,6 +1,8 @@
 package com.marta.logistika.controller;
 
 import com.marta.logistika.dto.DriverRecord;
+import com.marta.logistika.dto.ErrorMessage;
+import com.marta.logistika.exception.checked.DriverHasUnfinishedTicketsException;
 import com.marta.logistika.service.api.CityService;
 import com.marta.logistika.service.api.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,12 +89,15 @@ public class DriversController {
     }
 
     @GetMapping(value = "/remove")
-    public String remove(@RequestParam String personalId) {
-
-        driverService.remove(personalId);
-
-        return "redirect:/drivers";
-
+    public String remove(@RequestParam String personalId, Model uiModel) {
+        try {
+            driverService.remove(personalId);
+            return "redirect:/drivers";
+        } catch (DriverHasUnfinishedTicketsException e) {
+            uiModel.addAttribute("error", "Удаление невозможно - у водителя есть незавершенные маршрутные листы");
+            uiModel.addAttribute("drivers", driverService.listAll());
+            return "office/drivers/list";
+        }
     }
 
     @GetMapping(value = "/find-drivers")

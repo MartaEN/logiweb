@@ -52,20 +52,25 @@ public class UrlAuthenticationSuccessHandler implements AuthenticationSuccessHan
     private String determineTargetUrl(final Authentication authentication) {
         boolean isLogist = false;
         boolean isDriver = false;
+        boolean hasNoRole = false;
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (final GrantedAuthority grantedAuthority : authorities) {
-            if (grantedAuthority.getAuthority().equals("ROLE_LOGIST")) {
-                isLogist = true;
-                break;
-            } else if (grantedAuthority.getAuthority().equals("ROLE_DRIVER")) {
-                isDriver = true;
-                break;
+            switch (grantedAuthority.getAuthority()) {
+                case "ROLE_LOGIST":
+                    isLogist = true;
+                    break;
+                case "ROLE_DRIVER":
+                    isDriver = true;
+                    break;
+                case "ROLE_NONE":
+                    hasNoRole = true;
+                    break;
             }
         }
 
         if (isLogist) {
             return "/orders";
-        } else if (isDriver) {
+        } else if (isDriver || hasNoRole) {
             return "/logiweb";
         } else {
             throw new IllegalStateException();

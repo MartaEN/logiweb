@@ -4,6 +4,7 @@ import com.marta.logistika.dto.Instruction;
 import com.marta.logistika.dto.SystemMessage;
 import com.marta.logistika.dto.TripTicketRecord;
 import com.marta.logistika.entity.CityEntity;
+import com.marta.logistika.entity.DriverEntity;
 import com.marta.logistika.entity.OrderEntity;
 import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.exception.checked.NoDriversAvailableException;
@@ -90,6 +91,13 @@ public interface TripTicketService {
     // *  processing ticket on the road (driver operations) *//
     // ******************************************************//
 
+    /**
+     * Checks if there are any trip tickets with APPROVED or RUNNING status assigned to the driver
+     *
+     * @param driver driver
+     * @return true if there are such trip tickets
+     */
+    boolean hasAnyOpenTickets(DriverEntity driver);
 
     /**
      * Method looks up for a current trip ticket assigned to the driver

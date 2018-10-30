@@ -32,10 +32,14 @@ public class DriverEntity extends AbstractEntity {
     @JoinColumn(name = "location")
     private CityEntity location;
 
+    @Column
+    private boolean deleted;
+
     @PrePersist
     public void setDefaults() {
         bookedUntil = LocalDateTime.now();
         status = DriverStatus.OFFLINE;
+        deleted = false;
     }
 
     public String getPersonalId() {
@@ -92,6 +96,14 @@ public class DriverEntity extends AbstractEntity {
 
     public void setLocation(CityEntity location) {
         this.location = location;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

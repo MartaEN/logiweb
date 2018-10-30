@@ -1,6 +1,7 @@
 package com.marta.logistika.service.api;
 
 import com.marta.logistika.dto.DriverRecord;
+import com.marta.logistika.exception.checked.DriverHasUnfinishedTicketsException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,7 +12,7 @@ public interface DriverService {
 
     void update(DriverRecord driver);
 
-    void remove(String personalId);
+    void remove(String personalId) throws DriverHasUnfinishedTicketsException;
 
     boolean personalIdExists(String personalId);
 

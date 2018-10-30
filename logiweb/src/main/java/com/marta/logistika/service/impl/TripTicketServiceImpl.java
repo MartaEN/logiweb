@@ -134,12 +134,13 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
         OrderEntity order = orderDao.findById(orderId);
         try {
             helper.addOrderToTicket(order, ticket);
-            return new SystemMessage("Success", String.format("Order %d is added to ticket %d", orderId, ticketId));
+            return new SystemMessage(String.format("Маршрутный лист №%d", ticketId), String.format("Добавлен заказ №%d общим весом %d кг", orderId, order.getWeight()));
         } catch (CheckedServiceException e) {
             helper.removeOrderFromTicket(order, ticket);
-            return new SystemMessage("Failed", e.getLocalizedMessage(locale));
+            return new SystemMessage(String.format("Маршрутный лист №%d", ticketId),
+                    String.format("Заказ %d не добавлен: %s", orderId, e.getLocalizedMessage(locale)));
         } catch (Exception e) {
-            return new SystemMessage("Failed", "Something went wrong at server side");
+            return new SystemMessage(String.format("Маршрутный лист №%d", ticketId), String.format("Заказ %d не добавлен: ошибка на стороне сервера", orderId));
         }
     }
 
@@ -168,8 +169,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 //so far do nothing - later can be used for feedback to user
             }
         }
-        return new SystemMessage("Adding orders to tickets",
-                String.format("%d orders with total weight of %d kg added to ticket %d", totalQuantity, totalWeight, ticketId));
+        return new SystemMessage(String.format("Маршрутный лист №%d", ticketId),
+                String.format("Добавлено заказов: %d, общий вес: %d кг", totalQuantity, totalWeight));
     }
 
 
@@ -230,6 +231,7 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             applicationEventPublisher.publishEvent(new EntityUpdateEvent());
         }
     }
+
 
     /**
      * {@inheritDoc}
@@ -309,6 +311,15 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
                 .map(TransactionEntity::getOrder)
                 .sorted(OrderEntity::compareTo)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasAnyOpenTickets(DriverEntity driver) {
+        return ticketDao.findByDriverAndStatus(driver.getPersonalId(), APPROVED) != null ||
+                ticketDao.findByDriverAndStatus(driver.getPersonalId(), RUNNING) != null;
     }
 
     /**

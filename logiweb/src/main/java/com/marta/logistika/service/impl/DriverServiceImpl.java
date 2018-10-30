@@ -9,15 +9,20 @@ import com.marta.logistika.entity.TripTicketEntity;
 import com.marta.logistika.enums.DriverStatus;
 import com.marta.logistika.event.EntityUpdateEvent;
 import com.marta.logistika.exception.ServiceException;
+import com.marta.logistika.exception.checked.DriverHasUnfinishedTicketsException;
+import com.marta.logistika.security.SecurityService;
 import com.marta.logistika.service.api.DriverService;
 import com.marta.logistika.service.api.TimeTrackerService;
 import com.marta.logistika.service.api.TripTicketService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
@@ -35,14 +40,16 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
     private final TripTicketDao ticketDao;
     private final TripTicketService ticketService;
     private final TimeTrackerService timeService;
+    private final SecurityService securityService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public DriverServiceImpl(DriverDao driverDao, TripTicketDao ticketDao, TripTicketService ticketService, TimeTrackerService timeService, ApplicationEventPublisher applicationEventPublisher) {
+    public DriverServiceImpl(DriverDao driverDao, TripTicketDao ticketDao, TripTicketService ticketService, TimeTrackerService timeService, SecurityService securityService, ApplicationEventPublisher applicationEventPublisher) {
         this.driverDao = driverDao;
         this.ticketDao = ticketDao;
         this.ticketService = ticketService;
         this.timeService = timeService;
+        this.securityService = securityService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -52,8 +59,8 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
         if (driverDao.personalIdExists(driver.getPersonalId())) {
             throw new ServiceException(String.format("Employee with personal id %s already exists", driver.getPersonalId()));
         }
-        System.out.println(mapper.map(driver, DriverEntity.class));
         driverDao.add(mapper.map(driver, DriverEntity.class));
+        securityService.ensureUserWithDriverRole(driver.getUsername());
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
@@ -77,8 +84,11 @@ public class DriverServiceImpl extends AbstractService implements DriverService 
 
     @Override
     @Transactional
-    public void remove(String personalId) {
-        driverDao.remove(driverDao.findByPersonalId(personalId));
+    public void remove(String personalId) throws DriverHasUnfinishedTicketsException {
+        DriverEntity driver = driverDao.findByPersonalId(personalId);
+        if (ticketService.hasAnyOpenTickets(driver)) throw new DriverHasUnfinishedTicketsException();
+        securityService.removeDriverRoleFromUser(driver.getUsername());
+        driver.setDeleted(true);
         applicationEventPublisher.publishEvent(new EntityUpdateEvent());
     }
 
