@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.web.filter.CharacterEncodingFilter;
@@ -22,7 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final DataSource dataSource;
 
     @Autowired
-    public SecurityConfig(@Qualifier("dataSourceSecurity") DataSource dataSource) {
+    public SecurityConfig(@Qualifier("securityDataSource") DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -64,4 +66,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
         return new UrlAuthenticationSuccessHandler();
     }
+
+    @Bean
+    public UserDetailsManager userDetailsManager() {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
 }

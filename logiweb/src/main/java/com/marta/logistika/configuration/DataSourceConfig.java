@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -20,10 +19,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@PropertySources({
-        @PropertySource({"classpath:datasource.properties"}),
-        @PropertySource({"classpath:datasource_security.properties"})
-})
+@PropertySource("classpath:datasource.properties")
 public class DataSourceConfig {
 
     private final Environment env;
@@ -43,16 +39,6 @@ public class DataSourceConfig {
         return dataSource;
     }
 
-    @Bean("dataSourceSecurity")
-    public DataSource dataSourceSecurity() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getRequiredProperty("datasource_security.driver"));
-        dataSource.setUrl(env.getRequiredProperty("datasource_security.url"));
-        dataSource.setUsername(env.getRequiredProperty("datasource_security.user"));
-        dataSource.setPassword(env.getRequiredProperty("datasource_security.password"));
-        return dataSource;
-    }
-
     @Bean("entityManagerFactory")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             @Qualifier("dataSource") DataSource dataSource) {
@@ -69,7 +55,7 @@ public class DataSourceConfig {
 
     @Bean
     public PlatformTransactionManager transactionManager(
-            EntityManagerFactory emf) {
+            @Qualifier("entityManagerFactory") EntityManagerFactory emf) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
