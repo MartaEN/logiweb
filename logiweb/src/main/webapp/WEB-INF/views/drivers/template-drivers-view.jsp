@@ -61,12 +61,15 @@
         <div class="card card-body">
             {{#if ticket}}
             <h5>Маршрутный лист №{{ticket.id}}</h5>
+            <hr>
             <p><i class="far fa-calendar-alt"></i> {{{trimDate ticket.departureDateTime}}} <i class="far fa-clock"></i> {{{trimTime ticket.departureDateTime}}} <i class="fas fa-map-marker-alt"></i> {{ticket.stopovers.0.city.name}}</p>
             <p><i class="fas fa-truck-moving fa-flip-horizontal"></i> {{ticket.truck.regNumber}} {{ticket.truck.capacity}}кг</p>
+            <hr>
             {{#each ticket.drivers}}
             <p><i class="fas fa-user"></i> {{firstName}} {{lastName}}</p>
             {{/each}}
-            {{#each ticket.stopovers}}
+            <hr>
+            {{#each ticket.stopoversSorted}}
             <p><i class="fas fa-parking"></i> {{city.name}}</p>
             {{/each}}
             {{/if}}
