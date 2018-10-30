@@ -1,4 +1,5 @@
-CREATE DATABASE IF NOT EXISTS `logistika`;
+DROP DATABASE IF EXISTS `logistika`;
+CREATE DATABASE `logistika`;
 USE `logistika`;
 
 -- MySQL dump 10.13  Distrib 5.7.21, for Win64 (x86_64)
