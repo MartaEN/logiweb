@@ -93,10 +93,11 @@ public class OrdersController {
             Locale locale,
             @RequestParam long orderId,
             @RequestParam long ticketId) {
-        LOGGER.debug(String.format("###LOGIWEB### User %s: Adding Single Order %d to Ticket %d",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                orderId,
-                ticketId));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("###LOGIWEB### User %s: Adding Single Order %d to Ticket %d",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    orderId, ticketId));
+        }
         return tripTicketService.addSingleOrderToTicketAndReport(ticketId, orderId, locale);
     }
 
@@ -149,30 +150,12 @@ public class OrdersController {
 
         long newOrderId = orderService.add(orderEntryForm);
 
-        LOGGER.info(String.format("###LOGIWEB### User %s: Created new Order id %d",
+        LOGGER.info("###LOGIWEB### User {}: Created new Order id {}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                newOrderId));
+                newOrderId);
 
         return "redirect:/orders";
     }
-
-//    @PostMapping(value = "/add", consumes = {"application/x-www-form-urlencoded"})
-//    public ResponseEntity processNewOrderForm(OrderEntryResponse orderEntryResponse) {
-//        OrderEntryForm order = new OrderEntryForm();
-//
-//        order.setDescription(orderEntryResponse.getDescription());
-//        order.setWeight(orderEntryResponse.getWeight());
-//        order.setFromCity(cityService.findById(orderEntryResponse.getFromCity()));
-//        order.setToCity(cityService.findById(orderEntryResponse.getToCity()));
-//
-//        long newOrderId = orderService.add(order);
-//
-//        LOGGER.info(String.format("User %s: Created new Order id %d",
-//                SecurityContextHolder.getContext().getAuthentication().getName(),
-//                newOrderId));
-//
-//        return ResponseEntity.ok(HttpStatus.OK);
-//    }
 
     /**
      * Produces webpage with paginated list of orders

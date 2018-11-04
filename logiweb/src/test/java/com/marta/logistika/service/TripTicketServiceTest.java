@@ -111,18 +111,18 @@ public class TripTicketServiceTest {
         ticketService.createTicket("AA00000", departureDate, null);
 
         Mockito.verify(ticketDao).add(tripTicketArgument.capture());
-        Assert.assertEquals(tripTicketArgument.getValue().getStatus(), TripTicketStatus.CREATED);
-        Assert.assertEquals(tripTicketArgument.getValue().getCurrentStep(), 0);
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck(), truck1free);
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck().getBookedUntil(), MAX_FUTURE_DATE);
+        Assert.assertEquals(TripTicketStatus.CREATED, tripTicketArgument.getValue().getStatus());
+        Assert.assertEquals(0, tripTicketArgument.getValue().getCurrentStep());
+        Assert.assertEquals(truck1free, tripTicketArgument.getValue().getTruck());
+        Assert.assertEquals(MAX_FUTURE_DATE, tripTicketArgument.getValue().getTruck().getBookedUntil());
         Assert.assertFalse(tripTicketArgument.getValue().getTruck().isParked());
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck().getLocation(), moscow);
-        Assert.assertEquals(tripTicketArgument.getValue().getDepartureDateTime(), departureDate);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopovers().size(), 2);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(0).getSequenceNo(), 0);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(0).getCity(), moscow);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(1).getSequenceNo(), 1);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(1).getCity(), moscow);
+        Assert.assertEquals(moscow, tripTicketArgument.getValue().getTruck().getLocation());
+        Assert.assertEquals(departureDate, tripTicketArgument.getValue().getDepartureDateTime());
+        Assert.assertEquals(2, tripTicketArgument.getValue().getStopovers().size());
+        Assert.assertEquals(0, tripTicketArgument.getValue().getStopoversSorted().get(0).getSequenceNo());
+        Assert.assertEquals(moscow, tripTicketArgument.getValue().getStopoversSorted().get(0).getCity());
+        Assert.assertEquals(1, tripTicketArgument.getValue().getStopoversSorted().get(1).getSequenceNo());
+        Assert.assertEquals(moscow, tripTicketArgument.getValue().getStopoversSorted().get(1).getCity());
         Mockito.verify(applicationEventPublisher, VerificationModeFactory.times(1)).publishEvent(Mockito.any(EntityUpdateEvent.class));
     }
 
@@ -132,18 +132,18 @@ public class TripTicketServiceTest {
         ticketService.createTicket("AA00000", departureDate, tver);
 
         Mockito.verify(ticketDao).add(tripTicketArgument.capture());
-        Assert.assertEquals(tripTicketArgument.getValue().getStatus(), TripTicketStatus.CREATED);
-        Assert.assertEquals(tripTicketArgument.getValue().getCurrentStep(), 0);
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck(), truck1free);
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck().getBookedUntil(), MAX_FUTURE_DATE);
+        Assert.assertEquals(TripTicketStatus.CREATED, tripTicketArgument.getValue().getStatus());
+        Assert.assertEquals(0, tripTicketArgument.getValue().getCurrentStep());
+        Assert.assertEquals(truck1free, tripTicketArgument.getValue().getTruck());
+        Assert.assertEquals(MAX_FUTURE_DATE, tripTicketArgument.getValue().getTruck().getBookedUntil());
         Assert.assertFalse(tripTicketArgument.getValue().getTruck().isParked());
-        Assert.assertEquals(tripTicketArgument.getValue().getTruck().getLocation(), tver);
-        Assert.assertEquals(tripTicketArgument.getValue().getDepartureDateTime(), departureDate);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopovers().size(), 2);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(0).getSequenceNo(), 0);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(0).getCity(), moscow);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(1).getSequenceNo(), 1);
-        Assert.assertEquals(tripTicketArgument.getValue().getStopoversSorted().get(1).getCity(), tver);
+        Assert.assertEquals(tver, tripTicketArgument.getValue().getTruck().getLocation());
+        Assert.assertEquals(departureDate, tripTicketArgument.getValue().getDepartureDateTime());
+        Assert.assertEquals(2, tripTicketArgument.getValue().getStopovers().size());
+        Assert.assertEquals(0, tripTicketArgument.getValue().getStopoversSorted().get(0).getSequenceNo());
+        Assert.assertEquals(moscow, tripTicketArgument.getValue().getStopoversSorted().get(0).getCity());
+        Assert.assertEquals(1, tripTicketArgument.getValue().getStopoversSorted().get(1).getSequenceNo());
+        Assert.assertEquals(tver, tripTicketArgument.getValue().getStopoversSorted().get(1).getCity());
         Mockito.verify(applicationEventPublisher, VerificationModeFactory.times(1)).publishEvent(Mockito.any(EntityUpdateEvent.class));
     }
 
@@ -217,7 +217,7 @@ public class TripTicketServiceTest {
         Assert.assertEquals(0, ticket2.getStopoverWithSequenceNo(0).getUnloads().size());
         Assert.assertEquals(0, ticket2.getStopoverWithSequenceNo(1).getLoads().size());
         Assert.assertEquals(0, ticket2.getStopoverWithSequenceNo(1).getUnloads().size());
-        Assert.assertEquals(order1.getStatus(), OrderStatus.NEW);
+        Assert.assertEquals(OrderStatus.NEW, order1.getStatus());
         Assert.assertEquals(0, ticket2.getAvgLoad());
     }
 

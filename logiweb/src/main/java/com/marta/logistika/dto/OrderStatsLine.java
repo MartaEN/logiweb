@@ -2,7 +2,9 @@ package com.marta.logistika.dto;
 
 import com.marta.logistika.entity.CityEntity;
 
-public class OrderStatsLine {
+import java.io.Serializable;
+
+public class OrderStatsLine implements Serializable {
 
     private CityEntity fromCity;
     private CityEntity toCity;

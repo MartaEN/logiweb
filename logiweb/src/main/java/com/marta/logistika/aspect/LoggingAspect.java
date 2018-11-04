@@ -22,19 +22,22 @@ public class LoggingAspect {
 
         Object returnedValue = joinPoint.proceed();
 
-        StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
-        logMessage.append(joinPoint.getTarget().getClass().getName());
-        logMessage.append(".");
-        logMessage.append(joinPoint.getSignature().getName());
+        if (LOGGER.isDebugEnabled()) {
+            StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
+            logMessage.append(joinPoint.getTarget().getClass().getName());
+            logMessage.append(".");
+            logMessage.append(joinPoint.getSignature().getName());
 
-        logMessage.append("(");
-        logMessage.append(Arrays.toString(joinPoint.getArgs()));
-        logMessage.append(")");
+            logMessage.append("(");
+            logMessage.append(Arrays.toString(joinPoint.getArgs()));
+            logMessage.append(")");
 
-        logMessage.append(" returned ");
-        logMessage.append(returnedValue);
+            logMessage.append(" returned ");
+            logMessage.append(returnedValue);
 
-        LOGGER.debug(logMessage.toString());
+            LOGGER.debug(logMessage.toString());
+        }
+
         return returnedValue;
     }
 
@@ -43,17 +46,19 @@ public class LoggingAspect {
             throwing = "error")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
 
-        StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
-        logMessage.append(joinPoint.getTarget().getClass().getName());
-        logMessage.append(".");
-        logMessage.append(joinPoint.getSignature().getName());
-        logMessage.append("(");
-        logMessage.append(Arrays.toString(joinPoint.getArgs()));
-        logMessage.append(")");
-        logMessage.append(" Exception : ");
-        logMessage.append(error);
+        if (LOGGER.isErrorEnabled()) {
+            StringBuilder logMessage = new StringBuilder("###LOGIWEB### ");
+            logMessage.append(joinPoint.getTarget().getClass().getName());
+            logMessage.append(".");
+            logMessage.append(joinPoint.getSignature().getName());
+            logMessage.append("(");
+            logMessage.append(Arrays.toString(joinPoint.getArgs()));
+            logMessage.append(")");
+            logMessage.append(" Exception : ");
+            logMessage.append(error);
 
-        LOGGER.error(logMessage.toString(), error);
+            LOGGER.error(logMessage.toString(), error);
+        }
     }
 
 }

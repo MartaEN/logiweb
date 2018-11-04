@@ -208,7 +208,7 @@ public class TripTicketServiceHelper {
                             }
                             break;
                         default:
-                            throw new RuntimeException(String.format("Invalid task %s for ticket id %d", currentTask, ticket.getId()));
+                            throw new UncheckedServiceException(String.format("Invalid task %s for ticket id %d", currentTask, ticket.getId()));
                     }
             }
 
@@ -298,6 +298,7 @@ public class TripTicketServiceHelper {
                 case HANDLING:
                 case ROAD_BREAK:
                 case STOPOVER_BREAK:
+                case WAITING:
                 case OFFLINE:
                     throw new UncheckedServiceException(String.format("Road break can be only taken from driving or seconding status. Driver %s has %s status",
                             driver, driver.getStatus()));

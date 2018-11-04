@@ -6,6 +6,8 @@ import com.marta.logistika.entity.RoadEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Repository("roadRepository")
@@ -26,7 +28,7 @@ public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
 
     @Override
     public List<RoadEntity> listAllRoadsFrom(CityEntity fromCity) {
-        if (fromCity == null) return null;
+        if (fromCity == null) return Collections.emptyList();
         return em.createQuery(
                 "SELECT r FROM RoadEntity r WHERE r.fromCity=:fromCity ORDER BY r.distance",
                 RoadEntity.class)
@@ -36,7 +38,7 @@ public class RoadDaoImpl extends AbstractDao<RoadEntity> implements RoadDao {
 
     @Override
     public List<RoadEntity> listAllRoadsTo(CityEntity toCity) {
-        if (toCity == null) return null;
+        if (toCity == null) return Collections.emptyList();
         return em.createQuery(
                 "SELECT r FROM RoadEntity r WHERE r.toCity=:toCity ORDER BY r.distance",
                 RoadEntity.class)

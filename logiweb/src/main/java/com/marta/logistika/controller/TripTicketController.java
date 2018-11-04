@@ -78,17 +78,19 @@ public class TripTicketController {
 
         try {
             ticketService.approveTicket(ticketId);
-            LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - successful",
+            LOGGER.info("###LOGIWEB### User {}: Approving Ticket {} - successful",
                     SecurityContextHolder.getContext().getAuthentication().getName(),
-                    ticketId));
+                    ticketId);
             uiModel.addAttribute("ticket", ticketService.findById(ticketId));
             return "office/tickets/view";
         } catch (PastDepartureDateException | NoDriversAvailableException e) {
             uiModel.addAttribute("error", e.getLocalizedMessage(locale));
-            LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - failed (%s)",
-                    SecurityContextHolder.getContext().getAuthentication().getName(),
-                    ticketId,
-                    e.getLocalizedMessage(Locale.ENGLISH)));
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(String.format("###LOGIWEB### User %s: Approving Ticket %d - failed (%s)",
+                        SecurityContextHolder.getContext().getAuthentication().getName(),
+                        ticketId,
+                        e.getLocalizedMessage(Locale.ENGLISH)));
+            }
             return "office/tickets/approve";
         }
     }
@@ -115,9 +117,9 @@ public class TripTicketController {
         }
 
         ticketService.updateDepartureDateTime(ticketId, futureDateTimeRecord.getDepartureDateTime());
-        LOGGER.info(String.format("###LOGIWEB### User %s: Departure date time for ticket %d updated",
+        LOGGER.info("###LOGIWEB### User {}: Departure date time for ticket {} updated",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                ticketId));
+                ticketId);
         return String.format("redirect: /tickets/%d/approve", ticketId);
     }
 
@@ -170,9 +172,9 @@ public class TripTicketController {
                 ticketCreateForm.getDepartureDateTime(),
                 ticketCreateForm.getToCity() == null ? null : cityService.findById(ticketCreateForm.getToCity()));
 
-        LOGGER.info(String.format("###LOGIWEB### User %s: Created new trip ticket id %d",
+        LOGGER.info("###LOGIWEB### User {}: Created new trip ticket id {}",
                 SecurityContextHolder.getContext().getAuthentication().getName(),
-                newTicketId));
+                newTicketId);
 
         return "redirect:/orders";
     }
@@ -188,10 +190,12 @@ public class TripTicketController {
 
         ticketService.removeOrderFromTicket(ticketAndOrder.getTicketId(), ticketAndOrder.getOrderId());
 
-        LOGGER.info(String.format("###LOGIWEB### User %s: Removed order id %d from trip ticket id %d",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                ticketAndOrder.getOrderId(),
-                ticketAndOrder.getTicketId()));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(String.format("###LOGIWEB### User %s: Removed order id %d from trip ticket id %d",
+                    SecurityContextHolder.getContext().getAuthentication().getName(),
+                    ticketAndOrder.getOrderId(),
+                    ticketAndOrder.getTicketId()));
+        }
 
         return String.format("redirect:/tickets/%d/approve", ticketAndOrder.getTicketId());
     }
