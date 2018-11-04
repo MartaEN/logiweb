@@ -6,7 +6,6 @@ import com.marta.logistika.entity.RoadEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

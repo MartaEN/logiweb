@@ -147,7 +147,7 @@ public class StopoverHelper {
             if (stopover.getSequenceNo() == 0 || stopover.getSequenceNo() == lastStopoverNo) {
                 continue;
             }
-            if (stopover.getLoads().size() == 0 && stopover.getUnloads().size() == 0) {
+            if (stopover.getLoads().isEmpty() && stopover.getUnloads().isEmpty()) {
                 ticket.getStopovers().remove(stopover);
             }
         }

@@ -6,8 +6,8 @@ import java.util.Locale;
 
 public class NoRouteFoundException extends CheckedServiceException {
 
-    private CityEntity fromCity;
-    private CityEntity toCity;
+    private final CityEntity fromCity;
+    private final CityEntity toCity;
 
     public NoRouteFoundException(CityEntity fromCity, CityEntity toCity) {
         super("com.marta.logistika.error.noRouteFound");

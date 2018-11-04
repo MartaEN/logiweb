@@ -30,8 +30,8 @@ import static com.marta.logistika.enums.TripTicketStatus.*;
 @Component
 public class TripTicketServiceHelper {
 
-    private final static int SPEED = 60;
-    private final static Duration STOPOVER_DURATION = Duration.ofHours(2);
+    private static final int SPEED = 60;
+    private static final Duration STOPOVER_DURATION = Duration.ofHours(2);
 
     private final TripTicketDao ticketDao;
     private final RoadService roadService;
@@ -118,7 +118,7 @@ public class TripTicketServiceHelper {
 
         for (int i = 1; i < stopovers.size(); i++) {
             Duration currentStopoverDuration = STOPOVER_DURATION
-                    .plusMinutes((long)roadService.getDistanceFromTo(stopovers.get(i).getCity(), stopovers.get(i - 1).getCity()) / SPEED * 60);
+                    .plusMinutes((long) roadService.getDistanceFromTo(stopovers.get(i).getCity(), stopovers.get(i - 1).getCity()) / SPEED * 60);
             stopovers.get(i).setEstimatedDuration(currentStopoverDuration);
             totalTripDuration = totalTripDuration.plus(currentStopoverDuration);
         }

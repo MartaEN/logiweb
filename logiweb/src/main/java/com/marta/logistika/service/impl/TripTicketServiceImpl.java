@@ -207,7 +207,8 @@ public class TripTicketServiceImpl extends AbstractService implements TripTicket
             CityEntity fromCity = ticket.getStopoverWithSequenceNo(0).getCity();
             int shiftSize = ticket.getTruck().getShiftSize();
             List<DriverEntity> availableDrivers = driverDao.listAllAvailable(fromCity, ticket.getDepartureDateTime());
-            if (availableDrivers.size() < shiftSize) throw new NoDriversAvailableException(ticketId);
+            if (availableDrivers.size() < shiftSize)
+                throw new NoDriversAvailableException(ticketId, ticket.getStopoverWithSequenceNo(0).getCity().getName(), ticket.getDepartureDateTime().toString());
             ticket.setDrivers(availableDrivers.subList(0, shiftSize));
 
             // calculate estimated arrival time and record it for truck and drivers

@@ -5,8 +5,8 @@ import java.util.Locale;
 public class OrderDoesNotFitToTicketException extends CheckedServiceException {
 
     private long orderId;
-    private long ticketId;
-    private String details;
+    private final long ticketId;
+    private final String details;
 
     public OrderDoesNotFitToTicketException(long ticketId, String details) {
         super("com.marta.logistika.error.orderDoesNotFitToTicket");
@@ -38,15 +38,8 @@ public class OrderDoesNotFitToTicketException extends CheckedServiceException {
         return ticketId;
     }
 
-    public void setTicketId(long ticketId) {
-        this.ticketId = ticketId;
-    }
-
     public String getDetails() {
         return details;
     }
 
-    public void setDetails(String details) {
-        this.details = details;
-    }
 }

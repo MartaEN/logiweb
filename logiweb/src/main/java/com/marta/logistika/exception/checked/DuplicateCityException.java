@@ -4,7 +4,7 @@ import java.util.Locale;
 
 public class DuplicateCityException extends CheckedServiceException {
 
-    private String cityName;
+    private final String cityName;
 
     public DuplicateCityException(String cityName) {
         super("com.marta.logistika.error.duplicateCity");
