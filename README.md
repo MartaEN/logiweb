@@ -1,10 +1,7 @@
 # LogiWeb
-Logistics management system. JAVA EE training project
+<p>Logistics management system. JAVA EE training project (Spring and EJB).</p>
+<p>Please see Technical Solution Description (tsd.docx) for more details including deployment.</p>
 
-Use following scripts from scripts directory to set up the database:
-<ul>
-<li>1-schema-and-user.sql   - to set up schema and create user with necessary privilegies</li>
-<li>2-security.sql   - to create test users and user roles</li>
-<li>3-db-structure.sql - to create tables</li>
-<li>4-test-data.sql - to fill database with initial test data</li>
-</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://sonarcloud.io/images/project_badges/sonarcloud-orange.svg"><img src="https://sonarcloud.io/images/project_badges/sonarcloud-orange.svg" alt="sonar badge" style="max-width:100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://sonarcloud.io/api/project_badges/measure?project=MartaEN_t-systems-internship&metric=reliability_rating"><img src="https://sonarcloud.io/api/project_badges/measure?project=MartaEN_t-systems-internship&metric=reliability_rating" alt="sonar reliability rating" style="max-width:100%;"></a>
+  <a target="_blank" rel="noopener noreferrer" href="https://sonarcloud.io/api/project_badges/measure?project=MartaEN_t-systems-internship&metric=sqale_rating"><img src="https://sonarcloud.io/api/project_badges/measure?project=MartaEN_t-systems-internship&metric=sqale_rating" alt="sonar maintainability rating" style="max-width:100%;"></a></p>
