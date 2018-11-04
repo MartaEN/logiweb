@@ -19,7 +19,7 @@ public enum DriverStatus {
         return briefStatValue;
     }
 
-    public void setBriefStatValue(String briefStatValue) {
+    private void setBriefStatValue(String briefStatValue) {
         this.briefStatValue = briefStatValue;
     }
 }

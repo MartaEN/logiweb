@@ -122,7 +122,7 @@ public class StopoverHelper {
      * @param sequenceNo - indication where the new stopover should be inserted
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    void insertNewStopover(TripTicketEntity ticket, CityEntity city, int sequenceNo) {
+    public void insertNewStopover(TripTicketEntity ticket, CityEntity city, int sequenceNo) {
         ticket.getStopovers().forEach(s -> {
             if (s.getSequenceNo() >= sequenceNo) s.setSequenceNo(s.getSequenceNo() + 1);
         });
@@ -163,7 +163,7 @@ public class StopoverHelper {
      * @param ticket trip ticket to be updated
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    void updateWeights(TripTicketEntity ticket) {
+    public void updateWeights(TripTicketEntity ticket) {
         int cumulativeWeight = 0;
         List<StopoverEntity> route = ticket.getStopoversSorted();
         for (StopoverEntity s : route) {

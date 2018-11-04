@@ -55,7 +55,6 @@
 
 <%-- Scripts specific for the page --%>
 <script src="${contextPath}/resources/js/filter-table.js"/>
-<script src="${contextPath}/resources/js/save-new-order.js"></script>
-<script src="${contextPath}/resources/js/monitor-update.js"></script>
+<script src="${contextPath}/resources/js/monitor-update.js"/>
 
 <jsp:include page="../../_fragments/page-template-after-main.jsp"/>
