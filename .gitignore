@@ -24,6 +24,9 @@ target/
 # Log file
 *.log
 
+# Jacoco
+jacoco.exec
+
 # BlueJ files
 *.ctxt
 
