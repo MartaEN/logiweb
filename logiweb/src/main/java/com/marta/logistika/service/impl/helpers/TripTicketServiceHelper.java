@@ -118,7 +118,7 @@ public class TripTicketServiceHelper {
 
         for (int i = 1; i < stopovers.size(); i++) {
             Duration currentStopoverDuration = STOPOVER_DURATION
-                    .plusMinutes(roadService.getDistanceFromTo(stopovers.get(i).getCity(), stopovers.get(i - 1).getCity()) / SPEED * 60);
+                    .plusMinutes((long)roadService.getDistanceFromTo(stopovers.get(i).getCity(), stopovers.get(i - 1).getCity()) / SPEED * 60);
             stopovers.get(i).setEstimatedDuration(currentStopoverDuration);
             totalTripDuration = totalTripDuration.plus(currentStopoverDuration);
         }

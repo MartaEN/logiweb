@@ -21,7 +21,7 @@ public class EntityUpdateEventAsyncListener {
     @TransactionalEventListener
     @Async
     public void processEntityEvent(EntityUpdateEvent event) {
-        LOGGER.debug(String.format("###LOGIWEB### entity update (%s) detected and message being sent", event));
+        LOGGER.debug("###LOGIWEB### entity update ({}) detected and message being sent", event);
         messageSender.sendMessage();
     }
 }

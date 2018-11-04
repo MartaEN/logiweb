@@ -30,7 +30,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     private final CityService cityService;
     private final TableauService tableauService;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final static int ROWS_PER_PAGE = 10;
+    private static final int ROWS_PER_PAGE = 10;
 
     @Autowired
     public OrderServiceImpl(OrderDao orderDao, RoadService roadService, CityService cityService, TableauService tableauService, ApplicationEventPublisher applicationEventPublisher) {
@@ -148,7 +148,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         try {
             distance = roadService.getDistanceFromTo(fromCity, toCity);
         } catch (NoRouteFoundException e) {
-            e.printStackTrace();
+            // ok to show zero distance for tableau in case of no route
         }
 
         List<OrderEntity> orders = orderDao.listUnassigned(fromCityId, toCityId);
@@ -191,7 +191,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     @Override
     public int countPages() {
         long rowCount = orderDao.count();
-        int pageCount = (int) Math.ceil((float) rowCount / ROWS_PER_PAGE);
-        return pageCount;
+        return (int) Math.ceil((float) rowCount / ROWS_PER_PAGE);
     }
 }

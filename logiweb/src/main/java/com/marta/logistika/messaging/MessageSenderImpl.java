@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class MessageSenderImpl implements MessageSender {
 
     private final JmsTemplate jmsTemplate;
-    private final String DEFAULT_MESSAGE = "update";
+    private static final String DEFAULT_MESSAGE = "update";
 
     @Autowired
     public MessageSenderImpl(JmsTemplate jmsTemplate) {

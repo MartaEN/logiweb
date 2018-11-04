@@ -30,12 +30,14 @@ public class DataBindingControllerAdvice {
 
         binder.registerCustomEditor(CityEntity.class, "location", new PropertyEditorSupport() {
 
+            @Override
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
                 CityEntity location = cityService.findById(id);
                 setValue(location);
             }
 
+            @Override
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {
@@ -48,12 +50,14 @@ public class DataBindingControllerAdvice {
 
         binder.registerCustomEditor(CityEntity.class, "fromCity", new PropertyEditorSupport() {
 
+            @Override
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
                 CityEntity toCity = cityService.findById(id);
                 setValue(toCity);
             }
 
+            @Override
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {
@@ -66,12 +70,14 @@ public class DataBindingControllerAdvice {
 
         binder.registerCustomEditor(CityEntity.class, "toCity", new PropertyEditorSupport() {
 
+            @Override
             public void setAsText(String text) {
                 Long id = Long.parseLong(text);
                 CityEntity toCity = cityService.findById(id);
                 setValue(toCity);
             }
 
+            @Override
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {
@@ -84,11 +90,13 @@ public class DataBindingControllerAdvice {
 
         binder.registerCustomEditor(DriverRecord.class, "personalId", new PropertyEditorSupport() {
 
+            @Override
             public void setAsText(String personalId) {
                 DriverRecord driver = driverService.findDriverByPersonalId(personalId);
                 setValue(driver);
             }
 
+            @Override
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {
@@ -101,12 +109,14 @@ public class DataBindingControllerAdvice {
 
         binder.registerCustomEditor(LocalDateTime.class, "departureDateTime", new PropertyEditorSupport() {
 
+            @Override
             public void setAsText(String text) {
                 LocalDateTime departureDateTime = LocalDateTime.parse(
                         text, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 setValue(departureDateTime);
             }
 
+            @Override
             public String getAsText() {
                 Object value = getValue();
                 if (value != null) {

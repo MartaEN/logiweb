@@ -7,7 +7,7 @@ import com.marta.logistika.enums.DriverStatus;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,7 @@ public class DriverDaoImpl extends AbstractDao<DriverEntity> implements DriverDa
 
     @Override
     public Map<DriverStatus, Integer> getDriverStatistics() {
-        Map<DriverStatus, Integer> driverStats = new HashMap<>();
+        Map<DriverStatus, Integer> driverStats = new EnumMap<>(DriverStatus.class);
         List<Object[]> results = em.createQuery(
                 "SELECT d.status AS status, COUNT(d) AS total FROM DriverEntity d WHERE d.deleted=false GROUP BY d.status")
                 .getResultList();

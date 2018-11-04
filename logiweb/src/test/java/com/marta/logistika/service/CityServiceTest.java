@@ -1,6 +1,7 @@
 package com.marta.logistika.service;
 
 import com.marta.logistika.dao.api.CityDao;
+import com.marta.logistika.dto.CityRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.exception.checked.DuplicateCityException;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
@@ -36,7 +37,7 @@ public class CityServiceTest {
 
     @Test
     public void addCity() throws DuplicateCityException {
-        CityEntity newCity = new CityEntity();
+        CityRecord newCity = new CityRecord();
         newCity.setName("Санкт-Петербург");
         cityService.add(newCity);
         Mockito.verify(cityDao, VerificationModeFactory.times(1)).add(Mockito.any(CityEntity.class));
@@ -44,7 +45,7 @@ public class CityServiceTest {
 
     @Test(expected = DuplicateCityException.class)
     public void addDuplicateCity() throws DuplicateCityException {
-        CityEntity newCity = new CityEntity();
+        CityRecord newCity = new CityRecord();
         newCity.setName("Москва");
         cityService.add(newCity);
         Mockito.verify(cityDao, VerificationModeFactory.times(1)).add(Mockito.any(CityEntity.class));

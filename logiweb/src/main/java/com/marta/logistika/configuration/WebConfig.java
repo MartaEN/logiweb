@@ -23,6 +23,7 @@ import java.util.Locale;
 @ComponentScan("com.marta.logistika.controller")
 public class WebConfig implements WebMvcConfigurer {
 
+    @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/");

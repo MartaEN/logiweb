@@ -4,7 +4,6 @@ import com.marta.logistika.enums.TripTicketStatus;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TripTicketRecord implements Serializable {
 

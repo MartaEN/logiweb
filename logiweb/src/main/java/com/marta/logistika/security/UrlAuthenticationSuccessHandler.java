@@ -1,5 +1,6 @@
 package com.marta.logistika.security;
 
+import com.marta.logistika.exception.unchecked.UncheckedServiceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.Authentication;
@@ -55,7 +56,8 @@ public class UrlAuthenticationSuccessHandler implements AuthenticationSuccessHan
         boolean hasNoRole = false;
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (final GrantedAuthority grantedAuthority : authorities) {
-            switch (grantedAuthority.getAuthority()) {
+            String userRole = grantedAuthority.getAuthority();
+            switch (userRole) {
                 case "ROLE_LOGIST":
                     isLogist = true;
                     break;
@@ -65,6 +67,8 @@ public class UrlAuthenticationSuccessHandler implements AuthenticationSuccessHan
                 case "ROLE_NONE":
                     hasNoRole = true;
                     break;
+                default:
+                    throw new UncheckedServiceException(String.format("User with unknown role %s is trying to log in", userRole));
             }
         }
 

@@ -1,6 +1,7 @@
 package com.marta.logistika.service.impl;
 
 import com.marta.logistika.dao.api.CityDao;
+import com.marta.logistika.dto.CityRecord;
 import com.marta.logistika.entity.CityEntity;
 import com.marta.logistika.exception.checked.DuplicateCityException;
 import com.marta.logistika.exception.unchecked.EntityNotFoundException;
@@ -16,28 +17,26 @@ public class CityServiceImpl extends AbstractService implements CityService {
 
     private final CityDao cityDao;
 
+    /**
+     * {@inheritDoc}
+     */
     @Autowired
     public CityServiceImpl(CityDao cityDao) {
         this.cityDao = cityDao;
     }
 
     /**
-     * Adds a new city
-     *
-     * @param city new city
-     * @throws DuplicateCityException in case new city name is already registered in the system
+     * {@inheritDoc}
      */
     @Override
     @Transactional
-    public void add(CityEntity city) throws DuplicateCityException {
+    public long add(CityRecord city) throws DuplicateCityException {
         if (cityDao.cityNameExists(city.getName())) throw new DuplicateCityException(city.getName());
-        cityDao.add(city);
+        return cityDao.add(mapper.map(city, CityEntity.class));
     }
 
     /**
-     * Removes a city
-     *
-     * @param id city id to be removed
+     * {@inheritDoc}
      */
     @Override
     @Transactional
@@ -48,10 +47,7 @@ public class CityServiceImpl extends AbstractService implements CityService {
     }
 
     /**
-     * finds city by id
-     *
-     * @param id id
-     * @return city
+     * {@inheritDoc}
      */
     @Override
     public CityEntity findById(long id) {
@@ -60,11 +56,7 @@ public class CityServiceImpl extends AbstractService implements CityService {
         return city;
     }
 
-    /**
-     * Lists all the cities
-     *
-     * @return cities list
-     */
+
     @Override
     public List<CityEntity> listAll() {
         return cityDao.listAll();

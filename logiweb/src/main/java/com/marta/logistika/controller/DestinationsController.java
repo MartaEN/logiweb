@@ -1,5 +1,6 @@
 package com.marta.logistika.controller;
 
+import com.marta.logistika.dto.CityRecord;
 import com.marta.logistika.dto.RoadRecord;
 import com.marta.logistika.dto.RouteJsonResponse;
 import com.marta.logistika.entity.CityEntity;
@@ -59,15 +60,14 @@ public class DestinationsController {
 
     @PostMapping(value = "/add-city")
     public String addCity(
-            @Valid @ModelAttribute("city") CityEntity city,
+            @Valid @ModelAttribute("city") CityRecord city,
             BindingResult bindingResult,
             Locale locale) {
         if (bindingResult.hasErrors()) {
             return "office/destinations/add-city";
         }
         try {
-            cityService.add(city);
-            long id = city.getId();
+            long id = cityService.add(city);
             return ("redirect:/destinations/" + id);
         } catch (DuplicateCityException e) {
             bindingResult.addError(new FieldError("city", "name", e.getLocalizedMessage(locale)));

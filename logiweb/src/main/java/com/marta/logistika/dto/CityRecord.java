@@ -1,19 +1,14 @@
-package com.marta.logistika.tableau.dto;
+package com.marta.logistika.dto;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 public class CityRecord implements Serializable {
 
-    private long id;
+    @NotNull
+    @Pattern(regexp = "(^[А-ЯЁ][А-Яа-яЁё0-9\\-\\s]+$)|(^[A-Z][A-Za-z0-9\\-\\s]+$)")
     private String name;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -22,5 +17,4 @@ public class CityRecord implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
 }

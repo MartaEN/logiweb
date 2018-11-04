@@ -27,17 +27,5 @@ public class TopicSubscriberBean implements MessageListener {
     public void onMessage(Message message) {
         LOG.info("Received message from logiweb.update channel");
         pushBean.pushUpdate();
-//        try {
-//            if (message instanceof TextMessage) {
-//                String input = ((TextMessage) message).getText();
-//                System.out.println("TextMessage received: " + input);
-//            } else if (message instanceof ObjectMessage) {
-//                System.out.println("ObjectMessage received.");
-//            } else {
-//                System.out.println("Unknown message type:" + message.getClass());
-//            }
-//        } catch (JMSException e) {
-//            e.printStackTrace();
-//        }
     }
 }
