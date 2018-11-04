@@ -151,8 +151,8 @@ public class TripTicketServiceTest {
     public void createPastDateTicket() {
         LocalDateTime departureDate = LocalDateTime.now().minusDays(1);
         ticketService.createTicket("AA00000", departureDate, null);
-        Mockito.verify(ticketDao, VerificationModeFactory.times(0));
-        Mockito.verify(applicationEventPublisher, VerificationModeFactory.times(0));
+        Mockito.verify(ticketDao, VerificationModeFactory.times(0)).add(Mockito.any(TripTicketEntity.class));
+        Mockito.verify(applicationEventPublisher, VerificationModeFactory.times(0)).publishEvent(Mockito.any(EntityUpdateEvent.class));
     }
 
     @Test

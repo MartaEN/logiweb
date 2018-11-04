@@ -3,11 +3,8 @@ package com.marta.logistika.tableau.beans;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
 import java.util.logging.Logger;
 
 @MessageDriven(activationConfig = {
