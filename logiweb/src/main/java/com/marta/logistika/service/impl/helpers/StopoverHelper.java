@@ -111,7 +111,7 @@ public class StopoverHelper {
             totalDistance += distance;
             totalLoad += distance * weights.get(i);
         }
-        return totalLoad / totalDistance;
+        return totalDistance == 0 ? 0 : totalLoad / totalDistance;
     }
 
     /**
